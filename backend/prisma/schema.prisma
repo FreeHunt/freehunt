@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -124,8 +123,7 @@ model Document {
   id          String       @id @db.Uuid
   name        String
   url         String
-  type        DocumentType @relation(fields: [typeId], references: [id])
-  typeId      String       @db.Uuid
+  type        DocumentType
   freelance   Freelance?   @relation(fields: [freelanceId], references: [id])
   freelanceId String       @db.Uuid
   invoice     Invoice?     @relation(fields: [invoiceId], references: [id])
@@ -134,10 +132,9 @@ model Document {
   quoteId     String       @unique @db.Uuid
 }
 
-model DocumentType {
-  id        String     @id @db.Uuid
-  name      String
-  documents Document[]
+enum DocumentType {
+  INVOICE
+  QUOTE
 }
 
 model Logs {
