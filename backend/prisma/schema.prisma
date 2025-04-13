@@ -13,3 +13,136 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  FREELANCE
+  COMPANY
+}
+
+enum TypeSkills {
+  HARD
+  SOFT
+}
+
+model User {
+  id        String     @id @db.Uuid
+  email     String     @unique
+  password  String
+  role      Role
+  freelance Freelance?
+  company   Company?
+}
+
+enum SkillType {
+  TECHNICAL
+  SOFT
+}
+
+model Skills {
+  id         String       @id @db.Uuid
+  name       String       @unique
+  type       TypeSkills
+  freelance  Freelance[]
+  jobPosting JobPosting[]
+}
+
+model Freelance {
+  id               String     @id @db.Uuid
+  user             User       @relation(fields: [userId], references: [id])
+  userId           String     @unique @db.Uuid
+  firstName        String
+  lastName         String
+  averageDailyRate Float // TJM
+  skills           Skills[]
+  documents        Document[]
+}
+
+model Company {
+  id          String       @id @db.Uuid
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String       @unique @db.Uuid
+  name        String
+  siren       String
+  description String
+  jobPostings JobPosting[]
+}
+
+model JobPosting {
+  id          String        @id @db.Uuid
+  company     Company       @relation(fields: [companyId], references: [id])
+  companyId   String        @db.Uuid
+  title       String
+  description String
+  location    String
+  isPromoted  Boolean
+  skills      Skills[]
+  checkpoints Checkpoints[]
+  project     Project       @relation(fields: [projectId], references: [id])
+  projectId   String        @unique @db.Uuid
+}
+
+model Project {
+  id          String      @id @db.Uuid
+  name        String
+  description String
+  location    String
+  isPromoted  Boolean
+  jobPosting  JobPosting?
+}
+
+model Checkpoints {
+  id           String     @id @db.Uuid
+  name         String
+  description  String
+  date         DateTime
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
+  jobPostingId String     @db.Uuid
+  quote        Quote?
+}
+
+// Devis
+model Quote {
+  id           String      @id @db.Uuid
+  checkpoint   Checkpoints @relation(fields: [checkpointId], references: [id])
+  checkpointId String      @unique @db.Uuid
+  amount       Float?
+  document     Document?
+  invoice      Invoice?
+}
+
+model Invoice {
+  id            String    @id @db.Uuid
+  quote         Quote     @relation(fields: [quoteId], references: [id])
+  quoteId       String    @unique @db.Uuid
+  amount        Float?
+  valueAddedTax Float?
+  document      Document?
+  documentId    String    @db.Uuid
+}
+
+model Document {
+  id          String       @id @db.Uuid
+  name        String
+  url         String
+  type        DocumentType @relation(fields: [typeId], references: [id])
+  typeId      String       @db.Uuid
+  freelance   Freelance?   @relation(fields: [freelanceId], references: [id])
+  freelanceId String       @db.Uuid
+  invoice     Invoice?     @relation(fields: [invoiceId], references: [id])
+  invoiceId   String       @unique @db.Uuid
+  quote       Quote?       @relation(fields: [quoteId], references: [id])
+  quoteId     String       @unique @db.Uuid
+}
+
+model DocumentType {
+  id        String     @id @db.Uuid
+  name      String
+  documents Document[]
+}
+
+model Logs {
+  id        String   @id @db.Uuid
+  timestamp DateTime @default(now())
+  tableName String
+  action    String
+}
