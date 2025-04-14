@@ -33,7 +33,7 @@ enum SkillType {
 }
 
 model Skills {
-  id         String       @id @db.Uuid
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name       String       @unique
   type       SkillType
   freelance  Freelance[]
@@ -41,7 +41,7 @@ model Skills {
 }
 
 model Freelance {
-  id               String     @id @db.Uuid
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user             User       @relation(fields: [userId], references: [id])
   userId           String     @unique @db.Uuid
   firstName        String
@@ -52,7 +52,7 @@ model Freelance {
 }
 
 model Company {
-  id          String       @id @db.Uuid
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user        User         @relation(fields: [userId], references: [id])
   userId      String       @unique @db.Uuid
   name        String
@@ -62,7 +62,7 @@ model Company {
 }
 
 model JobPosting {
-  id          String        @id @db.Uuid
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   company     Company       @relation(fields: [companyId], references: [id])
   companyId   String        @db.Uuid
   title       String
@@ -76,7 +76,7 @@ model JobPosting {
 }
 
 model Project {
-  id          String      @id @db.Uuid
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
   description String
   location    String
@@ -85,7 +85,7 @@ model Project {
 }
 
 model Checkpoints {
-  id           String     @id @db.Uuid
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   description  String
   date         DateTime
@@ -96,7 +96,7 @@ model Checkpoints {
 
 // Devis
 model Quote {
-  id           String      @id @db.Uuid
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   checkpoint   Checkpoints @relation(fields: [checkpointId], references: [id])
   checkpointId String      @unique @db.Uuid
   amount       Float?
@@ -105,7 +105,7 @@ model Quote {
 }
 
 model Invoice {
-  id            String    @id @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quote         Quote     @relation(fields: [quoteId], references: [id])
   quoteId       String    @unique @db.Uuid
   amount        Float?
@@ -115,7 +115,7 @@ model Invoice {
 }
 
 model Document {
-  id          String       @id @db.Uuid
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
   url         String
   type        DocumentType
@@ -133,7 +133,7 @@ enum DocumentType {
 }
 
 model Logs {
-  id        String   @id @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   timestamp DateTime @default(now())
   tableName String
   action    String
