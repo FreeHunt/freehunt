@@ -50,18 +50,25 @@ model Company {
   user        User         @relation(fields: [userId], references: [id])
   userId      String       @unique @db.Uuid
   name        String
-  siren       String
   description String
+  address     String
+  siren       String
   jobPostings JobPosting[]
 }
 
+enum JobPostingLocation {
+  HYBRID
+  ONSITE
+  REMOTE
+}
+
 model JobPosting {
-  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company     Company       @relation(fields: [companyId], references: [id])
-  companyId   String        @db.Uuid
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company     Company            @relation(fields: [companyId], references: [id])
+  companyId   String             @db.Uuid
   title       String
   description String
-  location    String
+  location    JobPostingLocation
   isPromoted  Boolean
   skills      Skills[]
   checkpoints Checkpoints[]
