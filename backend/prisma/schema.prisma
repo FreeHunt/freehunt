@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -16,11 +10,6 @@ datasource db {
 enum Role {
   FREELANCE
   COMPANY
-}
-
-enum TypeSkills {
-  HARD
-  SOFT
 }
 
 model User {
@@ -38,15 +27,15 @@ enum SkillType {
 }
 
 model Skills {
-  id         String       @id @db.Uuid
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name       String       @unique
-  type       TypeSkills
+  type       SkillType
   freelance  Freelance[]
   jobPosting JobPosting[]
 }
 
 model Freelance {
-  id               String     @id @db.Uuid
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user             User       @relation(fields: [userId], references: [id])
   userId           String     @unique @db.Uuid
   firstName        String
@@ -54,10 +43,11 @@ model Freelance {
   averageDailyRate Float // TJM
   skills           Skills[]
   documents        Document[]
+  projects         Project[]
 }
 
 model Company {
-  id          String       @id @db.Uuid
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user        User         @relation(fields: [userId], references: [id])
   userId      String       @unique @db.Uuid
   name        String
@@ -67,7 +57,7 @@ model Company {
 }
 
 model JobPosting {
-  id          String        @id @db.Uuid
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   company     Company       @relation(fields: [companyId], references: [id])
   companyId   String        @db.Uuid
   title       String
@@ -76,21 +66,24 @@ model JobPosting {
   isPromoted  Boolean
   skills      Skills[]
   checkpoints Checkpoints[]
-  project     Project       @relation(fields: [projectId], references: [id])
-  projectId   String        @unique @db.Uuid
+  project     Project?
 }
 
 model Project {
-  id          String      @id @db.Uuid
-  name        String
-  description String
-  location    String
-  isPromoted  Boolean
-  jobPosting  JobPosting?
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  description  String
+  startDate    DateTime
+  endDate      DateTime?
+  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
+  jobPostingId String     @unique @db.Uuid
+  freelance    Freelance? @relation(fields: [freelanceId], references: [id])
+  freelanceId  String?    @db.Uuid
+  invoice      Invoice?
 }
 
 model Checkpoints {
-  id           String     @id @db.Uuid
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   description  String
   date         DateTime
@@ -101,7 +94,7 @@ model Checkpoints {
 
 // Devis
 model Quote {
-  id           String      @id @db.Uuid
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   checkpoint   Checkpoints @relation(fields: [checkpointId], references: [id])
   checkpointId String      @unique @db.Uuid
   amount       Float?
@@ -110,17 +103,24 @@ model Quote {
 }
 
 model Invoice {
-  id            String    @id @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   quote         Quote     @relation(fields: [quoteId], references: [id])
   quoteId       String    @unique @db.Uuid
   amount        Float?
   valueAddedTax Float?
   document      Document?
   documentId    String    @db.Uuid
+  project       Project?  @relation(fields: [projectId], references: [id])
+  projectId     String?   @unique @db.Uuid
+}
+
+enum DocumentType {
+  INVOICE
+  QUOTE
 }
 
 model Document {
-  id          String       @id @db.Uuid
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
   url         String
   type        DocumentType
@@ -132,13 +132,8 @@ model Document {
   quoteId     String       @unique @db.Uuid
 }
 
-enum DocumentType {
-  INVOICE
-  QUOTE
-}
-
 model Logs {
-  id        String   @id @db.Uuid
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   timestamp DateTime @default(now())
   tableName String
   action    String
