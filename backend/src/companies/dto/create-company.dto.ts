@@ -10,19 +10,26 @@ export class CreateCompanyDto {
   name: string;
 
   @IsString()
+  @ApiProperty({
+    description: 'The description of the company',
+    example: 'A leading tech company specializing in innovative solutions.',
+  })
+  description: string;
+
+  @IsString()
+  @ApiProperty({
+    description: 'The address of the company',
+    example: '123 Tech Lane, Silicon Valley, CA',
+  })
+  address: string;
+
+  @IsString()
   @Length(9)
   @ApiProperty({
     description: 'The unique identifier for the company (SIREN)',
     example: '123456789',
   })
   siren: string;
-
-  @IsString()
-  @ApiProperty({
-    description: 'The description of the company',
-    example: 'A leading tech company specializing in innovative solutions.',
-  })
-  description: string;
 
   @IsUUID()
   @ApiProperty({
