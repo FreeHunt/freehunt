@@ -25,7 +25,7 @@ enum SkillType {
   SOFT
 }
 
-model Skills {
+model Skill {
   id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String       @unique
   normalizedName String       @unique // Lowercase, no spaces, no special characters
@@ -42,7 +42,7 @@ model Freelance {
   firstName        String
   lastName         String
   averageDailyRate Float // TJM
-  skills           Skills[]
+  skills           Skill[]
   documents        Document[]
   projects         Project[]
 }
@@ -72,8 +72,8 @@ model JobPosting {
   description String
   location    JobPostingLocation
   isPromoted  Boolean
-  skills      Skills[]
-  checkpoints Checkpoints[]
+  skills      Skill[]
+  checkpoints Checkpoint[]
   project     Project?
 }
 
@@ -90,7 +90,7 @@ model Project {
   invoice      Invoice?
 }
 
-model Checkpoints {
+model Checkpoint {
   id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   description  String
@@ -102,9 +102,9 @@ model Checkpoints {
 
 // Devis
 model Quote {
-  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  checkpoint   Checkpoints @relation(fields: [checkpointId], references: [id])
-  checkpointId String      @unique @db.Uuid
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  checkpoint   Checkpoint @relation(fields: [checkpointId], references: [id])
+  checkpointId String     @unique @db.Uuid
   amount       Float?
   document     Document?
   invoice      Invoice?
@@ -140,7 +140,7 @@ model Document {
   quoteId     String       @unique @db.Uuid
 }
 
-model Logs {
+model Log {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   timestamp DateTime @default(now())
   tableName String
