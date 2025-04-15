@@ -44,7 +44,7 @@ export class CreateFreelanceDto {
     isArray: true,
     nullable: true,
   })
-  skills: number[];
+  skills: string[];
 
   @IsUUID()
   @ApiProperty({
