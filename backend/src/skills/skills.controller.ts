@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import { Skill } from '@prisma/client';
 import { CreateSkillDto } from './dto/create-skill.dto';
@@ -31,5 +39,10 @@ export class SkillsController {
     @Body() updateSkillDto: UpdateSkillDto,
   ): Promise<Skill> {
     return this.skillsService.update(id, updateSkillDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<Skill> {
+    return this.skillsService.remove(id);
   }
 }
