@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
 import { JobPosting } from '@prisma/client';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
@@ -33,5 +41,10 @@ export class JobPostingsController {
     @Body() updateJobPostingDto: UpdateJobPostingDto,
   ): Promise<JobPosting> {
     return this.jobPostingsService.update(id, updateJobPostingDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<JobPosting> {
+    return this.jobPostingsService.remove(id);
   }
 }

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { Company } from '@prisma/client';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -31,5 +39,10 @@ export class CompaniesController {
     @Body() updateCompanyDto: UpdateCompanyDto,
   ): Promise<Company> {
     return this.companiesService.update(id, updateCompanyDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string): Promise<Company> {
+    return this.companiesService.remove(id);
   }
 }
