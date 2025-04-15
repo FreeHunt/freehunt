@@ -26,11 +26,13 @@ enum SkillType {
 }
 
 model Skills {
-  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name       String       @unique
-  type       SkillType
-  freelance  Freelance[]
-  jobPosting JobPosting[]
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String       @unique
+  normalizedName String       @unique // Lowercase, no spaces, no special characters
+  aliases        String[] // Acronyms, synonyms, variations... (e.g. "JS", "JavaScript")
+  type           SkillType
+  freelance      Freelance[]
+  jobPosting     JobPosting[]
 }
 
 model Freelance {
