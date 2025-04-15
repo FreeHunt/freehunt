@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
-import { Skill } from '@prisma/client';
+import { Prisma, Skill } from '@prisma/client';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 
@@ -30,12 +30,16 @@ export class SkillsService {
   }
 
   async update(id: string, data: UpdateSkillDto): Promise<Skill> {
+    const updateData: Prisma.SkillUpdateInput = { ...data };
+
+    // Add normalizedName if name is provided
+    if (data.name !== undefined) {
+      updateData.normalizedName = this.normalizeName(data.name);
+    }
+
     return this.prisma.skill.update({
       where: { id },
-      data: {
-        ...data,
-        normalizedName: this.normalizeName(data.name),
-      },
+      data: updateData,
     });
   }
 
