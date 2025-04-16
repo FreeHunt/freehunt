@@ -11,7 +11,7 @@ import { UserResponseDto } from '../../users/dto/user-response.dto';
 
 export class FreelanceResponseDto {
   @ApiProperty({
-    description: 'The unique identifier for the company',
+    description: 'The unique identifier for the freelance',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   id: string;
