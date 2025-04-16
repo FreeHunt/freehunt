@@ -1,26 +1,60 @@
 import { Injectable } from '@nestjs/common';
 import { CreateFreelanceDto } from './dto/create-freelance.dto';
 import { UpdateFreelanceDto } from './dto/update-freelance.dto';
+import { PrismaService } from 'src/common/prisma/prisma.service';
+import { Freelance } from '@prisma/client';
 
 @Injectable()
 export class FreelancesService {
-  create(createFreelanceDto: CreateFreelanceDto) {
-    return 'This action adds a new freelance';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(data: CreateFreelanceDto): Promise<Freelance> {
+    return this.prisma.freelance.create({
+      data,
+      include: {
+        user: true,
+        skills: true,
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all freelances`;
+  async findAll(): Promise<Freelance[]> {
+    return this.prisma.freelance.findMany({
+      include: {
+        user: true,
+        skills: true,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} freelance`;
+  async findOne(id: string): Promise<Freelance | null> {
+    return this.prisma.freelance.findUnique({
+      where: { id },
+      include: {
+        user: true,
+        skills: true,
+      },
+    });
   }
 
-  update(id: number, updateFreelanceDto: UpdateFreelanceDto) {
-    return `This action updates a #${id} freelance`;
+  async update(id: string, data: UpdateFreelanceDto): Promise<Freelance> {
+    return this.prisma.freelance.update({
+      where: { id },
+      data,
+      include: {
+        user: true,
+        skills: true,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} freelance`;
+  async remove(id: string): Promise<Freelance> {
+    return this.prisma.freelance.delete({
+      where: { id },
+      include: {
+        user: true,
+        skills: true,
+      },
+    });
   }
 }

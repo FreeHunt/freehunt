@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsOptional,
   IsPositive,
   IsString,
@@ -32,24 +33,22 @@ export class CreateFreelanceDto {
   averageDailyRate: number;
 
   @IsOptional()
-  @IsString({ each: true })
+  @IsArray()
+  @IsUUID(undefined, { each: true })
   @ApiProperty({
-    description: 'The list of id skills of the freelance',
-    example: ['550e8400-e29b-41d4-a716-446655440000'],
-    type: 'array',
-    items: {
-      type: 'string',
-      format: 'uuid',
-    },
-    isArray: true,
-    nullable: true,
+    description: 'Array of skill IDs to associate with the freelance',
+    example: [
+      '550e8400-e29b-41d4-a716-446655440000',
+      '550e8400-e29b-41d4-a716-446655440001',
+    ],
+    required: false,
   })
-  skills: string[];
+  skillIds?: string[];
 
   @IsUUID()
   @ApiProperty({
     description:
-      'The unique identifier for the user associated with the company',
+      'The unique identifier for the user associated with the freelance',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   userId: string;
