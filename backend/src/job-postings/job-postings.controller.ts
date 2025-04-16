@@ -20,6 +20,14 @@ export class JobPostingsController {
   constructor(private readonly jobPostingsService: JobPostingsService) {}
 
   @Post()
+  @ApiOperation({
+    summary: 'Create a job posting',
+    description: 'Create a new job posting with optional skills',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The job posting has been successfully created',
+  })
   create(
     @Body() createJobPostingDto: CreateJobPostingDto,
   ): Promise<JobPosting> {
@@ -27,16 +35,48 @@ export class JobPostingsController {
   }
 
   @Get()
+  @ApiOperation({
+    summary: 'Find all job postings',
+    description: 'Retrieve all job postings with their skills and company',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all job postings',
+  })
   findAll(): Promise<JobPosting[]> {
     return this.jobPostingsService.findAll();
   }
 
   @Get(':id')
+  @ApiOperation({
+    summary: 'Find a job posting by ID',
+    description: 'Retrieve a job posting by its ID with skills and company',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the job posting with the specified ID',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job posting not found',
+  })
   findOne(@Param('id') id: string): Promise<JobPosting | null> {
     return this.jobPostingsService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiOperation({
+    summary: 'Update a job posting',
+    description: 'Update a job posting with optional skills modification',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The job posting has been successfully updated',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job posting not found',
+  })
   update(
     @Param('id') id: string,
     @Body() updateJobPostingDto: UpdateJobPostingDto,
@@ -45,6 +85,18 @@ export class JobPostingsController {
   }
 
   @Delete(':id')
+  @ApiOperation({
+    summary: 'Remove a job posting',
+    description: 'Delete a job posting by its ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The job posting has been successfully deleted',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job posting not found',
+  })
   remove(@Param('id') id: string): Promise<JobPosting> {
     return this.jobPostingsService.remove(id);
   }
