@@ -1,4 +1,11 @@
-import { IsString, IsEnum, IsBoolean, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsBoolean,
+  IsUUID,
+  IsArray,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { JobPostingLocation } from '@prisma/client';
 
@@ -40,5 +47,16 @@ export class CreateJobPostingDto {
   })
   companyId: string;
 
-  // TODO: Add skills
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  @ApiProperty({
+    description: 'Array of skill IDs to associate with the job posting',
+    example: [
+      '550e8400-e29b-41d4-a716-446655440000',
+      '550e8400-e29b-41d4-a716-446655440001',
+    ],
+    required: false,
+  })
+  skillIds?: string[];
 }
