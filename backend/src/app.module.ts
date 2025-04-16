@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { CompaniesModule } from './companies/companies.module';
-import { JobPostingsModule } from './job-posting/job-postings.module';
+import { JobPostingsModule } from './job-postings/job-postings.module';
 import { SkillsModule } from './skills/skills.module';
 
 @Module({
