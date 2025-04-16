@@ -9,9 +9,9 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
-import { Skill } from '@prisma/client';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
+import { SkillResponseDto } from './dto/skill-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('skills')
@@ -27,8 +27,9 @@ export class SkillsController {
   @ApiResponse({
     status: 201,
     description: 'The skill has been successfully created',
+    type: SkillResponseDto,
   })
-  create(@Body() createSkillDto: CreateSkillDto): Promise<Skill> {
+  create(@Body() createSkillDto: CreateSkillDto): Promise<SkillResponseDto> {
     return this.skillsService.create(createSkillDto);
   }
 
@@ -40,8 +41,9 @@ export class SkillsController {
   @ApiResponse({
     status: 200,
     description: 'Returns all skills',
+    type: [SkillResponseDto],
   })
-  findAll(): Promise<Skill[]> {
+  findAll(): Promise<SkillResponseDto[]> {
     return this.skillsService.findAll();
   }
 
@@ -57,6 +59,7 @@ export class SkillsController {
   @ApiResponse({
     status: 200,
     description: 'Returns the skill with the specified ID',
+    type: SkillResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -66,7 +69,9 @@ export class SkillsController {
     status: 404,
     description: 'Skill not found',
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Skill | null> {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<SkillResponseDto | null> {
     return this.skillsService.findOne(id);
   }
 
@@ -82,6 +87,7 @@ export class SkillsController {
   @ApiResponse({
     status: 200,
     description: 'The skill has been successfully updated',
+    type: SkillResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -94,7 +100,7 @@ export class SkillsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateSkillDto: UpdateSkillDto,
-  ): Promise<Skill> {
+  ): Promise<SkillResponseDto> {
     return this.skillsService.update(id, updateSkillDto);
   }
 
@@ -110,6 +116,7 @@ export class SkillsController {
   @ApiResponse({
     status: 200,
     description: 'The skill has been successfully deleted',
+    type: SkillResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -119,7 +126,7 @@ export class SkillsController {
     status: 404,
     description: 'Skill not found',
   })
-  remove(@Param('id', ParseUUIDPipe) id: string): Promise<Skill> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<SkillResponseDto> {
     return this.skillsService.remove(id);
   }
 }

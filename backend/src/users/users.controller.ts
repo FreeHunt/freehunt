@@ -9,9 +9,9 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('users')
@@ -27,8 +27,9 @@ export class UsersController {
   @ApiResponse({
     status: 201,
     description: 'The user has been successfully created',
+    type: UserResponseDto,
   })
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
+  create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     return this.usersService.create(createUserDto);
   }
 
@@ -40,8 +41,9 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Returns all users',
+    type: [UserResponseDto],
   })
-  findAll(): Promise<User[]> {
+  findAll(): Promise<UserResponseDto[]> {
     return this.usersService.findAll();
   }
 
@@ -57,6 +59,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'Returns the user with the specified ID',
+    type: UserResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -66,7 +69,9 @@ export class UsersController {
     status: 404,
     description: 'User not found',
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<User | null> {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<UserResponseDto | null> {
     return this.usersService.findOne(id);
   }
 
@@ -82,6 +87,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'The user has been successfully updated',
+    type: UserResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -94,7 +100,7 @@ export class UsersController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<UserResponseDto> {
     return this.usersService.update(id, updateUserDto);
   }
 
@@ -110,6 +116,7 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'The user has been successfully deleted',
+    type: UserResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -119,7 +126,7 @@ export class UsersController {
     status: 404,
     description: 'User not found',
   })
-  remove(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<UserResponseDto> {
     return this.usersService.remove(id);
   }
 }
