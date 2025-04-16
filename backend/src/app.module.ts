@@ -4,6 +4,7 @@ import { UsersModule } from './users/users.module';
 import { CompaniesModule } from './companies/companies.module';
 import { JobPostingsModule } from './job-postings/job-postings.module';
 import { SkillsModule } from './skills/skills.module';
+import { FreelancesModule } from './freelances/freelances.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { SkillsModule } from './skills/skills.module';
     CompaniesModule,
     JobPostingsModule,
     SkillsModule,
+    FreelancesModule,
   ],
   controllers: [],
   providers: [],
