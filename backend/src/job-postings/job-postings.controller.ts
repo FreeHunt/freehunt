@@ -9,10 +9,10 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
-import { JobPosting } from '@prisma/client';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { SearchJobPostingDto } from './dto/search-job-posting.dto';
+import { JobPostingResponseDto } from './dto/job-posting-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('job-postings')
@@ -28,10 +28,11 @@ export class JobPostingsController {
   @ApiResponse({
     status: 201,
     description: 'The job posting has been successfully created',
+    type: JobPostingResponseDto,
   })
   create(
     @Body() createJobPostingDto: CreateJobPostingDto,
-  ): Promise<JobPosting> {
+  ): Promise<JobPostingResponseDto> {
     return this.jobPostingsService.create(createJobPostingDto);
   }
 
@@ -43,8 +44,9 @@ export class JobPostingsController {
   @ApiResponse({
     status: 200,
     description: 'Returns all job postings',
+    type: [JobPostingResponseDto],
   })
-  findAll(): Promise<JobPosting[]> {
+  findAll(): Promise<JobPostingResponseDto[]> {
     return this.jobPostingsService.findAll();
   }
 
@@ -60,6 +62,7 @@ export class JobPostingsController {
   @ApiResponse({
     status: 200,
     description: 'Returns the job posting with the specified ID',
+    type: JobPostingResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -69,7 +72,9 @@ export class JobPostingsController {
     status: 404,
     description: 'Job posting not found',
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<JobPosting | null> {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<JobPostingResponseDto | null> {
     return this.jobPostingsService.findOne(id);
   }
 
@@ -85,6 +90,7 @@ export class JobPostingsController {
   @ApiResponse({
     status: 200,
     description: 'The job posting has been successfully updated',
+    type: JobPostingResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -97,7 +103,7 @@ export class JobPostingsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateJobPostingDto: UpdateJobPostingDto,
-  ): Promise<JobPosting> {
+  ): Promise<JobPostingResponseDto> {
     return this.jobPostingsService.update(id, updateJobPostingDto);
   }
 
@@ -113,6 +119,7 @@ export class JobPostingsController {
   @ApiResponse({
     status: 200,
     description: 'The job posting has been successfully deleted',
+    type: JobPostingResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -122,7 +129,9 @@ export class JobPostingsController {
     status: 404,
     description: 'Job posting not found',
   })
-  remove(@Param('id', ParseUUIDPipe) id: string): Promise<JobPosting> {
+  remove(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<JobPostingResponseDto> {
     return this.jobPostingsService.remove(id);
   }
 
@@ -134,10 +143,11 @@ export class JobPostingsController {
   @ApiResponse({
     status: 200,
     description: 'Returns job postings matching the search criteria',
+    type: [JobPostingResponseDto],
   })
   search(
     @Body() searchJobPostingDto: SearchJobPostingDto,
-  ): Promise<JobPosting[]> {
+  ): Promise<JobPostingResponseDto[]> {
     return this.jobPostingsService.search(searchJobPostingDto);
   }
 }

@@ -9,9 +9,9 @@ import {
   ParseUUIDPipe,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { Company } from '@prisma/client';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import { CompanyResponseDto } from './dto/company-response.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('companies')
@@ -27,8 +27,11 @@ export class CompaniesController {
   @ApiResponse({
     status: 201,
     description: 'The company has been successfully created',
+    type: CompanyResponseDto,
   })
-  create(@Body() createCompanyDto: CreateCompanyDto): Promise<Company> {
+  create(
+    @Body() createCompanyDto: CreateCompanyDto,
+  ): Promise<CompanyResponseDto> {
     return this.companiesService.create(createCompanyDto);
   }
 
@@ -40,8 +43,9 @@ export class CompaniesController {
   @ApiResponse({
     status: 200,
     description: 'Returns all companies',
+    type: [CompanyResponseDto],
   })
-  findAll(): Promise<Company[]> {
+  findAll(): Promise<CompanyResponseDto[]> {
     return this.companiesService.findAll();
   }
 
@@ -57,6 +61,7 @@ export class CompaniesController {
   @ApiResponse({
     status: 200,
     description: 'Returns the company with the specified ID',
+    type: CompanyResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -66,7 +71,9 @@ export class CompaniesController {
     status: 404,
     description: 'Company not found',
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Company | null> {
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CompanyResponseDto | null> {
     return this.companiesService.findOne(id);
   }
 
@@ -82,6 +89,7 @@ export class CompaniesController {
   @ApiResponse({
     status: 200,
     description: 'The company has been successfully updated',
+    type: CompanyResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -94,7 +102,7 @@ export class CompaniesController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
-  ): Promise<Company> {
+  ): Promise<CompanyResponseDto> {
     return this.companiesService.update(id, updateCompanyDto);
   }
 
@@ -110,6 +118,7 @@ export class CompaniesController {
   @ApiResponse({
     status: 200,
     description: 'The company has been successfully deleted',
+    type: CompanyResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -119,7 +128,7 @@ export class CompaniesController {
     status: 404,
     description: 'Company not found',
   })
-  remove(@Param('id', ParseUUIDPipe) id: string): Promise<Company> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<CompanyResponseDto> {
     return this.companiesService.remove(id);
   }
 }
