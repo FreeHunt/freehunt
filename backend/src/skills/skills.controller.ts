@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import { Skill } from '@prisma/client';
@@ -51,17 +52,21 @@ export class SkillsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the skill',
+    description: 'The ID of the skill (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'Returns the skill with the specified ID',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Skill not found',
   })
-  findOne(@Param('id') id: string): Promise<Skill | null> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Skill | null> {
     return this.skillsService.findOne(id);
   }
 
@@ -72,18 +77,22 @@ export class SkillsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the skill',
+    description: 'The ID of the skill (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'The skill has been successfully updated',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Skill not found',
   })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateSkillDto: UpdateSkillDto,
   ): Promise<Skill> {
     return this.skillsService.update(id, updateSkillDto);
@@ -96,17 +105,21 @@ export class SkillsController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the skill',
+    description: 'The ID of the skill (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'The skill has been successfully deleted',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Skill not found',
   })
-  remove(@Param('id') id: string): Promise<Skill> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<Skill> {
     return this.skillsService.remove(id);
   }
 }

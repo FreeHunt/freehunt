@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { Company } from '@prisma/client';
@@ -51,17 +52,21 @@ export class CompaniesController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the company',
+    description: 'The ID of the company (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'Returns the company with the specified ID',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Company not found',
   })
-  findOne(@Param('id') id: string): Promise<Company | null> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Company | null> {
     return this.companiesService.findOne(id);
   }
 
@@ -72,18 +77,22 @@ export class CompaniesController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the company',
+    description: 'The ID of the company (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'The company has been successfully updated',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Company not found',
   })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
   ): Promise<Company> {
     return this.companiesService.update(id, updateCompanyDto);
@@ -96,17 +105,21 @@ export class CompaniesController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the company',
+    description: 'The ID of the company (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'The company has been successfully deleted',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Company not found',
   })
-  remove(@Param('id') id: string): Promise<Company> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<Company> {
     return this.companiesService.remove(id);
   }
 }
