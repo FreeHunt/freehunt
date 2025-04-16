@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -51,17 +52,21 @@ export class UsersController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the user',
+    description: 'The ID of the user (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'Returns the user with the specified ID',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'User not found',
   })
-  findOne(@Param('id') id: string): Promise<User | null> {
+  findOne(@Param('id', ParseUUIDPipe) id: string): Promise<User | null> {
     return this.usersService.findOne(id);
   }
 
@@ -72,18 +77,22 @@ export class UsersController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the user',
+    description: 'The ID of the user (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'The user has been successfully updated',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'User not found',
   })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
     return this.usersService.update(id, updateUserDto);
@@ -96,17 +105,21 @@ export class UsersController {
   })
   @ApiParam({
     name: 'id',
-    description: 'The ID of the user',
+    description: 'The ID of the user (must be a valid UUID)',
   })
   @ApiResponse({
     status: 200,
     description: 'The user has been successfully deleted',
   })
   @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
     status: 404,
     description: 'User not found',
   })
-  remove(@Param('id') id: string): Promise<User> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<User> {
     return this.usersService.remove(id);
   }
 }
