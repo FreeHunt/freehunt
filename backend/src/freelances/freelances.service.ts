@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateFreelanceDto } from './dto/create-freelance.dto';
 import { UpdateFreelanceDto } from './dto/update-freelance.dto';
-import { PrismaService } from 'src/common/prisma/prisma.service';
+import { PrismaService } from '../common/prisma/prisma.service';
 import { Freelance } from '@prisma/client';
 
 @Injectable()
