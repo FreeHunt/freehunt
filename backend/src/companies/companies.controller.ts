@@ -6,12 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { Company } from '@prisma/client';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { CompanyResponseDto } from './dto/company-response.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('companies')
 @Controller('companies')
@@ -19,30 +20,115 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto): Promise<Company> {
+  @ApiOperation({
+    summary: 'Create a company',
+    description: 'Create a new company profile',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The company has been successfully created',
+    type: CompanyResponseDto,
+  })
+  create(
+    @Body() createCompanyDto: CreateCompanyDto,
+  ): Promise<CompanyResponseDto> {
     return this.companiesService.create(createCompanyDto);
   }
 
   @Get()
-  findAll(): Promise<Company[]> {
+  @ApiOperation({
+    summary: 'Find all companies',
+    description: 'Retrieve all companies',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all companies',
+    type: [CompanyResponseDto],
+  })
+  findAll(): Promise<CompanyResponseDto[]> {
     return this.companiesService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Company | null> {
+  @ApiOperation({
+    summary: 'Find a company by ID',
+    description: 'Retrieve a company by its ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the company (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the company with the specified ID',
+    type: CompanyResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Company not found',
+  })
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<CompanyResponseDto | null> {
     return this.companiesService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiOperation({
+    summary: 'Update a company',
+    description: 'Update a company by its ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the company (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The company has been successfully updated',
+    type: CompanyResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Company not found',
+  })
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
-  ): Promise<Company> {
+  ): Promise<CompanyResponseDto> {
     return this.companiesService.update(id, updateCompanyDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string): Promise<Company> {
+  @ApiOperation({
+    summary: 'Remove a company',
+    description: 'Delete a company by its ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the company (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The company has been successfully deleted',
+    type: CompanyResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Company not found',
+  })
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<CompanyResponseDto> {
     return this.companiesService.remove(id);
   }
 }
