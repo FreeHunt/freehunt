@@ -23,7 +23,11 @@ export class JobPostingsService {
       },
       include: {
         skills: true,
-        company: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
@@ -32,7 +36,11 @@ export class JobPostingsService {
     return this.prisma.jobPosting.findMany({
       include: {
         skills: true,
-        company: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
@@ -42,7 +50,11 @@ export class JobPostingsService {
       where: { id },
       include: {
         skills: true,
-        company: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
@@ -64,7 +76,11 @@ export class JobPostingsService {
       },
       include: {
         skills: true,
-        company: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
@@ -74,7 +90,11 @@ export class JobPostingsService {
       where: { id },
       include: {
         skills: true,
-        company: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
       },
     });
   }
@@ -104,7 +124,11 @@ export class JobPostingsService {
       where,
       include: {
         skills: true,
-        company: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
       },
       skip,
       take,
