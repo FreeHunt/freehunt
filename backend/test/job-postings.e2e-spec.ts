@@ -7,6 +7,8 @@ import { JobPostingResponseDto } from '../src/job-postings/dto/job-posting-respo
 import { JobPostingsService } from '../src/job-postings/job-postings.service';
 import { JobPostingLocation } from '@prisma/client';
 import { SearchJobPostingDto } from '../src/job-postings/dto/search-job-posting.dto';
+import { PrismaService } from '../src/common/prisma/prisma.service';
+import { PrismaServiceMock } from './mocks/prisma.mock';
 
 describe('JobPostingsController (e2e)', () => {
   let app: INestApplication<App>;
@@ -50,6 +52,8 @@ describe('JobPostingsController (e2e)', () => {
     })
       .overrideProvider(JobPostingsService)
       .useValue(jobPostingsService)
+      .overrideProvider(PrismaService)
+      .useValue(PrismaServiceMock)
       .compile();
 
     app = moduleFixture.createNestApplication();

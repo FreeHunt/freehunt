@@ -6,6 +6,8 @@ import { SkillsModule } from '../src/skills/skills.module';
 import { SkillResponseDto } from '../src/skills/dto/skill-response.dto';
 import { SkillsService } from '../src/skills/skills.service';
 import { SkillType } from '@prisma/client';
+import { PrismaService } from '../src/common/prisma/prisma.service';
+import { PrismaServiceMock } from './mocks/prisma.mock';
 
 describe('SkillsController (e2e)', () => {
   let app: INestApplication<App>;
@@ -32,6 +34,8 @@ describe('SkillsController (e2e)', () => {
     })
       .overrideProvider(SkillsService)
       .useValue(skillsService)
+      .overrideProvider(PrismaService)
+      .useValue(PrismaServiceMock)
       .compile();
 
     app = moduleFixture.createNestApplication();

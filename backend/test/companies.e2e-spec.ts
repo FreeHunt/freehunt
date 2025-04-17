@@ -5,6 +5,8 @@ import { App } from 'supertest/types';
 import { CompaniesModule } from '../src/companies/companies.module';
 import { CompanyResponseDto } from '../src/companies/dto/company-response.dto';
 import { CompaniesService } from '../src/companies/companies.service';
+import { PrismaService } from '../src/common/prisma/prisma.service';
+import { PrismaServiceMock } from './mocks/prisma.mock';
 
 describe('CompaniesController (e2e)', () => {
   let app: INestApplication<App>;
@@ -30,6 +32,8 @@ describe('CompaniesController (e2e)', () => {
     })
       .overrideProvider(CompaniesService)
       .useValue(companiesService)
+      .overrideProvider(PrismaService)
+      .useValue(PrismaServiceMock)
       .compile();
 
     app = moduleFixture.createNestApplication();

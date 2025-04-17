@@ -5,6 +5,8 @@ import { App } from 'supertest/types';
 import { UsersModule } from '../src/users/users.module';
 import { UserResponseDto } from '../src/users/dto/user-response.dto';
 import { UsersService } from '../src/users/users.service';
+import { PrismaService } from '../src/common/prisma/prisma.service';
+import { PrismaServiceMock } from './mocks/prisma.mock';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication<App>;
@@ -28,6 +30,8 @@ describe('UsersController (e2e)', () => {
     })
       .overrideProvider(UsersService)
       .useValue(usersService)
+      .overrideProvider(PrismaService)
+      .useValue(PrismaServiceMock)
       .compile();
 
     app = moduleFixture.createNestApplication();
