@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  HttpCode,
 } from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
@@ -145,6 +146,7 @@ export class JobPostingsController {
     description: 'Returns job postings matching the search criteria',
     type: [JobPostingResponseDto],
   })
+  @HttpCode(200)
   search(
     @Body() searchJobPostingDto: SearchJobPostingDto,
   ): Promise<JobPostingResponseDto[]> {
