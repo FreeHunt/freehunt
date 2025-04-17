@@ -9,8 +9,17 @@ export class FreelancesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateFreelanceDto): Promise<Freelance> {
+    const { skillIds, ...freelanceData } = data;
+
     return this.prisma.freelance.create({
-      data,
+      data: {
+        ...freelanceData,
+        skills: skillIds?.length
+          ? {
+              connect: skillIds?.map((id) => ({ id })),
+            }
+          : undefined,
+      },
       include: {
         user: true,
         skills: true,
@@ -38,9 +47,20 @@ export class FreelancesService {
   }
 
   async update(id: string, data: UpdateFreelanceDto): Promise<Freelance> {
+    const { skillIds, ...freelanceData } = data;
+
     return this.prisma.freelance.update({
       where: { id },
-      data,
+      data: {
+        ...freelanceData,
+        skills:
+          skillIds !== undefined
+            ? {
+                set: [],
+                connect: skillIds?.map((id) => ({ id })),
+              }
+            : { set: [] },
+      },
       include: {
         user: true,
         skills: true,
