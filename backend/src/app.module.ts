@@ -4,6 +4,8 @@ import { UsersModule } from './users/users.module';
 import { CompaniesModule } from './companies/companies.module';
 import { JobPostingsModule } from './job-postings/job-postings.module';
 import { SkillsModule } from './skills/skills.module';
+import { FreelancesModule } from './freelances/freelances.module';
+
 import { AuthModule } from './auth/auth.module';
 import { AuthentikModule } from './common/authentik/authentik.module';
 @Module({
@@ -13,6 +15,7 @@ import { AuthentikModule } from './common/authentik/authentik.module';
     CompaniesModule,
     JobPostingsModule,
     SkillsModule,
+    FreelancesModule,
     AuthModule,
     AuthentikModule,
   ],
