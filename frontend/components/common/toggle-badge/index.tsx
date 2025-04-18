@@ -23,7 +23,9 @@ function ToggleBadge({
   return (
     <Badge
       className={`${
-        isActive ? "bg-freehunt-main text-white" : "text-freehunt-black-two"
+        isActive
+          ? "bg-freehunt-main text-white border-none"
+          : "text-freehunt-black-two"
       } cursor-pointer`}
       variant="outline"
       onClick={handleClick}
