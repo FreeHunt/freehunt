@@ -8,29 +8,32 @@ import { formatNumberToEuros } from "@/lib/utils";
 import { SearchInput } from "@/components/common/input";
 import { Badge } from "@/components/ui/badge";
 import { searchFreelances } from "@/actions/freelances";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Freelance, Skill } from "@/lib/interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleBadge } from "@/components/common/toggle-badge";
 import { getSkills } from "@/actions/skills";
+import debounce from "debounce";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
 const SLIDER_STEP = 100;
+const DEBOUNCE_DELAY = 300;
 
 function Page() {
   const [minimumAverageDailyRate, setMinimumAverageDailyRate] = useState(
-    MINIMUM_AVERAGE_DAILY_RATE,
+    MINIMUM_AVERAGE_DAILY_RATE
   );
   const [maximumAverageDailyRate, setMaximumAverageDailyRate] = useState(
-    MAXIMUM_AVERAGE_DAILY_RATE,
+    MAXIMUM_AVERAGE_DAILY_RATE
   );
   const [freelancesLoading, setFreelancesLoading] = useState(true);
   const [freelances, setFreelances] = useState<Freelance[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
 
   // Fetch skills
   useEffect(() => {
@@ -43,36 +46,56 @@ function Page() {
     fetchSkills();
   }, []);
 
-  // Fetch initial freelances
-  useEffect(() => {
-    const fetchFreelances = async () => {
+  const fetchFreelances = useCallback(
+    async (query = "") => {
       const freelances = await searchFreelances({
-        query: "",
+        query,
         minimumAverageDailyRate,
         maximumAverageDailyRate,
+        skills: selectedSkills,
       });
       setFreelances(freelances);
       setFreelancesLoading(false);
-    };
+    },
+    [minimumAverageDailyRate, maximumAverageDailyRate, selectedSkills]
+  );
 
-    fetchFreelances();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Debounced version of fetchFreelances
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedFetchFreelances = useCallback(
+    debounce((query: string) => {
+      fetchFreelances(query);
+    }, DEBOUNCE_DELAY),
+    [fetchFreelances]
+  );
+
+  // Initial load and when filters change
+  useEffect(() => {
+    debouncedFetchFreelances(searchQuery);
+    // Cancel any pending debounced calls when component unmounts
+    return () => debouncedFetchFreelances.clear();
+  }, [debouncedFetchFreelances, searchQuery]);
+
+  // Handle search form submission
+  const handleSearch = async (formData: FormData) => {
+    const query = formData.get("search") as string;
+    setSearchQuery(query);
+  };
+
+  // Handle skill selection with debounce
+  const handleSkillToggle = useCallback((skill: Skill) => {
+    setSelectedSkills((prev) =>
+      prev.some((s) => s.id === skill.id)
+        ? prev.filter((s) => s.id !== skill.id)
+        : [...prev, skill]
+    );
   }, []);
 
-  const handleSearch = async (formData: FormData) => {
-    setFreelancesLoading(true);
-
-    const searchQuery = formData.get("search") as string;
-
-    const freelances = await searchFreelances({
-      query: searchQuery,
-      minimumAverageDailyRate,
-      maximumAverageDailyRate,
-    });
-
-    setFreelances(freelances);
-    setFreelancesLoading(false);
-  };
+  // Handle slider value change with debounce
+  const handleSliderValueChange = useCallback((value: number[]) => {
+    setMinimumAverageDailyRate(value[0]);
+    setMaximumAverageDailyRate(value[1]);
+  }, []);
 
   return (
     <BasePage>
@@ -81,7 +104,7 @@ function Page() {
 
       <div className="flex px-5 gap-5">
         {/* Sidebar */}
-        <aside className="flex flex-col py-7 pl-5 pr-10 gap-5 w-[276px] border-r border-freehunt-grey box-content">
+        <aside className="flex flex-col py-7 pl-5 pr-10 gap-5 w-[276px] box-content">
           <h2 className="text-xl font-semibold text-freehunt-black-two">
             Filtres
           </h2>
@@ -98,17 +121,14 @@ function Page() {
               max={MAXIMUM_AVERAGE_DAILY_RATE}
               step={SLIDER_STEP}
               className="w-full"
-              onValueCommit={(value) => {
-                setMinimumAverageDailyRate(value[0]);
-                setMaximumAverageDailyRate(value[1]);
-              }}
+              onValueChange={handleSliderValueChange}
             />
             <div className="flex items-center justify-between w-full">
               <p className="text-sm text-freehunt-black-two">
-                {formatNumberToEuros(MINIMUM_AVERAGE_DAILY_RATE)}
+                {formatNumberToEuros(minimumAverageDailyRate)}
               </p>
               <p className="text-sm text-freehunt-black-two">
-                {formatNumberToEuros(MAXIMUM_AVERAGE_DAILY_RATE)}
+                {formatNumberToEuros(maximumAverageDailyRate)}
               </p>
             </div>
           </div>
@@ -129,13 +149,7 @@ function Page() {
                   <ToggleBadge
                     key={skill.id}
                     value={skill.name}
-                    onClick={() => {
-                      setSelectedSkills((prev) =>
-                        prev.includes(skill.name)
-                          ? prev.filter((s) => s !== skill.name)
-                          : [...prev, skill.name],
-                      );
-                    }}
+                    onClick={() => handleSkillToggle(skill)}
                   />
                 ))}
             </div>
@@ -173,7 +187,9 @@ function Page() {
                 <FreelanceCard key={freelance.id} {...freelance} />
               ))}
             {!freelancesLoading && freelances.length === 0 && (
-              <p className="text-freehunt-black-two">Aucun freelance trouvé.</p>
+              <p className="text-freehunt-black-two">
+                Aucun freelance ne correspond à votre recherche.
+              </p>
             )}
           </div>
         </main>
