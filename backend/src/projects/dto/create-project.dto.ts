@@ -1,9 +1,7 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateProjectDto } from './create-project.dto';
 import { IsString, IsNotEmpty, IsDate, IsOptional, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class UpdateProjectDto extends PartialType(CreateProjectDto) {
+export class CreateProjectDto {
     @IsString()
     @IsNotEmpty()
     name: string;
@@ -20,7 +18,7 @@ export class UpdateProjectDto extends PartialType(CreateProjectDto) {
     @IsDate()
     @Type(() => Date)
     @IsOptional()
-    endDate?: Date;
+    endDate?: Date | null | undefined;
   
     @IsUUID()
     @IsNotEmpty()
@@ -28,5 +26,5 @@ export class UpdateProjectDto extends PartialType(CreateProjectDto) {
   
     @IsUUID()
     @IsOptional()
-    freelanceId?: string;
+    freelanceId?: string | null | undefined;
 }
