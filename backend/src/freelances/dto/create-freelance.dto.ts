@@ -30,7 +30,6 @@ export class CreateFreelanceDto {
   @ApiProperty({
     description: 'The job title of the freelance',
     example: 'Full Stack Developer',
-    required: false,
   })
   jobTitle: string;
 
