@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateFreelanceDto } from './dto/create-freelance.dto';
 import { UpdateFreelanceDto } from './dto/update-freelance.dto';
 import { PrismaService } from '../common/prisma/prisma.service';
-import { Freelance } from '@prisma/client';
+import { Freelance, Prisma } from '@prisma/client';
+import { SearchFreelanceDto } from './dto/search-freelance.dto';
 
 @Injectable()
 export class FreelancesService {
@@ -75,6 +76,64 @@ export class FreelancesService {
         user: true,
         skills: true,
       },
+    });
+  }
+
+  async search(searchParams: SearchFreelanceDto): Promise<Freelance[]> {
+    const {
+      firstName,
+      lastName,
+      jobTitle,
+      skillNames,
+      minDailyRate,
+      maxDailyRate,
+      skip,
+      take,
+    } = searchParams;
+
+    const where: Prisma.FreelanceWhereInput = {};
+
+    if (firstName) {
+      where.firstName = { contains: firstName, mode: 'insensitive' };
+    }
+
+    if (lastName) {
+      where.lastName = { contains: lastName, mode: 'insensitive' };
+    }
+
+    if (jobTitle) {
+      where.jobTitle = { contains: jobTitle, mode: 'insensitive' };
+    }
+
+    if (skillNames && skillNames.length > 0) {
+      where.skills = {
+        some: {
+          name: { in: skillNames, mode: 'insensitive' },
+        },
+      };
+    }
+
+    // Handle daily rate range
+    if (minDailyRate !== undefined || maxDailyRate !== undefined) {
+      where.averageDailyRate = {};
+
+      if (minDailyRate !== undefined) {
+        where.averageDailyRate.gte = minDailyRate;
+      }
+
+      if (maxDailyRate !== undefined) {
+        where.averageDailyRate.lte = maxDailyRate;
+      }
+    }
+
+    return this.prisma.freelance.findMany({
+      where,
+      include: {
+        user: true,
+        skills: true,
+      },
+      skip,
+      take,
     });
   }
 }
