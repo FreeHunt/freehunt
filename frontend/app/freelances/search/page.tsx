@@ -16,6 +16,7 @@ import { getSkills } from "@/actions/skills";
 import debounce from "debounce";
 import { Button } from "@/components/ui/button";
 import { X, Filter } from "lucide-react";
+import { Button as FreeHuntButton } from "@/components/common/button";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
@@ -24,10 +25,10 @@ const DEBOUNCE_DELAY = 300;
 
 function Page() {
   const [minimumAverageDailyRate, setMinimumAverageDailyRate] = useState(
-    MINIMUM_AVERAGE_DAILY_RATE
+    MINIMUM_AVERAGE_DAILY_RATE,
   );
   const [maximumAverageDailyRate, setMaximumAverageDailyRate] = useState(
-    MAXIMUM_AVERAGE_DAILY_RATE
+    MAXIMUM_AVERAGE_DAILY_RATE,
   );
   const [freelancesLoading, setFreelancesLoading] = useState(true);
   const [freelances, setFreelances] = useState<Freelance[]>([]);
@@ -61,7 +62,7 @@ function Page() {
       setFreelances(freelances);
       setFreelancesLoading(false);
     },
-    [minimumAverageDailyRate, maximumAverageDailyRate, selectedSkills]
+    [minimumAverageDailyRate, maximumAverageDailyRate, selectedSkills],
   );
 
   // Debounced version of fetchFreelances
@@ -70,7 +71,7 @@ function Page() {
     debounce((query: string) => {
       fetchFreelances(query);
     }, DEBOUNCE_DELAY),
-    [fetchFreelances]
+    [fetchFreelances],
   );
 
   // Initial load and when filters change
@@ -91,7 +92,7 @@ function Page() {
     setSelectedSkills((prev) =>
       prev.some((s) => s.id === skill.id)
         ? prev.filter((s) => s.id !== skill.id)
-        : [...prev, skill]
+        : [...prev, skill],
     );
   }, []);
 
@@ -106,26 +107,16 @@ function Page() {
       {/* Decoration Banner */}
       <Banner text="Trouvez le freelance de vos rêves." />
 
-      <div className="flex flex-col md:flex-row px-4 md:px-5 gap-5 relative">
-        {/* Mobile Filter Toggle Button */}
-        <Button
-          variant="outline"
-          className="flex md:hidden items-center gap-2 mb-4 mt-4"
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-        >
-          <Filter size={16} />
-          Filtres
-        </Button>
-
+      <div className="flex flex-col lg:flex-row px-4 lg:px-5 gap-5 relative">
         {/* Sidebar - Hidden on mobile by default, shown when sidebarOpen is true */}
         <aside
           className={`
-          ${sidebarOpen ? "flex" : "hidden"} 
-          md:flex flex-col py-4 md:py-7 px-4 md:pl-5 md:pr-10 gap-5 
-          w-full md:w-[276px] md:border-r border-freehunt-grey
-          fixed md:static top-0 left-0 h-full md:h-auto
-          bg-white md:bg-transparent z-50 overflow-y-auto
-          max-w-[85vw] md:max-w-none
+          ${sidebarOpen ? "flex" : "hidden"}
+          lg:flex flex-col py-4 lg:py-7 px-4 lg:pl-5 lg:pr-10 gap-5
+          w-full lg:w-[276px] lg:border-r border-freehunt-grey
+          fixed lg:static top-0 left-0 h-full lg:h-auto
+          bg-white lg:bg-transparent z-50 overflow-y-auto
+          max-w-[100vw] lg:max-w-none
         `}
         >
           <div className="flex items-center justify-between">
@@ -134,7 +125,7 @@ function Page() {
             </h2>
             <Button
               variant="ghost"
-              className="md:hidden"
+              className="lg:hidden"
               onClick={() => setSidebarOpen(false)}
               size="sm"
             >
@@ -183,38 +174,48 @@ function Page() {
                     key={skill.id}
                     value={skill.name}
                     onClick={() => handleSkillToggle(skill)}
-                    className="text-xs md:text-sm"
                   />
                 ))}
             </div>
           </div>
 
           {/* Mobile apply filters button */}
-          <Button
-            className="mt-4 md:hidden"
+          <FreeHuntButton
+            className="mt-4 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           >
             Appliquer les filtres
-          </Button>
+          </FreeHuntButton>
         </aside>
 
         {/* Overlay for mobile when sidebar is open */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           ></div>
         )}
 
         {/* Main */}
-        <main className="flex flex-col gap-5 w-full py-2 md:py-5">
+        <main className="flex flex-col gap-5 w-full py-2 lg:py-5">
           <form action={handleSearch} className="w-full">
             {/* Search Bar */}
             <SearchInput
               placeholder="Intitulé du poste, technologies..."
-              className="w-full text-sm md:text-base py-1.5 md:py-2.5 px-3 md:px-4"
+              className="w-full text-sm lg:text-base px-6 lg:px-12 mt-2 lg:mt-0"
             />
           </form>
+
+          {/* Mobile Filter Toggle Button */}
+          <FreeHuntButton
+            variant="outline"
+            theme="secondary"
+            className="flex lg:hidden items-center gap-2"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            <Filter size={16} />
+            Filtres
+          </FreeHuntButton>
 
           {/* Title */}
           <div className="flex items-center gap-1.5">
@@ -227,7 +228,7 @@ function Page() {
           </div>
 
           {/* Freelance Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {freelancesLoading &&
               Array.from({ length: 6 }).map((_, index) => (
                 <Skeleton key={index} className="h-[248px] rounded-[30px]" />

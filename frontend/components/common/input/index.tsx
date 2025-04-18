@@ -25,7 +25,7 @@ function SearchInput({
     <div className="relative">
       <Search
         size={20}
-        className="absolute top-1/2 left-4 -translate-y-1/2 text-freehunt-black-two"
+        className="hidden lg:block absolute top-1/2 left-4 -translate-y-1/2 text-freehunt-black-two"
       />
       <ShadcnInput
         className={cn(
@@ -39,9 +39,10 @@ function SearchInput({
       />
       <Button
         variant="secondary"
-        className="absolute top-1/2 right-4 -translate-y-1/2  rounded-full font-semibold px-8 py-5"
+        className="absolute top-1/2 right-4 -translate-y-1/2  rounded-full font-semibold lg:px-8 lg:py-5"
       >
-        Rechercher
+        <Search size={20} className="lg:hidden" />
+        <span className="hidden lg:block">Rechercher</span>
       </Button>
     </div>
   );
