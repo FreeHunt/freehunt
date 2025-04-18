@@ -7,13 +7,16 @@ import {
   Param,
   Delete,
   ParseUUIDPipe,
+  HttpCode,
 } from '@nestjs/common';
 import { FreelancesService } from './freelances.service';
 import { CreateFreelanceDto } from './dto/create-freelance.dto';
 import { UpdateFreelanceDto } from './dto/update-freelance.dto';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { SearchFreelanceDto } from './dto/search-freelance.dto';
+import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FreelanceResponseDto } from './dto/freelance-response.dto';
 
+@ApiTags('freelances')
 @Controller('freelances')
 export class FreelancesController {
   constructor(private readonly freelancesService: FreelancesService) {}
@@ -131,5 +134,22 @@ export class FreelancesController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<FreelanceResponseDto> {
     return this.freelancesService.remove(id);
+  }
+
+  @Post('search')
+  @ApiOperation({
+    summary: 'Search freelances',
+    description: 'Search freelances by name, skills, and/or daily rate range',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns freelances matching the search criteria',
+    type: [FreelanceResponseDto],
+  })
+  @HttpCode(200)
+  async search(
+    @Body() searchFreelanceDto: SearchFreelanceDto,
+  ): Promise<FreelanceResponseDto[]> {
+    return this.freelancesService.search(searchFreelanceDto);
   }
 }
