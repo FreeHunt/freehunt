@@ -41,6 +41,7 @@ model Freelance {
   userId           String     @unique @db.Uuid
   firstName        String
   lastName         String
+  jobTitle         String
   averageDailyRate Float // TJM
   skills           Skill[]
   documents        Document[]

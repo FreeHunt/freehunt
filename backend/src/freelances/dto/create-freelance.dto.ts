@@ -25,6 +25,15 @@ export class CreateFreelanceDto {
   @Length(2, 25)
   lastName: string;
 
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'The job title of the freelance',
+    example: 'Full Stack Developer',
+    required: false,
+  })
+  jobTitle: string;
+
   @IsPositive()
   @ApiProperty({
     description: 'The daily rate of the freelance',
