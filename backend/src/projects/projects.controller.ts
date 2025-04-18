@@ -22,6 +22,15 @@ export class ProjectController {
     summary: 'Create a project',
     description: 'Create a new project',
   })
+  @ApiResponse({
+    status: 201,
+    description: 'The project has been successfully created.',
+    type: CreateProjectDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
   create(
     @Body() createProjectDto: CreateProjectDto,
   ): Promise<{ message: string; data: CreateProjectDto }> {
@@ -32,6 +41,15 @@ export class ProjectController {
   @ApiOperation({
     summary: 'Find all projects',
     description: 'Retrieve all projects',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all projects',
+    type: [CreateProjectDto],
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No projects found',
   })
   findAll() {
     return this.projectService.findAll();
@@ -46,6 +64,19 @@ export class ProjectController {
     name: 'id',
     description: 'The ID of the project (must be a valid UUID)',
   })
+  @ApiResponse({
+    status: 200,
+    description: 'Project found successfully',
+    type: CreateProjectDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
+  })
   findOne(@Param('id') id: string) {
     return this.projectService.findOne(id);
   }
@@ -58,6 +89,19 @@ export class ProjectController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the project (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project updated successfully',
+    type: UpdateProjectDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
   })
   update(
     @Param('id') id: string,
@@ -74,6 +118,19 @@ export class ProjectController {
   @ApiParam({
     name: 'id',
     description: 'The ID of the project (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Project deleted successfully',
+    type: CreateProjectDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Project not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad Request',
   })
   remove(
     @Param('id') id: string,
