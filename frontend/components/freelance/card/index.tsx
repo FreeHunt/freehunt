@@ -49,8 +49,8 @@ function FreelanceCard(freelance: Freelance) {
       <CardContent className="flex gap-2.5 flex-wrap flex-1">
         {/* Skills */}
         {skills.length > 0 &&
-          skills.map((skill, index) => (
-            <SkillBadge key={`${skill}-${index}`}>{skill.name}</SkillBadge>
+          skills.map((skill) => (
+            <SkillBadge key={skill.id}>{skill.name}</SkillBadge>
           ))}
       </CardContent>
 
