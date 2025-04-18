@@ -1,16 +1,16 @@
 import React from "react";
 import { Button as ShadcnButton } from "@/components/ui/button";
 
+type ButtonProps = React.ComponentProps<typeof ShadcnButton> & {
+  theme?: "primary" | "secondary";
+};
+
 function Button({
   className,
   theme = "primary",
   children,
   ...props
-}: {
-  className?: string;
-  theme?: "primary" | "secondary";
-  children: React.ReactNode;
-}) {
+}: ButtonProps) {
   const colorClasses = {
     primary: "bg-freehunt-main text-white hover:bg-freehunt-main/80",
     secondary: "bg-white text-freehunt-main hover:bg-gray-100",
