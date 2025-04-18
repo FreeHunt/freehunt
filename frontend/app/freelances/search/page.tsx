@@ -9,8 +9,10 @@ import { SearchInput } from "@/components/common/input";
 import { Badge } from "@/components/ui/badge";
 import { searchFreelances } from "@/actions/freelances";
 import { useState, useEffect } from "react";
-import { Freelance } from "@/lib/interfaces";
+import { Freelance, Skill } from "@/lib/interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleBadge } from "@/components/common/toggle-badge";
+import { getSkills } from "@/actions/skills";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
@@ -23,9 +25,25 @@ function Page() {
   const [maximumAverageDailyRate, setMaximumAverageDailyRate] = useState(
     MAXIMUM_AVERAGE_DAILY_RATE,
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const [freelancesLoading, setFreelancesLoading] = useState(true);
   const [freelances, setFreelances] = useState<Freelance[]>([]);
 
+  const [skillsLoading, setSkillsLoading] = useState(true);
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+
+  // Fetch skills
+  useEffect(() => {
+    const fetchSkills = async () => {
+      const skills = await getSkills();
+      setSkills(skills);
+      setSkillsLoading(false);
+    };
+
+    fetchSkills();
+  }, []);
+
+  // Fetch initial freelances
   useEffect(() => {
     const fetchFreelances = async () => {
       const freelances = await searchFreelances({
@@ -34,7 +52,7 @@ function Page() {
         maximumAverageDailyRate,
       });
       setFreelances(freelances);
-      setIsLoading(false);
+      setFreelancesLoading(false);
     };
 
     fetchFreelances();
@@ -42,7 +60,7 @@ function Page() {
   }, []);
 
   const handleSearch = async (formData: FormData) => {
-    setIsLoading(true);
+    setFreelancesLoading(true);
 
     const searchQuery = formData.get("search") as string;
 
@@ -53,7 +71,7 @@ function Page() {
     });
 
     setFreelances(freelances);
-    setIsLoading(false);
+    setFreelancesLoading(false);
   };
 
   return (
@@ -94,6 +112,34 @@ function Page() {
               </p>
             </div>
           </div>
+
+          {/* Technical skills */}
+          <div className="flex flex-col gap-2.5 items-start self-stretch">
+            <p className="font-semibold">Compétences techniques</p>
+            <div className="flex flex-wrap gap-2.5">
+              {skillsLoading &&
+                Array.from({ length: 5 }).map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    className="w-[63px] h-4 rounded-[8px]"
+                  />
+                ))}
+              {!skillsLoading &&
+                skills.map((skill) => (
+                  <ToggleBadge
+                    key={skill.id}
+                    value={skill.name}
+                    onClick={() => {
+                      setSelectedSkills((prev) =>
+                        prev.includes(skill.name)
+                          ? prev.filter((s) => s !== skill.name)
+                          : [...prev, skill.name],
+                      );
+                    }}
+                  />
+                ))}
+            </div>
+          </div>
         </aside>
 
         {/* Main */}
@@ -115,7 +161,7 @@ function Page() {
 
           {/* Freelance Cards */}
           <div className="flex flex-wrap gap-6">
-            {isLoading &&
+            {freelancesLoading &&
               Array.from({ length: 6 }).map((_, index) => (
                 <Skeleton
                   key={index}
@@ -126,7 +172,7 @@ function Page() {
               freelances.map((freelance) => (
                 <FreelanceCard key={freelance.id} {...freelance} />
               ))}
-            {!isLoading && freelances.length === 0 && (
+            {!freelancesLoading && freelances.length === 0 && (
               <p className="text-freehunt-black-two">Aucun freelance trouvé.</p>
             )}
           </div>
