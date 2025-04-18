@@ -59,7 +59,7 @@ export class ProjectService {
     });
 
     if (!project) {
-      throw new Error(`Project with id ${id} does not exist`);
+      throw new NotFoundException(`Project with id ${id} does not exist`);
     }
 
     return {
