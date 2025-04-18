@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 // Navigation links configuration
-const NAV_LINKS = [
-  { href: "/", label: "Lien 1" },
-  { href: "/", label: "Lien 2" },
-  { href: "/", label: "Lien 3" },
+const NAV_LINKS: { href: string; label: string }[] = [
+  // { href: "/", label: "Lien 1" },
+  // { href: "/", label: "Lien 2" },
+  // { href: "/", label: "Lien 3" },
 ];
 
 // Auth links configuration
