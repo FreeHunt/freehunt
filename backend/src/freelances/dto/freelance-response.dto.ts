@@ -1,13 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsOptional,
-  IsPositive,
-  IsString,
-  IsUUID,
-  Length,
-} from 'class-validator';
+import { IsPositive, IsString, Length } from 'class-validator';
 import { UserResponseDto } from '../../users/dto/user-response.dto';
+import { SkillResponseDto } from '../../skills/dto/skill-response.dto';
 
 export class FreelanceResponseDto {
   @ApiProperty({
@@ -32,6 +26,13 @@ export class FreelanceResponseDto {
   @Length(2, 25)
   lastName: string;
 
+  @IsString()
+  @ApiProperty({
+    description: 'The job title of the freelance',
+    example: 'Full Stack Developer',
+  })
+  jobTitle: string;
+
   @IsPositive()
   @ApiProperty({
     description: 'The daily rate of the freelance',
@@ -39,18 +40,11 @@ export class FreelanceResponseDto {
   })
   averageDailyRate: number;
 
-  @IsOptional()
-  @IsArray()
-  @IsUUID(undefined, { each: true })
   @ApiProperty({
-    description: 'Array of skill IDs to associate with the freelance',
-    example: [
-      '550e8400-e29b-41d4-a716-446655440000',
-      '550e8400-e29b-41d4-a716-446655440001',
-    ],
-    required: false,
+    description: 'The skills required for the job posting',
+    type: [SkillResponseDto],
   })
-  skillIds?: string[];
+  skills?: SkillResponseDto[];
 
   @ApiProperty({
     description: 'The user associated with the freelance',
