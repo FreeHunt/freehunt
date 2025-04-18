@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { searchFreelances } from "@/actions/freelances";
 import { useState, useEffect } from "react";
 import { Freelance } from "@/lib/interfaces";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
@@ -22,6 +23,7 @@ function Page() {
   const [maximumAverageDailyRate, setMaximumAverageDailyRate] = useState(
     MAXIMUM_AVERAGE_DAILY_RATE,
   );
+  const [isLoading, setIsLoading] = useState(true);
   const [freelances, setFreelances] = useState<Freelance[]>([]);
 
   useEffect(() => {
@@ -32,6 +34,7 @@ function Page() {
         maximumAverageDailyRate,
       });
       setFreelances(freelances);
+      setIsLoading(false);
     };
 
     fetchFreelances();
@@ -39,6 +42,8 @@ function Page() {
   }, []);
 
   const handleSearch = async (formData: FormData) => {
+    setIsLoading(true);
+
     const searchQuery = formData.get("search") as string;
 
     const freelances = await searchFreelances({
@@ -48,6 +53,7 @@ function Page() {
     });
 
     setFreelances(freelances);
+    setIsLoading(false);
   };
 
   return (
@@ -109,11 +115,18 @@ function Page() {
 
           {/* Freelance Cards */}
           <div className="flex flex-wrap gap-6">
-            {freelances.length > 0 ? (
+            {isLoading &&
+              Array.from({ length: 6 }).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  className="w-[338px] h-[248px] rounded-[30px]"
+                />
+              ))}
+            {freelances.length > 0 &&
               freelances.map((freelance) => (
                 <FreelanceCard key={freelance.id} {...freelance} />
-              ))
-            ) : (
+              ))}
+            {!isLoading && freelances.length === 0 && (
               <p className="text-freehunt-black-two">Aucun freelance trouvé.</p>
             )}
           </div>
