@@ -79,4 +79,33 @@ export class SearchFreelanceDto extends PaginationParams {
     required: false,
   })
   maxDailyRate?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Minimum seniority in years',
+    example: 2,
+    required: false,
+  })
+  minSeniority?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Maximum seniority in years',
+    example: 10,
+    required: false,
+  })
+  maxSeniority?: number;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'Location to search for',
+    example: 'Paris',
+    required: false,
+  })
+  location?: string;
 }

@@ -48,6 +48,24 @@ export class UpdateFreelanceDto {
   averageDailyRate?: number;
 
   @IsOptional()
+  @IsPositive()
+  @ApiProperty({
+    description: 'The seniority of the freelance in years',
+    example: 5,
+    required: false,
+  })
+  seniority?: number;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'The location of the freelance',
+    example: 'Paris, France',
+    required: false,
+  })
+  location?: string;
+
+  @IsOptional()
   @IsArray()
   @IsUUID(undefined, { each: true })
   @ApiProperty({
