@@ -43,6 +43,8 @@ model Freelance {
   lastName         String
   jobTitle         String
   averageDailyRate Float // TJM
+  seniority        Int
+  location         String
   skills           Skill[]
   documents        Document[]
   projects         Project[]
