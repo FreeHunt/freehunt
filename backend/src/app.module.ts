@@ -8,6 +8,9 @@ import { FreelancesModule } from './freelances/freelances.module';
 import { ChatModule } from './common/chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthentikModule } from './common/authentik/authentik.module';
+import { ConversationsModule } from './conversations/conversations.module';
+import { MessagesModule } from './messages/message.module';
+
 @Module({
   imports: [
     PrismaModule,
@@ -16,9 +19,11 @@ import { AuthentikModule } from './common/authentik/authentik.module';
     JobPostingsModule,
     SkillsModule,
     FreelancesModule,
+    ConversationsModule,
     AuthModule,
     AuthentikModule,
     ChatModule,
+    MessagesModule,
   ],
   controllers: [],
   providers: [],

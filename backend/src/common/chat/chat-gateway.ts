@@ -23,6 +23,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.broadcast.emit('userConnected', {
       message: `user connected ${client.id}`,
     });
+
+    client.to(client.id).emit('reply', 'bonjour Fayssal');
   }
 
   handleDisconnect(client: Socket): void {
@@ -30,5 +32,23 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.broadcast.emit('userDisconnected', {
       message: `user disconnected ${client.id}`,
     });
+  }
+
+  async handleJoinRoom(client: Socket, room: string): Promise<void> {
+    try {
+      await client.join(room);
+      client.emit('reply', `you joined the room ${room}`);
+    } catch (error) {
+      client.emit('reply', `error joining the room ${room} : ${error}`);
+    }
+  }
+
+  async handleLeaveRoom(client: Socket, room: string): Promise<void> {
+    try {
+      await client.leave(room);
+      client.emit('reply', `you left the room ${room}`);
+    } catch (error) {
+      client.emit('reply', `error leaving the room ${room} : ${error}`);
+    }
   }
 }
