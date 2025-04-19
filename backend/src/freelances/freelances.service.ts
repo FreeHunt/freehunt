@@ -87,6 +87,9 @@ export class FreelancesService {
       skillNames,
       minDailyRate,
       maxDailyRate,
+      minSeniority,
+      maxSeniority,
+      location,
       skip,
       take,
     } = searchParams;
@@ -124,6 +127,24 @@ export class FreelancesService {
       if (maxDailyRate !== undefined) {
         where.averageDailyRate.lte = maxDailyRate;
       }
+    }
+
+    // Handle seniority range
+    if (minSeniority !== undefined || maxSeniority !== undefined) {
+      where.seniority = {};
+
+      if (minSeniority !== undefined) {
+        where.seniority.gte = minSeniority;
+      }
+
+      if (maxSeniority !== undefined) {
+        where.seniority.lte = maxSeniority;
+      }
+    }
+
+    // Handle location search
+    if (location) {
+      where.location = { contains: location, mode: 'insensitive' };
     }
 
     return this.prisma.freelance.findMany({

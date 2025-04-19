@@ -18,6 +18,8 @@ describe('FreelancesController (e2e)', () => {
     lastName: 'Doe',
     jobTitle: 'Full Stack Developer',
     averageDailyRate: 500,
+    seniority: 5,
+    location: 'Paris, France',
     user: {
       id: '550e8400-e29b-41d4-a716-446655440001',
       email: 'john.doe@example.com',
@@ -69,6 +71,8 @@ describe('FreelancesController (e2e)', () => {
         lastName: 'Doe',
         jobTitle: 'Full Stack Developer',
         averageDailyRate: 500,
+        seniority: 5,
+        location: 'Paris, France',
         userId: '550e8400-e29b-41d4-a716-446655440001',
         skillIds: ['550e8400-e29b-41d4-a716-446655440002'],
       })
@@ -112,6 +116,9 @@ describe('FreelancesController (e2e)', () => {
       skillNames: ['JavaScript'],
       minDailyRate: 400,
       maxDailyRate: 600,
+      minSeniority: 3,
+      maxSeniority: 7,
+      location: 'Paris',
       skip: 0,
       take: 10,
     };
@@ -139,6 +146,31 @@ describe('FreelancesController (e2e)', () => {
     const searchDto: SearchFreelanceDto = {
       minDailyRate: 400,
       maxDailyRate: 600,
+    };
+
+    return request(app.getHttpServer())
+      .post('/freelances/search')
+      .send(searchDto)
+      .expect(200)
+      .expect([freelanceResponse]);
+  });
+
+  it('/freelances/search with seniority range (POST)', () => {
+    const searchDto: SearchFreelanceDto = {
+      minSeniority: 4,
+      maxSeniority: 6,
+    };
+
+    return request(app.getHttpServer())
+      .post('/freelances/search')
+      .send(searchDto)
+      .expect(200)
+      .expect([freelanceResponse]);
+  });
+
+  it('/freelances/search with location (POST)', () => {
+    const searchDto: SearchFreelanceDto = {
+      location: 'Paris',
     };
 
     return request(app.getHttpServer())
