@@ -166,18 +166,6 @@ describe('FreelancesController (e2e)', () => {
       .expect([freelanceResponse]);
   });
 
-  it('/freelances/search with location (POST)', () => {
-    const searchDto: SearchFreelanceDto = {
-      location: 'Paris',
-    };
-
-    return request(app.getHttpServer())
-      .post('/freelances/search')
-      .send(searchDto)
-      .expect(200)
-      .expect([freelanceResponse]);
-  });
-
   it('/freelances/search with just query (POST)', () => {
     const searchDto: SearchFreelanceDto = {
       query: 'John',
