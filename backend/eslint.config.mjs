@@ -20,7 +20,7 @@ export default tseslint.config(
       ecmaVersion: 5,
       sourceType: 'module',
       parserOptions: {
-        projectsService: true,
+        projectService: true,
         tsconfigRootDir: import.meta.dirname,
       },
     },
