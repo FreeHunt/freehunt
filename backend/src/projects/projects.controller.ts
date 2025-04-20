@@ -79,6 +79,7 @@ export class ProjectController {
     description: 'Bad Request',
   })
   findOne(@Param('id') id: string): Promise<ProjectResponseDto> {
+    return this.projectService.findOne(id);
   }
 
   @Patch(':id')
