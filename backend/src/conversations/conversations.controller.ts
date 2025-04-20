@@ -1,10 +1,20 @@
-import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConversationsService } from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { ChatService } from 'src/common/chat/chat.service';
+import { AuthentikAuthGuard } from 'src/auth/auth.guard';
 @ApiTags('conversations')
 @Controller('conversations')
+@UseGuards(AuthentikAuthGuard)
 export class ConversationsController {
   constructor(
     private readonly conversationsService: ConversationsService,

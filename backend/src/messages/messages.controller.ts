@@ -6,13 +6,16 @@ import {
   Param,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 import { ChatService } from 'src/common/chat/chat.service';
+import { AuthentikAuthGuard } from 'src/auth/auth.guard';
 
 @Controller('messages')
+@UseGuards(AuthentikAuthGuard)
 export class MessagesController {
   constructor(
     private readonly messagesService: MessagesService,
