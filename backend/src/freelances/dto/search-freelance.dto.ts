@@ -27,20 +27,12 @@ export class SearchFreelanceDto extends PaginationParams {
   @IsOptional()
   @IsString()
   @ApiProperty({
-    description: 'First name to search for',
-    example: 'John',
+    description:
+      'Generic search query for firstName, lastName, jobTitle, and location',
+    example: 'John Paris',
     required: false,
   })
-  firstName?: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiProperty({
-    description: 'Last name to search for',
-    example: 'Doe',
-    required: false,
-  })
-  lastName?: string;
+  query?: string;
 
   @IsOptional()
   @IsString()
@@ -79,4 +71,24 @@ export class SearchFreelanceDto extends PaginationParams {
     required: false,
   })
   maxDailyRate?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Minimum seniority in years',
+    example: 2,
+    required: false,
+  })
+  minSeniority?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Maximum seniority in years',
+    example: 10,
+    required: false,
+  })
+  maxSeniority?: number;
 }

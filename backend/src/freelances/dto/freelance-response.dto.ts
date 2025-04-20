@@ -40,6 +40,20 @@ export class FreelanceResponseDto {
   })
   averageDailyRate: number;
 
+  @IsPositive()
+  @ApiProperty({
+    description: 'The seniority of the freelance in years',
+    example: 5,
+  })
+  seniority: number;
+
+  @IsString()
+  @ApiProperty({
+    description: 'The location of the freelance',
+    example: 'Paris, France',
+  })
+  location: string;
+
   @ApiProperty({
     description: 'The skills required for the job posting',
     type: [SkillResponseDto],

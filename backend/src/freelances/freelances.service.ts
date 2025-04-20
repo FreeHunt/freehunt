@@ -81,36 +81,76 @@ export class FreelancesService {
 
   async search(searchParams: SearchFreelanceDto): Promise<Freelance[]> {
     const {
-      firstName,
-      lastName,
+      query,
       jobTitle,
       skillNames,
       minDailyRate,
       maxDailyRate,
+      minSeniority,
+      maxSeniority,
       skip,
       take,
     } = searchParams;
 
+    // Build the where conditions
     const where: Prisma.FreelanceWhereInput = {};
 
-    if (firstName) {
-      where.firstName = { contains: firstName, mode: 'insensitive' };
+    // Handle text search across multiple fields if query is provided
+    if (query) {
+      // Define search conditions for freelance fields
+      const freelanceFieldsSearch = [
+        { firstName: { contains: query, mode: Prisma.QueryMode.insensitive } },
+        { lastName: { contains: query, mode: Prisma.QueryMode.insensitive } },
+        { location: { contains: query, mode: Prisma.QueryMode.insensitive } },
+        { jobTitle: { contains: query, mode: Prisma.QueryMode.insensitive } },
+      ];
+
+      // Add skill search to OR conditions
+      const skillSearch = {
+        skills: {
+          some: {
+            OR: [
+              { name: { contains: query, mode: Prisma.QueryMode.insensitive } },
+              {
+                normalizedName: {
+                  contains: query,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              { aliases: { hasSome: [query] } },
+            ],
+          },
+        },
+      };
+
+      where.OR = [...freelanceFieldsSearch, skillSearch];
     }
 
-    if (lastName) {
-      where.lastName = { contains: lastName, mode: 'insensitive' };
-    }
-
+    // Keep specific job title filter if provided separately
     if (jobTitle) {
       where.jobTitle = { contains: jobTitle, mode: 'insensitive' };
     }
 
+    // Skills filter (when specifically filtering by skill names)
     if (skillNames && skillNames.length > 0) {
-      where.skills = {
-        some: {
-          name: { in: skillNames, mode: 'insensitive' },
-        },
-      };
+      // If we already have a query with skills in OR condition, we need to combine with AND
+      if (where.OR) {
+        where.AND = [
+          {
+            skills: {
+              some: {
+                name: { in: skillNames, mode: 'insensitive' },
+              },
+            },
+          },
+        ];
+      } else {
+        where.skills = {
+          some: {
+            name: { in: skillNames, mode: 'insensitive' },
+          },
+        };
+      }
     }
 
     // Handle daily rate range
@@ -126,6 +166,20 @@ export class FreelancesService {
       }
     }
 
+    // Handle seniority range
+    if (minSeniority !== undefined || maxSeniority !== undefined) {
+      where.seniority = {};
+
+      if (minSeniority !== undefined) {
+        where.seniority.gte = minSeniority;
+      }
+
+      if (maxSeniority !== undefined) {
+        where.seniority.lte = maxSeniority;
+      }
+    }
+
+    // Execute the search query
     return this.prisma.freelance.findMany({
       where,
       include: {
@@ -134,6 +188,16 @@ export class FreelancesService {
       },
       skip,
       take,
+      // Order results by relevance if there's a query
+      ...(query && {
+        orderBy: {
+          _relevance: {
+            fields: ['firstName', 'lastName', 'location', 'jobTitle'],
+            search: query,
+            sort: 'desc',
+          },
+        },
+      }),
     });
   }
 }
