@@ -9,12 +9,11 @@ export class ProjectService {
 
   // Create a new project
   async create(createProjectDto: CreateProjectDto) {
-    await this.prismaService.project.create({data: createProjectDto})
+    const createdProject = await this.prismaService.project.create({ data: createProjectDto });
 
     return {
       message: 'Project created successfully',
-      data: createProjectDto
-    };
+      data: createdProject,
   }
 
   // Find all projects
