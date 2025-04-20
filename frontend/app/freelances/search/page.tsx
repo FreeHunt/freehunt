@@ -44,7 +44,7 @@ function Page() {
   useEffect(() => {
     const fetchSkills = async () => {
       const skills = await getSkills();
-      setSkills(skills);
+      setSkills(skills.slice(0, 10)); // Limit to 10 skills for display
       setSkillsLoading(false);
     };
 
