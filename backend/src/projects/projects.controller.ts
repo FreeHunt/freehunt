@@ -11,6 +11,7 @@ import { ProjectService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ProjectResponseDto } from './dto/project-response.dto';
 
 @ApiTags('project')
 @Controller('project')
@@ -25,7 +26,7 @@ export class ProjectController {
   @ApiResponse({
     status: 201,
     description: 'The project has been successfully created.',
-    type: CreateProjectDto,
+    type: ProjectResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -33,7 +34,7 @@ export class ProjectController {
   })
   create(
     @Body() createProjectDto: CreateProjectDto,
-  ): Promise<{ message: string; data: CreateProjectDto }> {
+  ): Promise<ProjectResponseDto> {
     return this.projectService.create(createProjectDto);
   }
 
@@ -45,13 +46,13 @@ export class ProjectController {
   @ApiResponse({
     status: 200,
     description: 'List of all projects',
-    type: [CreateProjectDto],
+    type: [ProjectResponseDto],
   })
   @ApiResponse({
     status: 404,
     description: 'No projects found',
   })
-  findAll() {
+  findAll(): Promise<ProjectResponseDto[]> {
     return this.projectService.findAll();
   }
 
@@ -67,7 +68,7 @@ export class ProjectController {
   @ApiResponse({
     status: 200,
     description: 'Project found successfully',
-    type: CreateProjectDto,
+    type: ProjectResponseDto,
   })
   @ApiResponse({
     status: 404,
@@ -77,7 +78,7 @@ export class ProjectController {
     status: 400,
     description: 'Bad Request',
   })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): Promise<ProjectResponseDto | null> {
     return this.projectService.findOne(id);
   }
 
@@ -93,7 +94,7 @@ export class ProjectController {
   @ApiResponse({
     status: 200,
     description: 'Project updated successfully',
-    type: UpdateProjectDto,
+    type: ProjectResponseDto,
   })
   @ApiResponse({
     status: 404,
@@ -106,7 +107,7 @@ export class ProjectController {
   update(
     @Param('id') id: string,
     @Body() updateProjectDto: UpdateProjectDto,
-  ): Promise<{ message: string; data: UpdateProjectDto }> {
+  ): Promise<ProjectResponseDto> {
     return this.projectService.update(id, updateProjectDto);
   }
 
@@ -122,7 +123,7 @@ export class ProjectController {
   @ApiResponse({
     status: 200,
     description: 'Project deleted successfully',
-    type: CreateProjectDto,
+    type: ProjectResponseDto,
   })
   @ApiResponse({
     status: 404,
@@ -134,7 +135,7 @@ export class ProjectController {
   })
   remove(
     @Param('id') id: string,
-  ) {
+  ): Promise<ProjectResponseDto> {
     return this.projectService.remove(id);
   }
 }

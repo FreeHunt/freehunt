@@ -9,12 +9,12 @@ export class ProjectService {
 
   // Create a new project
   async create(createProjectDto: CreateProjectDto) {
-    const createdProject = await this.prismaService.project.create({ data: createProjectDto });
-
-    return {
-      message: 'Project created successfully',
-      data: createdProject,
-    };
+    return this.prismaService.project.create({ 
+      data: createProjectDto,
+      include: {
+        freelance: true,
+        jobPosting: true,
+      }});
   }
 
   // Find all projects
@@ -25,10 +25,8 @@ export class ProjectService {
         jobPosting: true,
       }
     });
-    return { 
-      message: 'Projects found successfully',
-      data: projects,
-    };
+
+    return projects;
   }
 
   // Find a project by ID
@@ -45,29 +43,29 @@ export class ProjectService {
       throw new NotFoundException(`Project with id ${id} does not exist`);
     }
 
-    return {
-      message: 'Project found successfully',
-      data: project,
-    }
+    return project;
   }
 
   // Update a project
   async update(id: string, updateProjectDto: UpdateProjectDto) {
-    const project = await this.prismaService.project.update({
+    return this.prismaService.project.update({
       where: { id },
       data: updateProjectDto,
+      include: {
+        freelance: true,
+        jobPosting: true,
+      }
     });
-
-    return {
-      message: 'Project updated successfully',
-      data: project,
-    };
   }
 
   // Remove a project
   async remove(id: string) {
     return this.prismaService.project.delete({
       where: { id },
+      include: {
+        freelance: true,
+        jobPosting: true,
+      }
     });
   }
 }
