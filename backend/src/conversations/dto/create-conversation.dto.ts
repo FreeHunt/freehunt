@@ -6,4 +6,12 @@ export class CreateConversationDto {
   @IsUUID()
   @ApiProperty()
   projectId: string;
+
+  @IsUUID()
+  @ApiProperty()
+  receiverId: string;
+
+  @IsUUID()
+  @ApiProperty()
+  senderId: string;
 }

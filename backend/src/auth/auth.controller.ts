@@ -6,10 +6,15 @@ import { RegisterDto } from './dto/register.dto';
 import { Response } from 'express';
 import { AuthSuccessResponse } from './types/auth-success-response.interface';
 import { AuthErrorResponse } from './types/auth-error-response.interface';
+import { Role } from '@prisma/client';
+import { UsersService } from 'src/users/users.service';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post('login')
   async login(
@@ -17,11 +22,11 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
     const loginResponse = await this.authService.login(loginDto);
-    const rawCookie = loginResponse.cookies[0].split(';')[0]; // Récupère le cookie brut
-    const token = decodeURIComponent(rawCookie.split('=')[1]); // Décode le token
+    const rawCookie = loginResponse.cookies[1].split(';')[0]; // Récupère le cookie brut authentik_session
+    const token = decodeURIComponent(rawCookie.split('=')[1]); // Décode la valeur du cookie
     response.cookie('authentik_session', token, {
       httpOnly: true,
-    });
+    }); // on va stocker un cookie avec le token
     return loginResponse;
   }
 
@@ -31,10 +36,15 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
     const registerResponse = await this.authService.register(registerDto);
-    const rawCookie = registerResponse.cookies[0].split(';')[0]; // Récupère le cookie brut
-    const token = decodeURIComponent(rawCookie.split('=')[1]); // Décode le token
+    const rawCookie = registerResponse.cookies[1].split(';')[0]; // Récupère le cookie brut authentik_session
+    const token = decodeURIComponent(rawCookie.split('=')[1]); // Décode la valeur du cookie
     response.cookie('authentik_session', token, {
       httpOnly: true,
+    }); // on va stocker un cookie avec le token
+    await this.usersService.create({
+      email: registerDto.email,
+      username: registerDto.username,
+      role: Role.FREELANCE,
     });
     return registerResponse;
   }

@@ -2,11 +2,14 @@ import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConversationsService } from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
-
+import { ChatService } from 'src/common/chat/chat.service';
 @ApiTags('conversations')
 @Controller('conversations')
 export class ConversationsController {
-  constructor(private readonly conversationsService: ConversationsService) {}
+  constructor(
+    private readonly conversationsService: ConversationsService,
+    private readonly chatService: ChatService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -17,8 +20,14 @@ export class ConversationsController {
     status: 201,
     description: 'Conversation created successfully',
   })
-  createConversation(@Body() createConversationDto: CreateConversationDto) {
-    return this.conversationsService.createConversation(createConversationDto);
+  async createConversation(
+    @Body() createConversationDto: CreateConversationDto,
+  ) {
+    const conversation = await this.conversationsService.createConversation(
+      createConversationDto,
+    );
+    this.chatService.server.emit('newConversation', conversation);
+    return conversation;
   }
 
   @Get(':id')
@@ -30,8 +39,10 @@ export class ConversationsController {
     status: 200,
     description: 'Conversation retrieved successfully',
   })
-  getConversation(@Param('id') id: string) {
-    return this.conversationsService.getConversation(id);
+  async getConversation(@Param('id') id: string) {
+    const conversation = await this.conversationsService.getConversation(id);
+    this.chatService.server.emit('getConversation', conversation);
+    return conversation;
   }
 
   @Get()
@@ -43,8 +54,10 @@ export class ConversationsController {
     status: 200,
     description: 'Conversations retrieved successfully',
   })
-  getConversations() {
-    return this.conversationsService.getConversations();
+  async getConversations() {
+    const conversations = await this.conversationsService.getConversations();
+    this.chatService.server.emit('getConversations', conversations);
+    return conversations;
   }
 
   @Delete(':id')
@@ -68,7 +81,9 @@ export class ConversationsController {
     status: 400,
     description: 'Invalid UUID format',
   })
-  deleteConversation(@Param('id') id: string) {
-    return this.conversationsService.deleteConversation(id);
+  async deleteConversation(@Param('id') id: string) {
+    const conversation = await this.conversationsService.deleteConversation(id);
+    this.chatService.server.emit('deleteConversation', conversation);
+    return conversation;
   }
 }

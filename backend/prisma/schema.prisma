@@ -15,11 +15,14 @@ enum Role {
 model User {
   id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email     String     @unique
+  username  String
   role      Role
   freelance Freelance?
   company   Company?
   sentMessages  Message[] @relation("sender")
   receivedMessages  Message[] @relation("receiver")
+  conversations Conversation[] @relation("sender")
+  conversationsReceived Conversation[] @relation("receiver")
 }
 
 enum SkillType {
@@ -157,6 +160,10 @@ model Conversation {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   messages  Message[]
   project   Project? 
+  sender    User       @relation("sender", fields: [senderId], references: [id])
+  senderId  String     @db.Uuid
+  receiver  User       @relation("receiver", fields: [receiverId], references: [id])
+  receiverId String     @db.Uuid
 }
 
 model Message {

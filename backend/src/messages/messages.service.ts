@@ -8,30 +8,30 @@ export class MessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createMessageDto: CreateMessageDto) {
-    return this.prisma.message.create({
+    return await this.prisma.message.create({
       data: createMessageDto,
     });
   }
 
   async findOne(id: string) {
-    return this.prisma.message.findUnique({
+    return await this.prisma.message.findUnique({
       where: { id },
     });
   }
 
   async findAll() {
-    return this.prisma.message.findMany();
+    return await this.prisma.message.findMany();
   }
 
   async update(id: string, updateMessageDto: UpdateMessageDto) {
-    return this.prisma.message.update({
+    return await this.prisma.message.update({
       where: { id },
       data: updateMessageDto,
     });
   }
 
   async delete(id: string) {
-    return this.prisma.message.delete({
+    return await this.prisma.message.delete({
       where: { id },
     });
   }

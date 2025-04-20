@@ -50,11 +50,13 @@ export class AuthentikService {
         },
       );
 
+      const cookiesResponse = loginResponse.headers['set-cookie'];
+
       return {
         success:
           (loginResponse.data as AuthFlowResponse).component ===
           'xak-flow-redirect',
-        cookies: cookies || [],
+        cookies: cookiesResponse || [],
         response: loginResponse.data as AuthFlowResponse,
       };
     } catch (error) {
@@ -91,11 +93,13 @@ export class AuthentikService {
         },
       );
 
+      const cookiesResponse = registerResponse.headers['set-cookie'];
+
       return {
         success:
           (registerResponse.data as AuthFlowResponse).component ===
           'xak-flow-redirect',
-        cookies: cookies || [],
+        cookies: cookiesResponse || [],
         response: registerResponse.data as AuthFlowResponse,
       };
     } catch (error) {
