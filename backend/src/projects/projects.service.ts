@@ -70,10 +70,6 @@ export class ProjectService {
       where: { id },
     });
 
-    if (!project) {
-      throw new NotFoundException(`Project with id ${id} does not exist`);
-    }
-
     return {
       message: `Project ${project.name} deleted successfully`,
       data: project,
