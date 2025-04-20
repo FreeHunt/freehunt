@@ -14,6 +14,7 @@ export class ProjectService {
     return {
       message: 'Project created successfully',
       data: createdProject,
+    };
   }
 
   // Find all projects
