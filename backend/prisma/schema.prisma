@@ -45,9 +45,12 @@ model Freelance {
   userId           String     @unique @db.Uuid
   firstName        String
   lastName         String
+  ///FAKE:faker.person.jobTitle()
   jobTitle         String
   averageDailyRate Float // TJM
+  ///FAKE:faker.number.int({ min: 0, max: 10 })
   seniority        Int
+  ///FAKE:faker.location.city()
   location         String
   skills           Skill[]
   documents        Document[]
@@ -58,9 +61,12 @@ model Company {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user        User         @relation(fields: [userId], references: [id])
   userId      String       @unique @db.Uuid
+  ///FAKE:faker.company.name()
   name        String
   description String
+  ///FAKE:faker.location.streetAddress({ useFullAddress: true })
   address     String
+  ///FAKE:faker.string.numeric(9)
   siren       String
   jobPostings JobPosting[]
 }

@@ -46,10 +46,10 @@ export function fakeFreelance() {
   return {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
-    jobTitle: faker.lorem.words(5),
+    jobTitle: faker.person.jobTitle(),
     averageDailyRate: faker.number.float(),
-    seniority: faker.number.int(),
-    location: faker.lorem.words(5),
+    seniority: faker.number.int({ min: 0, max: 10 }),
+    location: faker.location.city(),
   };
 }
 export function fakeFreelanceComplete() {
@@ -58,28 +58,28 @@ export function fakeFreelanceComplete() {
     userId: faker.string.uuid(),
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
-    jobTitle: faker.lorem.words(5),
+    jobTitle: faker.person.jobTitle(),
     averageDailyRate: faker.number.float(),
-    seniority: faker.number.int(),
-    location: faker.lorem.words(5),
+    seniority: faker.number.int({ min: 0, max: 10 }),
+    location: faker.location.city(),
   };
 }
 export function fakeCompany() {
   return {
-    name: faker.person.fullName(),
+    name: faker.company.name(),
     description: faker.lorem.words(5),
-    address: faker.lorem.words(5),
-    siren: faker.lorem.words(5),
+    address: faker.location.streetAddress({ useFullAddress: true }),
+    siren: faker.string.numeric(9),
   };
 }
 export function fakeCompanyComplete() {
   return {
     id: faker.string.uuid(),
     userId: faker.string.uuid(),
-    name: faker.person.fullName(),
+    name: faker.company.name(),
     description: faker.lorem.words(5),
-    address: faker.lorem.words(5),
-    siren: faker.lorem.words(5),
+    address: faker.location.streetAddress({ useFullAddress: true }),
+    siren: faker.string.numeric(9),
   };
 }
 export function fakeJobPosting() {
