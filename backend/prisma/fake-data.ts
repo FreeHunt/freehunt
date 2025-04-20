@@ -1,10 +1,8 @@
-import {
-  Role,
-  SkillType,
-  JobPostingLocation,
-  DocumentType,
-} from '@prisma/client';
+import { Role, SkillType, JobPostingLocation, DocumentType } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import Decimal from 'decimal.js';
+
+
 
 export function fakeUser() {
   return {
@@ -24,10 +22,7 @@ export function fakeSkill() {
     name: faker.person.fullName(),
     normalizedName: faker.lorem.words(5),
     aliases: faker.lorem.words(5).split(' '),
-    type: faker.helpers.arrayElement([
-      SkillType.TECHNICAL,
-      SkillType.SOFT,
-    ] as const),
+    type: faker.helpers.arrayElement([SkillType.TECHNICAL, SkillType.SOFT] as const),
   };
 }
 export function fakeSkillComplete() {
@@ -36,10 +31,7 @@ export function fakeSkillComplete() {
     name: faker.person.fullName(),
     normalizedName: faker.lorem.words(5),
     aliases: faker.lorem.words(5).split(' '),
-    type: faker.helpers.arrayElement([
-      SkillType.TECHNICAL,
-      SkillType.SOFT,
-    ] as const),
+    type: faker.helpers.arrayElement([SkillType.TECHNICAL, SkillType.SOFT] as const),
   };
 }
 export function fakeFreelance() {
@@ -86,11 +78,7 @@ export function fakeJobPosting() {
   return {
     title: faker.lorem.words(5),
     description: faker.lorem.words(5),
-    location: faker.helpers.arrayElement([
-      JobPostingLocation.HYBRID,
-      JobPostingLocation.ONSITE,
-      JobPostingLocation.REMOTE,
-    ] as const),
+    location: faker.helpers.arrayElement([JobPostingLocation.HYBRID, JobPostingLocation.ONSITE, JobPostingLocation.REMOTE] as const),
     isPromoted: faker.datatype.boolean(),
   };
 }
@@ -100,11 +88,7 @@ export function fakeJobPostingComplete() {
     companyId: faker.string.uuid(),
     title: faker.lorem.words(5),
     description: faker.lorem.words(5),
-    location: faker.helpers.arrayElement([
-      JobPostingLocation.HYBRID,
-      JobPostingLocation.ONSITE,
-      JobPostingLocation.REMOTE,
-    ] as const),
+    location: faker.helpers.arrayElement([JobPostingLocation.HYBRID, JobPostingLocation.ONSITE, JobPostingLocation.REMOTE] as const),
     isPromoted: faker.datatype.boolean(),
   };
 }
@@ -176,10 +160,7 @@ export function fakeDocument() {
   return {
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
-    type: faker.helpers.arrayElement([
-      DocumentType.INVOICE,
-      DocumentType.QUOTE,
-    ] as const),
+    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE] as const),
   };
 }
 export function fakeDocumentComplete() {
@@ -187,10 +168,7 @@ export function fakeDocumentComplete() {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
-    type: faker.helpers.arrayElement([
-      DocumentType.INVOICE,
-      DocumentType.QUOTE,
-    ] as const),
+    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE] as const),
     freelanceId: faker.string.uuid(),
     invoiceId: faker.string.uuid(),
     quoteId: faker.string.uuid(),

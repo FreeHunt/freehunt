@@ -120,9 +120,9 @@ describe('FreelancesController', () => {
       },
     ];
 
-    it('should search freelances by first name', async () => {
+    it('should search freelances using generic query', async () => {
       const searchDto: SearchFreelanceDto = {
-        firstName: 'John',
+        query: 'John Paris',
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
@@ -132,20 +132,6 @@ describe('FreelancesController', () => {
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
       expect(result).toEqual([freelances[0]]);
-    });
-
-    it('should search freelances by last name', async () => {
-      const searchDto: SearchFreelanceDto = {
-        lastName: 'Smith',
-      };
-
-      const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[1]]);
-
-      const result = await freelancesController.search(searchDto);
-
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[1]]);
     });
 
     it('should search freelances by job title', async () => {
@@ -208,7 +194,7 @@ describe('FreelancesController', () => {
 
     it('should search freelances with multiple search parameters', async () => {
       const searchDto: SearchFreelanceDto = {
-        firstName: 'John',
+        query: 'John',
         jobTitle: 'Developer',
         skillNames: ['JavaScript'],
         minDailyRate: 400,
@@ -237,20 +223,6 @@ describe('FreelancesController', () => {
       expect(result).toEqual(freelances);
     });
 
-    it('should search freelances by location', async () => {
-      const searchDto: SearchFreelanceDto = {
-        location: 'Paris',
-      };
-
-      const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[0]]);
-
-      const result = await freelancesController.search(searchDto);
-
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[0]]);
-    });
-
     it('should search freelances by seniority range', async () => {
       const searchDto: SearchFreelanceDto = {
         minSeniority: 4,
@@ -266,14 +238,13 @@ describe('FreelancesController', () => {
       expect(result).toEqual([freelances[0]]);
     });
 
-    it('should search freelances with multiple search parameters including seniority and location', async () => {
+    it('should search freelances with multiple search parameters including query and jobTitle', async () => {
       const searchDto: SearchFreelanceDto = {
-        firstName: 'John',
+        query: 'John',
         jobTitle: 'Developer',
         skillNames: ['JavaScript'],
         minDailyRate: 400,
         minSeniority: 4,
-        location: 'Paris',
         skip: 0,
         take: 10,
       };

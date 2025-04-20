@@ -81,33 +81,36 @@ export class FreelancesService {
 
   async search(searchParams: SearchFreelanceDto): Promise<Freelance[]> {
     const {
-      firstName,
-      lastName,
+      query,
       jobTitle,
       skillNames,
       minDailyRate,
       maxDailyRate,
       minSeniority,
       maxSeniority,
-      location,
       skip,
       take,
     } = searchParams;
 
+    // Build the where conditions
     const where: Prisma.FreelanceWhereInput = {};
 
-    if (firstName) {
-      where.firstName = { contains: firstName, mode: 'insensitive' };
+    // Handle text search across multiple fields if query is provided
+    if (query) {
+      where.OR = [
+        { firstName: { search: query, mode: 'insensitive' } },
+        { lastName: { search: query, mode: 'insensitive' } },
+        { location: { search: query, mode: 'insensitive' } },
+        { jobTitle: { search: query, mode: 'insensitive' } },
+      ];
     }
 
-    if (lastName) {
-      where.lastName = { contains: lastName, mode: 'insensitive' };
-    }
-
+    // Keep specific job title filter if provided separately
     if (jobTitle) {
       where.jobTitle = { contains: jobTitle, mode: 'insensitive' };
     }
 
+    // Skills filter
     if (skillNames && skillNames.length > 0) {
       where.skills = {
         some: {
@@ -142,11 +145,7 @@ export class FreelancesService {
       }
     }
 
-    // Handle location search
-    if (location) {
-      where.location = { contains: location, mode: 'insensitive' };
-    }
-
+    // Execute the search query
     return this.prisma.freelance.findMany({
       where,
       include: {
@@ -155,6 +154,16 @@ export class FreelancesService {
       },
       skip,
       take,
+      // Order results by relevance if there's a query
+      ...(query && {
+        orderBy: {
+          _relevance: {
+            fields: ['firstName', 'lastName', 'location', 'jobTitle'],
+            search: query,
+            sort: 'desc',
+          },
+        },
+      }),
     });
   }
 }

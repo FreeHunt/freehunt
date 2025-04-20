@@ -17,7 +17,7 @@ export const searchFreelances = async ({
   skills,
 }: SearchFreelanceParams): Promise<Freelance[]> => {
   const response = await api.post("/freelances/search", {
-    jobTitle: query,
+    query,
     minDailyRate: minimumAverageDailyRate,
     maxDailyRate: maximumAverageDailyRate,
     skillNames: skills?.map((skill) => skill.name),
