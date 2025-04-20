@@ -231,7 +231,10 @@ function Page() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {freelancesLoading &&
               Array.from({ length: 6 }).map((_, index) => (
-                <Skeleton key={index} className="h-[248px] rounded-[30px]" />
+                <Skeleton
+                  key={index}
+                  className="w-[362px] h-[300px] rounded-[30px]"
+                />
               ))}
             {freelances.length > 0 &&
               freelances.map((freelance) => (

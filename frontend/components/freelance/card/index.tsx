@@ -36,11 +36,13 @@ function FreelanceCard(freelance: Freelance) {
             <CardTitle className="text-lg text-freehunt-black-two pb-2">
               {firstName} {lastName}
             </CardTitle>
-            <CardDescription className="flex flex-col gap-3">
+            <CardDescription className="flex flex-col gap-3 h-[72px]">
               <p className="text-freehunt-black-two font-medium">{jobTitle}</p>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 min-w-0">
                 <MapPin size={14} className="text-freehunt-main" />
-                <p className="text-freehunt-main">{location}</p>
+                <p className="text-freehunt-main w-40 overflow-hidden text-ellipsis">
+                  {location}
+                </p>
               </div>
             </CardDescription>
           </div>
