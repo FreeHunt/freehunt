@@ -58,10 +58,6 @@ export class ProjectService {
       data: updateProjectDto,
     });
 
-    if (!project) {
-      throw new NotFoundException(`Project with id ${id} does not exist`);
-    }
-
     return {
       message: 'Project updated successfully',
       data: project,
