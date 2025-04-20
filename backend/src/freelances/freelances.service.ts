@@ -97,12 +97,33 @@ export class FreelancesService {
 
     // Handle text search across multiple fields if query is provided
     if (query) {
-      where.OR = [
-        { firstName: { search: query, mode: 'insensitive' } },
-        { lastName: { search: query, mode: 'insensitive' } },
-        { location: { search: query, mode: 'insensitive' } },
-        { jobTitle: { search: query, mode: 'insensitive' } },
+      // Define search conditions for freelance fields
+      const freelanceFieldsSearch = [
+        { firstName: { contains: query, mode: Prisma.QueryMode.insensitive } },
+        { lastName: { contains: query, mode: Prisma.QueryMode.insensitive } },
+        { location: { contains: query, mode: Prisma.QueryMode.insensitive } },
+        { jobTitle: { contains: query, mode: Prisma.QueryMode.insensitive } },
       ];
+
+      // Add skill search to OR conditions
+      const skillSearch = {
+        skills: {
+          some: {
+            OR: [
+              { name: { contains: query, mode: Prisma.QueryMode.insensitive } },
+              {
+                normalizedName: {
+                  contains: query,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
+              { aliases: { hasSome: [query] } },
+            ],
+          },
+        },
+      };
+
+      where.OR = [...freelanceFieldsSearch, skillSearch];
     }
 
     // Keep specific job title filter if provided separately
@@ -110,13 +131,26 @@ export class FreelancesService {
       where.jobTitle = { contains: jobTitle, mode: 'insensitive' };
     }
 
-    // Skills filter
+    // Skills filter (when specifically filtering by skill names)
     if (skillNames && skillNames.length > 0) {
-      where.skills = {
-        some: {
-          name: { in: skillNames, mode: 'insensitive' },
-        },
-      };
+      // If we already have a query with skills in OR condition, we need to combine with AND
+      if (where.OR) {
+        where.AND = [
+          {
+            skills: {
+              some: {
+                name: { in: skillNames, mode: 'insensitive' },
+              },
+            },
+          },
+        ];
+      } else {
+        where.skills = {
+          some: {
+            name: { in: skillNames, mode: 'insensitive' },
+          },
+        };
+      }
     }
 
     // Handle daily rate range
