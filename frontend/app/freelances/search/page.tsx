@@ -17,22 +17,40 @@ import debounce from "debounce";
 import { Button } from "@/components/ui/button";
 import { X, Filter } from "lucide-react";
 import { Button as FreeHuntButton } from "@/components/common/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
 const SLIDER_STEP = 100;
 const DEBOUNCE_DELAY = 300;
 
+type SeniorityOption = {
+  value: string;
+  label: string;
+  min?: number;
+  max?: number;
+};
+
+const SENIORITY_OPTIONS: SeniorityOption[] = [
+  { value: "any", label: "Tous niveaux" },
+  { value: "junior", label: "0 à 2 ans", min: 0, max: 2 },
+  { value: "intermediate", label: "2 à 5 ans", min: 2, max: 5 },
+  { value: "senior", label: "7 à 10 ans", min: 7, max: 10 },
+  { value: "expert", label: "10 ans et +", min: 10 },
+];
+
 function Page() {
   const [minimumAverageDailyRate, setMinimumAverageDailyRate] = useState(
-    MINIMUM_AVERAGE_DAILY_RATE,
+    MINIMUM_AVERAGE_DAILY_RATE
   );
   const [maximumAverageDailyRate, setMaximumAverageDailyRate] = useState(
-    MAXIMUM_AVERAGE_DAILY_RATE,
+    MAXIMUM_AVERAGE_DAILY_RATE
   );
   const [freelancesLoading, setFreelancesLoading] = useState(true);
   const [freelances, setFreelances] = useState<Freelance[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSeniority, setSelectedSeniority] = useState<string>("any");
 
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -53,16 +71,29 @@ function Page() {
 
   const fetchFreelances = useCallback(
     async (query = "") => {
+      // Get seniority range based on selection
+      const selectedOption = SENIORITY_OPTIONS.find(
+        (option) => option.value === selectedSeniority
+      );
+
       const freelances = await searchFreelances({
         query,
         minimumAverageDailyRate,
         maximumAverageDailyRate,
         skills: selectedSkills,
+        minSeniority: selectedOption?.min,
+        maxSeniority: selectedOption?.max,
       });
+
       setFreelances(freelances);
       setFreelancesLoading(false);
     },
-    [minimumAverageDailyRate, maximumAverageDailyRate, selectedSkills],
+    [
+      minimumAverageDailyRate,
+      maximumAverageDailyRate,
+      selectedSkills,
+      selectedSeniority,
+    ]
   );
 
   // Debounced version of fetchFreelances
@@ -71,7 +102,7 @@ function Page() {
     debounce((query: string) => {
       fetchFreelances(query);
     }, DEBOUNCE_DELAY),
-    [fetchFreelances],
+    [fetchFreelances]
   );
 
   // Initial load and when filters change
@@ -92,7 +123,7 @@ function Page() {
     setSelectedSkills((prev) =>
       prev.some((s) => s.id === skill.id)
         ? prev.filter((s) => s.id !== skill.id)
-        : [...prev, skill],
+        : [...prev, skill]
     );
   }, []);
 
@@ -100,6 +131,11 @@ function Page() {
   const handleSliderValueChange = useCallback((value: number[]) => {
     setMinimumAverageDailyRate(value[0]);
     setMaximumAverageDailyRate(value[1]);
+  }, []);
+
+  // Handle seniority selection
+  const handleSeniorityChange = useCallback((value: string) => {
+    setSelectedSeniority(value);
   }, []);
 
   return (
@@ -177,6 +213,32 @@ function Page() {
                   />
                 ))}
             </div>
+          </div>
+
+          {/* Seniority level radio group */}
+          <div className="flex flex-col gap-2.5 items-start w-full">
+            <p className="font-semibold">Niveau d&apos;expérience</p>
+            <RadioGroup
+              defaultValue="any"
+              value={selectedSeniority}
+              onValueChange={handleSeniorityChange}
+              className="flex flex-col gap-2 w-full"
+            >
+              {SENIORITY_OPTIONS.map((option) => (
+                <div key={option.value} className="flex items-center space-x-2">
+                  <RadioGroupItem
+                    value={option.value}
+                    id={`seniority-${option.value}`}
+                  />
+                  <Label
+                    htmlFor={`seniority-${option.value}`}
+                    className="cursor-pointer"
+                  >
+                    {option.label}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
           </div>
 
           {/* Mobile apply filters button */}
