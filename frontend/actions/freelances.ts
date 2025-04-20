@@ -4,10 +4,12 @@ import { api } from "@/lib/api";
 import { Freelance, Skill } from "@/lib/interfaces";
 
 interface SearchFreelanceParams {
-  query: string;
+  query?: string;
   minimumAverageDailyRate?: number;
   maximumAverageDailyRate?: number;
   skills?: Skill[];
+  minSeniority?: number;
+  maxSeniority?: number;
 }
 
 export const searchFreelances = async ({
@@ -15,12 +17,16 @@ export const searchFreelances = async ({
   minimumAverageDailyRate,
   maximumAverageDailyRate,
   skills,
+  minSeniority,
+  maxSeniority,
 }: SearchFreelanceParams): Promise<Freelance[]> => {
   const response = await api.post("/freelances/search", {
-    jobTitle: query,
+    query,
     minDailyRate: minimumAverageDailyRate,
     maxDailyRate: maximumAverageDailyRate,
     skillNames: skills?.map((skill) => skill.name),
+    minSeniority,
+    maxSeniority,
   });
 
   return response.data;

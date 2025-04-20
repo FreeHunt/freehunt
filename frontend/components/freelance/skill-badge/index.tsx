@@ -11,7 +11,7 @@ function SkillBadge({
 }) {
   return (
     <ShadcnBadge
-      className={`bg-freehunt-grey-light text-freehunt-black-two rounded-[6px] ${className}`}
+      className={`bg-freehunt-grey-light text-freehunt-black-two rounded-[6px] self-start ${className}`}
       {...props}
     >
       {children}

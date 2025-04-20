@@ -137,16 +137,17 @@ export class FreelancesController {
   }
 
   @Post('search')
+  @HttpCode(200)
   @ApiOperation({
     summary: 'Search freelances',
-    description: 'Search freelances by name, skills, and/or daily rate range',
+    description:
+      'Search freelances using full-text search on name, location, and job title',
   })
   @ApiResponse({
     status: 200,
     description: 'Returns freelances matching the search criteria',
     type: [FreelanceResponseDto],
   })
-  @HttpCode(200)
   async search(
     @Body() searchFreelanceDto: SearchFreelanceDto,
   ): Promise<FreelanceResponseDto[]> {

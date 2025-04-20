@@ -111,14 +111,12 @@ describe('FreelancesController (e2e)', () => {
 
   it('/freelances/search (POST)', () => {
     const searchDto: SearchFreelanceDto = {
-      firstName: 'John',
-      jobTitle: 'Developer',
+      query: 'John Paris',
       skillNames: ['JavaScript'],
       minDailyRate: 400,
       maxDailyRate: 600,
       minSeniority: 3,
       maxSeniority: 7,
-      location: 'Paris',
       skip: 0,
       take: 10,
     };
@@ -168,9 +166,9 @@ describe('FreelancesController (e2e)', () => {
       .expect([freelanceResponse]);
   });
 
-  it('/freelances/search with location (POST)', () => {
+  it('/freelances/search with just query (POST)', () => {
     const searchDto: SearchFreelanceDto = {
-      location: 'Paris',
+      query: 'John',
     };
 
     return request(app.getHttpServer())
