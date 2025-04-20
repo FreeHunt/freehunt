@@ -41,6 +41,13 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* FreeHunt */
+  --color-freehunt-main: var(--freehunt-main);
+  --color-freehunt-grey-light: var(--freehunt-grey-light);
+  --color-freehunt-black-two: var(--freehunt-black-two);
+  --color-freehunt-beige-dark: var(--freehunt-beige-dark);
+  --color-freehunt-grey: var(--freehunt-grey);
 }
 
 :root {
@@ -76,6 +83,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* FreeHunt */
+  --freehunt-main: #ff4d6d;
+  --freehunt-grey-light: #eaeaea;
+  --freehunt-black-two: #3e3e3e;
+  --freehunt-beige-dark: #f2ede4;
+  --freehunt-grey: #d9d9d9;
 }
 
 .dark {
