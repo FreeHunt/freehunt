@@ -59,4 +59,11 @@ export class MessagesController {
     this.chatService.server.emit('deleteMessage', message);
     return message;
   }
+
+  @Get('conversation/:id')
+  async getMessagesByConversationId(@Param('id') id: string) {
+    const messages = await this.messagesService.getMessagesByConversationId(id);
+    this.chatService.server.emit('getMessagesByConversationId', messages);
+    return messages;
+  }
 }

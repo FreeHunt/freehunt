@@ -100,15 +100,4 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
   handleGetMessages(@MessageBody() data: { messages: Message[] }) {
     this.server.emit('getMessages', data.messages);
   }
-
-  @SubscribeMessage('privateMessage')
-  handlePrivateMessage(
-    @MessageBody() data: { roomId: string; text: string; senderId: string },
-  ) {
-    this.server.to(data.roomId).emit('reply', {
-      text: data.text,
-      senderId: data.senderId,
-      timestamp: new Date().toISOString(),
-    });
-  }
 }

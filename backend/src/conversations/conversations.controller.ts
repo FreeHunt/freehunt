@@ -70,6 +70,22 @@ export class ConversationsController {
     return conversations;
   }
 
+  @Get('user/:id')
+  @ApiOperation({
+    summary: 'Get all conversations for a user',
+    description: 'Get all conversations for a user',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the user',
+  })
+  async getConversationsByUser(@Param('id') id: string) {
+    const conversations =
+      await this.conversationsService.getConversationsByUser(id);
+    this.chatService.server.emit('getConversationsByUser', conversations);
+    return conversations;
+  }
+
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete a conversation',

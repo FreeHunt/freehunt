@@ -32,6 +32,18 @@ export class ConversationsService {
     });
   }
 
+  async getConversationsByUser(id: string): Promise<Conversation[]> {
+    return this.prisma.conversation.findMany({
+      where: {
+        OR: [{ project: { freelanceId: id } }, { project: { companyId: id } }],
+      },
+      include: {
+        messages: true,
+        project: true,
+      },
+    });
+  }
+
   async deleteConversation(id: string): Promise<Conversation> {
     return this.prisma.conversation.delete({
       where: { id },

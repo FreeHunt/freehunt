@@ -35,4 +35,10 @@ export class MessagesService {
       where: { id },
     });
   }
+
+  async getMessagesByConversationId(conversationId: string) {
+    return await this.prisma.message.findMany({
+      where: { conversationId },
+    });
+  }
 }
