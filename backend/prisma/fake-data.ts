@@ -39,7 +39,7 @@ export function fakeFreelance() {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     jobTitle: faker.person.jobTitle(),
-    averageDailyRate: faker.number.float(),
+    averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     location: faker.location.city(),
   };
@@ -51,7 +51,7 @@ export function fakeFreelanceComplete() {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     jobTitle: faker.person.jobTitle(),
-    averageDailyRate: faker.number.float(),
+    averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     location: faker.location.city(),
   };
