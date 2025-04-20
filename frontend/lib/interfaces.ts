@@ -16,6 +16,7 @@ export interface Freelance {
   id: string;
   firstName: string;
   lastName: string;
+  location: string;
   jobTitle: string;
   skills: Skill[];
   averageDailyRate: number;

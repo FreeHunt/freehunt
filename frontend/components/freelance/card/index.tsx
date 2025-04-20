@@ -15,7 +15,8 @@ import { Freelance } from "@/lib/interfaces";
 import { formatNumberToEuros } from "@/lib/utils";
 
 function FreelanceCard(freelance: Freelance) {
-  const { firstName, lastName, jobTitle, skills, averageDailyRate } = freelance;
+  const { firstName, lastName, location, jobTitle, skills, averageDailyRate } =
+    freelance;
 
   const getInitials = () => {
     return firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
@@ -39,7 +40,7 @@ function FreelanceCard(freelance: Freelance) {
               <p className="text-freehunt-black-two font-medium">{jobTitle}</p>
               <div className="flex items-center gap-1">
                 <MapPin size={14} className="text-freehunt-main" />
-                <p className="text-freehunt-main">Paris, France</p>
+                <p className="text-freehunt-main">{location}</p>
               </div>
             </CardDescription>
           </div>
