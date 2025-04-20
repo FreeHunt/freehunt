@@ -134,7 +134,7 @@ export class ProjectController {
   })
   remove(
     @Param('id') id: string,
-  ): Promise<{ message: string; data: { id: string } }> {
+  ) {
     return this.projectService.remove(id);
   }
 }
