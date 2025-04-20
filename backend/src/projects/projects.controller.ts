@@ -78,8 +78,7 @@ export class ProjectController {
     status: 400,
     description: 'Bad Request',
   })
-  findOne(@Param('id') id: string): Promise<ProjectResponseDto | null> {
-    return this.projectService.findOne(id);
+  findOne(@Param('id') id: string): Promise<ProjectResponseDto> {
   }
 
   @Patch(':id')
