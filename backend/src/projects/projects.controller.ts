@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { ProjectService } from './projects.service';
+import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
@@ -16,7 +16,7 @@ import { ProjectResponseDto } from './dto/project-response.dto';
 @ApiTags('projects')
 @Controller('projects')
 export class ProjectController {
-  constructor(private readonly projectService: ProjectService) {}
+  constructor(private readonly projectsService: ProjectsService) {}
 
   @Post()
   @ApiOperation({
@@ -35,7 +35,7 @@ export class ProjectController {
   create(
     @Body() createProjectDto: CreateProjectDto,
   ): Promise<ProjectResponseDto> {
-    return this.projectService.create(createProjectDto);
+    return this.projectsService.create(createProjectDto);
   }
 
   @Get()
@@ -53,7 +53,7 @@ export class ProjectController {
     description: 'No projects found',
   })
   findAll(): Promise<ProjectResponseDto[]> {
-    return this.projectService.findAll();
+    return this.projectsService.findAll();
   }
 
   @Get(':id')
@@ -79,7 +79,7 @@ export class ProjectController {
     description: 'Bad Request',
   })
   findOne(@Param('id') id: string): Promise<ProjectResponseDto> {
-    return this.projectService.findOne(id);
+    return this.projectsService.findOne(id);
   }
 
   @Patch(':id')
@@ -108,7 +108,7 @@ export class ProjectController {
     @Param('id') id: string,
     @Body() updateProjectDto: UpdateProjectDto,
   ): Promise<ProjectResponseDto> {
-    return this.projectService.update(id, updateProjectDto);
+    return this.projectsService.update(id, updateProjectDto);
   }
 
   @Delete(':id')
@@ -136,6 +136,6 @@ export class ProjectController {
   remove(
     @Param('id') id: string,
   ): Promise<ProjectResponseDto> {
-    return this.projectService.remove(id);
+    return this.projectsService.remove(id);
   }
 }
