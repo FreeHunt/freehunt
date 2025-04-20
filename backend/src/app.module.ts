@@ -8,7 +8,7 @@ import { FreelancesModule } from './freelances/freelances.module';
 
 import { AuthModule } from './auth/auth.module';
 import { AuthentikModule } from './common/authentik/authentik.module';
-import { ProjectModule } from './projects/projects.module';
+import { ProjectsModule } from './projects/projects.module';
 @Module({
   imports: [
     PrismaModule,
@@ -19,7 +19,7 @@ import { ProjectModule } from './projects/projects.module';
     FreelancesModule,
     AuthModule,
     AuthentikModule,
-    ProjectModule,
+    ProjectsModule,
   ],
   controllers: [],
   providers: [],
