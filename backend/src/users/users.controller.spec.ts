@@ -35,6 +35,8 @@ describe('UsersController', () => {
   const user: User = {
     ...createUserDto,
     id: '3246540a-3ecd-4912-a909-953c881816fc',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   describe('create', () => {

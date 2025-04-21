@@ -45,6 +45,8 @@ describe('FreelancesController', () => {
   const freelance: Freelance = {
     ...createFreelanceDto,
     id: '550e8400-e29b-41d4-a716-446655440000',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   describe('create', () => {
@@ -107,6 +109,8 @@ describe('FreelancesController', () => {
         seniority: 5,
         location: 'Paris, France',
         userId: '550e8400-e29b-41d4-a716-446655440000',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: '550e8400-e29b-41d4-a716-446655440001',
@@ -117,6 +121,8 @@ describe('FreelancesController', () => {
         seniority: 3,
         location: 'London, UK',
         userId: '550e8400-e29b-41d4-a716-446655440001',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ];
     const freelanceSearchResult = {

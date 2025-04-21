@@ -28,6 +28,8 @@ model User {
   receivedMessages  Message[] @relation("receiver")
   conversations Conversation[] @relation("sender")
   conversationsReceived Conversation[] @relation("receiver")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
 }
 
 enum SkillType {
@@ -43,6 +45,8 @@ model Skill {
   type           SkillType
   freelance      Freelance[]
   jobPosting     JobPosting[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
 }
 
 model Freelance {
@@ -62,6 +66,8 @@ model Freelance {
   skills           Skill[]
   documents        Document[]
   projects         Project[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @default(now()) @updatedAt
 }
 
 model Company {
@@ -77,6 +83,8 @@ model Company {
   siren       String
   jobPostings JobPosting[]
   projects    Project[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
 }
 
 enum JobPostingLocation {
@@ -96,6 +104,8 @@ model JobPosting {
   skills      Skill[]
   checkpoints Checkpoint[]
   project     Project?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @default(now()) @updatedAt
 }
 
 model Project {
@@ -113,6 +123,8 @@ model Project {
   invoice      Invoice?
   conversation Conversation? @relation(fields: [conversationId], references: [id])
   conversationId String?    @unique @db.Uuid
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
 }
 
 model Checkpoint {
@@ -123,6 +135,8 @@ model Checkpoint {
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
   jobPostingId String     @db.Uuid
   quote        Quote?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
 }
 
 // Devis
@@ -133,6 +147,8 @@ model Quote {
   amount       Float?
   document     Document?
   invoice      Invoice?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now()) @updatedAt
 }
 
 model Invoice {
@@ -145,6 +161,8 @@ model Invoice {
   documentId    String    @db.Uuid
   project       Project?  @relation(fields: [projectId], references: [id])
   projectId     String?   @unique @db.Uuid
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now()) @updatedAt
 }
 
 enum DocumentType {
@@ -164,6 +182,8 @@ model Document {
   quote       Quote?       @relation(fields: [quoteId], references: [id])
   quoteId     String       @unique @db.Uuid
   message     Message?     
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
 }
 
 model Log {
@@ -171,28 +191,36 @@ model Log {
   timestamp DateTime @default(now())
   tableName String
   action    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
 }
 
 model Conversation {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   messages  Message[]
   project   Project? 
-  sender    User       @relation("sender", fields: [senderId], references: [id])
-  senderId  String     @db.Uuid
-  receiver  User       @relation("receiver", fields: [receiverId], references: [id])
+  sender    User        @relation("sender", fields: [senderId], references: [id])
+  senderId  String      @db.Uuid
+  receiver  User        @relation("receiver", fields: [receiverId], references: [id])
   receiverId String     @db.Uuid
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
 }
 
 model Message {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   conversation Conversation @relation(fields: [conversationId], references: [id])
   conversationId String     @db.Uuid
-  sender       User       @relation("sender", fields: [senderId], references: [id])
-  senderId     String     @db.Uuid
-  receiver     User       @relation("receiver", fields: [receiverId], references: [id])
-  receiverId   String     @db.Uuid
-  documentId   String?    @unique @db.Uuid
-  document     Document?  @relation(fields: [documentId], references: [id])
-  timestamp    DateTime   @default(now())
+  sender       User         @relation("sender", fields: [senderId], references: [id])
+  senderId     String       @db.Uuid
+  receiver     User         @relation("receiver", fields: [receiverId], references: [id])
+  receiverId   String       @db.Uuid
+  documentId   String?      @unique @db.Uuid
+  document     Document?    @relation(fields: [documentId], references: [id])
+  timestamp    DateTime     @default(now())
   content      String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now()) @updatedAt
 }
+

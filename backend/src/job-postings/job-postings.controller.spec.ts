@@ -41,6 +41,8 @@ describe('JobPostingsController', () => {
   const jobPosting: JobPosting = {
     ...createJobPostingDto,
     id: '3246540a-3ecd-4912-a909-953c881816fc',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   describe('create', () => {
@@ -102,6 +104,8 @@ describe('JobPostingsController', () => {
         location: 'REMOTE',
         isPromoted: true,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       {
         id: '4246540a-3ecd-4912-a909-953c881816fd',
@@ -110,6 +114,8 @@ describe('JobPostingsController', () => {
         location: 'ONSITE',
         isPromoted: false,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
     ];
 

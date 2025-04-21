@@ -17,6 +17,8 @@ export function fakeUserComplete() {
     email: faker.internet.email(),
     username: faker.internet.userName(),
     role: faker.helpers.arrayElement([Role.FREELANCE, Role.COMPANY] as const),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeSkill() {
@@ -34,6 +36,8 @@ export function fakeSkillComplete() {
     normalizedName: faker.lorem.words(5),
     aliases: faker.lorem.words(5).split(' '),
     type: faker.helpers.arrayElement([SkillType.TECHNICAL, SkillType.SOFT] as const),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeFreelance() {
@@ -56,6 +60,8 @@ export function fakeFreelanceComplete() {
     averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     location: faker.location.city(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeCompany() {
@@ -74,6 +80,8 @@ export function fakeCompanyComplete() {
     description: faker.lorem.words(5),
     address: faker.location.streetAddress({ useFullAddress: true }),
     siren: faker.string.numeric(9),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeJobPosting() {
@@ -92,6 +100,8 @@ export function fakeJobPostingComplete() {
     description: faker.lorem.words(5),
     location: faker.helpers.arrayElement([JobPostingLocation.HYBRID, JobPostingLocation.ONSITE, JobPostingLocation.REMOTE] as const),
     isPromoted: faker.datatype.boolean(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeProject() {
@@ -113,6 +123,8 @@ export function fakeProjectComplete() {
     freelanceId: undefined,
     companyId: undefined,
     conversationId: undefined,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeCheckpoint() {
@@ -129,6 +141,8 @@ export function fakeCheckpointComplete() {
     description: faker.lorem.words(5),
     date: faker.date.anytime(),
     jobPostingId: faker.string.uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeQuote() {
@@ -141,6 +155,8 @@ export function fakeQuoteComplete() {
     id: faker.string.uuid(),
     checkpointId: faker.string.uuid(),
     amount: undefined,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeInvoice() {
@@ -158,6 +174,8 @@ export function fakeInvoiceComplete() {
     valueAddedTax: undefined,
     documentId: faker.lorem.words(5),
     projectId: undefined,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeDocument() {
@@ -176,6 +194,8 @@ export function fakeDocumentComplete() {
     freelanceId: faker.string.uuid(),
     invoiceId: faker.string.uuid(),
     quoteId: faker.string.uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeLog() {
@@ -190,6 +210,8 @@ export function fakeLogComplete() {
     timestamp: new Date(),
     tableName: faker.lorem.words(5),
     action: faker.lorem.words(5),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeConversationComplete() {
@@ -197,6 +219,8 @@ export function fakeConversationComplete() {
     id: faker.string.uuid(),
     senderId: faker.string.uuid(),
     receiverId: faker.string.uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeMessage() {
@@ -213,5 +237,7 @@ export function fakeMessageComplete() {
     documentId: undefined,
     timestamp: new Date(),
     content: faker.lorem.words(5),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }

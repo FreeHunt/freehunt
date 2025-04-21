@@ -38,6 +38,8 @@ describe('SkillsService', () => {
         normalizedName: 'typescript',
         aliases: ['TS'],
         type: 'TECHNICAL',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       PrismaServiceMock.skill.update.mockResolvedValue(updatedSkill);
@@ -67,6 +69,8 @@ describe('SkillsService', () => {
         normalizedName: 'javascript',
         aliases: ['JS'],
         type: 'TECHNICAL',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
 
       const updatedSkill = { ...existingSkill, aliases: ['JS', 'ECMAScript'] };

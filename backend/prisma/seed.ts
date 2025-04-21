@@ -1,11 +1,12 @@
 import { PrismaClient } from '@prisma/client';
-import { User, Freelance, Company, Skill, JobPosting } from '@prisma/client';
+import { User, Freelance, Company, Skill, JobPosting, Project } from '@prisma/client';
 import {
   fakeUser,
   fakeFreelance,
   fakeCompany,
   fakeSkill,
   fakeJobPosting,
+  fakeProject,
 } from './fake-data';
 
 // Configuration constants for data generation
@@ -216,6 +217,36 @@ async function main() {
   }
 
   console.log(`Created ${jobPostings.length} job postings`);
+
+  // Create projects
+  const projects: Project[] = [];
+
+  for (const jobPosting of jobPostings) {
+    const projectData = fakeProject();
+
+    const maybeFreelance =
+      freelances.length > 0 && Math.random() > 0.5
+        ? freelances[Math.floor(Math.random() * freelances.length)]
+        : null;
+
+    const project = await prisma.project.create({
+      data: {
+        ...projectData,
+        jobPosting: {
+          connect: { id: jobPosting.id },
+        },
+        ...(maybeFreelance && {
+          freelance: {
+            connect: { id: maybeFreelance.id },
+          },
+        }),
+      },
+    });
+
+    projects.push(project);
+  }
+
+  console.log(`Created ${projects.length} projects`);
 
   console.log('Database seeding completed!');
 }
