@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function ToggleBadge({
   value,
@@ -13,6 +13,10 @@ function ToggleBadge({
   isActive?: boolean;
 }) {
   const [localIsActive, setLocalIsActive] = useState(isActive);
+
+  useEffect(() => {
+    setLocalIsActive(isActive);
+  }, [isActive]);
 
   const handleClick = () => {
     const newState = !localIsActive;
