@@ -33,7 +33,7 @@ const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
 const SLIDER_STEP = 100;
 const DEBOUNCE_DELAY = 300;
-const DEFAULT_PAGE_SIZE = 6;
+const DEFAULT_PAGE_SIZE = 10;
 
 type SeniorityOption = {
   value: string;
@@ -52,10 +52,10 @@ const SENIORITY_OPTIONS: SeniorityOption[] = [
 
 function Page() {
   const [minimumAverageDailyRate, setMinimumAverageDailyRate] = useState(
-    MINIMUM_AVERAGE_DAILY_RATE
+    MINIMUM_AVERAGE_DAILY_RATE,
   );
   const [maximumAverageDailyRate, setMaximumAverageDailyRate] = useState(
-    MAXIMUM_AVERAGE_DAILY_RATE
+    MAXIMUM_AVERAGE_DAILY_RATE,
   );
   const [freelancesLoading, setFreelancesLoading] = useState(true);
   const [freelanceResults, setFreelanceResults] =
@@ -89,7 +89,7 @@ function Page() {
       setFreelancesLoading(true);
       // Get seniority range based on selection
       const selectedOption = SENIORITY_OPTIONS.find(
-        (option) => option.value === selectedSeniority
+        (option) => option.value === selectedSeniority,
       );
 
       const results = await searchFreelances({
@@ -111,7 +111,7 @@ function Page() {
       maximumAverageDailyRate,
       selectedSkills,
       selectedSeniority,
-    ]
+    ],
   );
 
   // Debounced version of fetchFreelances for text search
@@ -120,7 +120,7 @@ function Page() {
     debounce((query: string, page: number) => {
       fetchFreelances(query, page);
     }, DEBOUNCE_DELAY),
-    [fetchFreelances]
+    [fetchFreelances],
   );
 
   // Initial load and when filters change
@@ -142,7 +142,7 @@ function Page() {
     setSelectedSkills((prev) =>
       prev.some((s) => s.id === skill.id)
         ? prev.filter((s) => s.id !== skill.id)
-        : [...prev, skill]
+        : [...prev, skill],
     );
     setCurrentPage(1); // Reset to first page when changing filters
   }, []);
