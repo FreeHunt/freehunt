@@ -291,6 +291,7 @@ function Page() {
                     key={skill.id}
                     value={skill.name}
                     onClick={() => handleSkillToggle(skill)}
+                    isActive={selectedSkills.some((s) => s.id === skill.id)}
                   />
                 ))}
             </div>

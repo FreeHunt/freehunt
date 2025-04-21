@@ -6,15 +6,17 @@ import { useState } from "react";
 function ToggleBadge({
   value,
   onClick,
+  isActive = false,
 }: {
   value: string;
   onClick?: (value: string, newState: boolean) => void;
+  isActive?: boolean;
 }) {
-  const [isActive, setIsActive] = useState(false);
+  const [localIsActive, setLocalIsActive] = useState(isActive);
 
   const handleClick = () => {
-    const newState = !isActive;
-    setIsActive(newState);
+    const newState = !localIsActive;
+    setLocalIsActive(newState);
     if (onClick) {
       onClick(value, newState);
     }
