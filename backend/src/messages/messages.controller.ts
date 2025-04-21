@@ -11,8 +11,8 @@ import {
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import { ChatService } from 'src/common/chat/chat.service';
-import { AuthentikAuthGuard } from 'src/auth/auth.guard';
+import { ChatService } from '../common/chat/chat.service';
+import { AuthentikAuthGuard } from '../auth/auth.guard';
 
 @Controller('messages')
 @UseGuards(AuthentikAuthGuard)

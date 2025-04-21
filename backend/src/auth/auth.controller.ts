@@ -7,7 +7,7 @@ import { Response } from 'express';
 import { AuthSuccessResponse } from './types/auth-success-response.interface';
 import { AuthErrorResponse } from './types/auth-error-response.interface';
 import { Role } from '@prisma/client';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
