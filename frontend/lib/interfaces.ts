@@ -24,3 +24,8 @@ export interface Freelance {
   user: User;
   userId: string;
 }
+
+export interface FreelanceSearchResult {
+  data: Freelance[];
+  total: number;
+}
