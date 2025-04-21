@@ -8,6 +8,50 @@ import {
   fakeJobPosting,
 } from './fake-data';
 
+// Configuration constants for data generation
+const CONFIG = {
+  USERS: {
+    TOTAL: 30, // Total number of users to create
+  },
+  SKILLS: {
+    // Pre-defined skills to generate
+    TECHNICAL: [
+      'JavaScript',
+      'Python',
+      'React',
+      'SQL',
+      'AWS',
+      'Machine Learning',
+      'Docker',
+      'Node.js',
+      'TypeScript',
+      'Git',
+    ],
+    SOFT: [
+      'Communication',
+      'Leadership',
+      'Problem Solving',
+      'Teamwork',
+      'Time Management',
+      'Adaptability',
+      'Critical Thinking',
+      'Emotional Intelligence',
+      'Conflict Resolution',
+      'Creativity',
+    ],
+  },
+  JOB_POSTINGS: {
+    MIN_PER_COMPANY: 1, // Minimum job postings per company
+    MAX_PER_COMPANY: 3, // Maximum job postings per company
+    MIN_SKILLS: 3, // Minimum skills per job posting
+    MAX_SKILLS: 10, // Maximum skills (MIN + random additional skills)
+  },
+  FREELANCE: {
+    MIN_SKILLS: 1, // Minimum skills per freelance
+    MAX_SKILLS: 6, // Maximum skills (MIN + random additional skills)
+  },
+};
+
 const prisma = new PrismaClient();
 
 async function main() {
@@ -24,32 +68,8 @@ async function main() {
   const createdSkills: Skill[] = [];
 
   // Define the technical and soft skills for type assignment
-  const technicalSkills = [
-    'JavaScript',
-    'Python',
-    'React',
-    'SQL',
-    'AWS',
-    'Machine Learning',
-    'Docker',
-    'Node.js',
-    'TypeScript',
-    'Git',
-  ];
-
-  const softSkills = [
-    'Communication',
-    'Leadership',
-    'Problem Solving',
-    'Teamwork',
-    'Time Management',
-    'Adaptability',
-    'Critical Thinking',
-    'Emotional Intelligence',
-    'Conflict Resolution',
-    'Creativity',
-  ];
-
+  const technicalSkills = CONFIG.SKILLS.TECHNICAL;
+  const softSkills = CONFIG.SKILLS.SOFT;
   const randomSkills = [...technicalSkills, ...softSkills];
 
   for (let i = 0; i < randomSkills.length; i++) {
@@ -79,7 +99,7 @@ async function main() {
   console.log(`Created ${randomSkills.length} skills`);
 
   // Create users and their related entities
-  const userCount = 10;
+  const userCount = CONFIG.USERS.TOTAL;
   const freelanceUsers: User[] = [];
   const companyUsers: User[] = [];
 
@@ -107,7 +127,11 @@ async function main() {
     // Add random skills to the freelance
     const skillsToConnect = createdSkills
       .sort(() => 0.5 - Math.random())
-      .slice(0, Math.floor(Math.random() * 5) + 1);
+      .slice(
+        0,
+        Math.floor(Math.random() * CONFIG.FREELANCE.MAX_SKILLS) +
+          CONFIG.FREELANCE.MIN_SKILLS,
+      );
 
     const freelance = await prisma.freelance.create({
       data: {
@@ -151,8 +175,14 @@ async function main() {
   // Create job postings
   const jobPostings: JobPosting[] = [];
   for (const company of companies) {
-    // Create 1-3 job postings per company
-    const postingCount = Math.floor(Math.random() * 3) + 1;
+    // Create job postings per company based on configuration
+    const postingCount =
+      Math.floor(
+        Math.random() *
+          (CONFIG.JOB_POSTINGS.MAX_PER_COMPANY -
+            CONFIG.JOB_POSTINGS.MIN_PER_COMPANY +
+            1),
+      ) + CONFIG.JOB_POSTINGS.MIN_PER_COMPANY;
 
     for (let i = 0; i < postingCount; i++) {
       const jobPostingData = fakeJobPosting();
@@ -160,7 +190,11 @@ async function main() {
       // Add random skills to the job posting
       const skillsToConnect = createdSkills
         .sort(() => 0.5 - Math.random())
-        .slice(0, Math.floor(Math.random() * 7) + 3);
+        .slice(
+          0,
+          Math.floor(Math.random() * CONFIG.JOB_POSTINGS.MAX_SKILLS) +
+            CONFIG.JOB_POSTINGS.MIN_SKILLS,
+        );
 
       const jobPosting = await prisma.jobPosting.create({
         data: {
