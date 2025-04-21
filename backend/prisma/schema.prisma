@@ -204,6 +204,8 @@ model Conversation {
   senderId  String      @db.Uuid
   receiver  User        @relation("receiver", fields: [receiverId], references: [id])
   receiverId String     @db.Uuid
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now()) @updatedAt
 }
 
 model Message {
@@ -218,5 +220,7 @@ model Message {
   document     Document?    @relation(fields: [documentId], references: [id])
   timestamp    DateTime     @default(now())
   content      String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now()) @updatedAt
 }
 
