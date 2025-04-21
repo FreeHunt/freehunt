@@ -23,6 +23,8 @@ model User {
   role      Role
   freelance Freelance?
   company   Company?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 enum SkillType {
@@ -38,6 +40,8 @@ model Skill {
   type           SkillType
   freelance      Freelance[]
   jobPosting     JobPosting[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 model Freelance {
@@ -57,6 +61,8 @@ model Freelance {
   skills           Skill[]
   documents        Document[]
   projects         Project[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 }
 
 model Company {
@@ -71,6 +77,8 @@ model Company {
   ///FAKE:faker.string.numeric(9)
   siren       String
   jobPostings JobPosting[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 enum JobPostingLocation {
@@ -90,6 +98,8 @@ model JobPosting {
   skills      Skill[]
   checkpoints Checkpoint[]
   project     Project?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model Project {
@@ -103,6 +113,8 @@ model Project {
   freelance    Freelance? @relation(fields: [freelanceId], references: [id])
   freelanceId  String?    @db.Uuid
   invoice      Invoice?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Checkpoint {
@@ -113,6 +125,8 @@ model Checkpoint {
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
   jobPostingId String     @db.Uuid
   quote        Quote?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 // Devis
@@ -123,6 +137,8 @@ model Quote {
   amount       Float?
   document     Document?
   invoice      Invoice?
+  createdAt   DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 }
 
 model Invoice {
@@ -135,6 +151,8 @@ model Invoice {
   documentId    String    @db.Uuid
   project       Project?  @relation(fields: [projectId], references: [id])
   projectId     String?   @unique @db.Uuid
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 enum DocumentType {
@@ -153,6 +171,8 @@ model Document {
   invoiceId   String       @unique @db.Uuid
   quote       Quote?       @relation(fields: [quoteId], references: [id])
   quoteId     String       @unique @db.Uuid
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model Log {
@@ -160,4 +180,6 @@ model Log {
   timestamp DateTime @default(now())
   tableName String
   action    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
