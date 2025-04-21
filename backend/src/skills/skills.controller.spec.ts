@@ -36,6 +36,8 @@ describe('SkillsController', () => {
     ...createSkillDto,
     id: '3246540a-3ecd-4912-a909-953c881816fc',
     normalizedName: 'javascript',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
   describe('create', () => {
