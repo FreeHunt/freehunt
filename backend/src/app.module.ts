@@ -5,10 +5,13 @@ import { CompaniesModule } from './companies/companies.module';
 import { JobPostingsModule } from './job-postings/job-postings.module';
 import { SkillsModule } from './skills/skills.module';
 import { FreelancesModule } from './freelances/freelances.module';
-
+import { ChatModule } from './common/chat/chat.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthentikModule } from './common/authentik/authentik.module';
 import { ProjectsModule } from './projects/projects.module';
+import { ConversationsModule } from './conversations/conversations.module';
+import { MessagesModule } from './messages/message.module';
+
 @Module({
   imports: [
     PrismaModule,
@@ -17,9 +20,12 @@ import { ProjectsModule } from './projects/projects.module';
     JobPostingsModule,
     SkillsModule,
     FreelancesModule,
+    ConversationsModule,
     AuthModule,
     AuthentikModule,
     ProjectsModule,
+    ChatModule,
+    MessagesModule,
   ],
   controllers: [],
   providers: [],

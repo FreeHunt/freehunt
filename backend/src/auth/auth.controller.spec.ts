@@ -3,6 +3,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthentikService } from '../common/authentik/authentik.service';
 import { HttpModule, HttpService } from '@nestjs/axios';
+import { UsersService } from '../users/users.service';
+import { PrismaService } from '../common/prisma/prisma.service';
 
 import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponse } from './types/auth-success-response.interface';
@@ -24,6 +26,8 @@ describe('AuthController', () => {
       providers: [
         AuthService,
         AuthentikService,
+        UsersService,
+        PrismaService,
         {
           provide: HttpService,
           useValue: mockHttpService,

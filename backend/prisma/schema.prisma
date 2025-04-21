@@ -20,9 +20,14 @@ enum Role {
 model User {
   id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email     String     @unique
+  username  String
   role      Role
   freelance Freelance?
   company   Company?
+  sentMessages  Message[] @relation("sender")
+  receivedMessages  Message[] @relation("receiver")
+  conversations Conversation[] @relation("sender")
+  conversationsReceived Conversation[] @relation("receiver")
 }
 
 enum SkillType {
@@ -71,6 +76,7 @@ model Company {
   ///FAKE:faker.string.numeric(9)
   siren       String
   jobPostings JobPosting[]
+  projects    Project[]
 }
 
 enum JobPostingLocation {
@@ -102,7 +108,11 @@ model Project {
   jobPostingId String     @unique @db.Uuid
   freelance    Freelance? @relation(fields: [freelanceId], references: [id])
   freelanceId  String?    @db.Uuid
+  company      Company?   @relation(fields: [companyId], references: [id])
+  companyId    String?    @db.Uuid
   invoice      Invoice?
+  conversation Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId String?    @unique @db.Uuid
 }
 
 model Checkpoint {
@@ -153,6 +163,7 @@ model Document {
   invoiceId   String       @unique @db.Uuid
   quote       Quote?       @relation(fields: [quoteId], references: [id])
   quoteId     String       @unique @db.Uuid
+  message     Message?     
 }
 
 model Log {
@@ -160,4 +171,28 @@ model Log {
   timestamp DateTime @default(now())
   tableName String
   action    String
+}
+
+model Conversation {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messages  Message[]
+  project   Project? 
+  sender    User       @relation("sender", fields: [senderId], references: [id])
+  senderId  String     @db.Uuid
+  receiver  User       @relation("receiver", fields: [receiverId], references: [id])
+  receiverId String     @db.Uuid
+}
+
+model Message {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String     @db.Uuid
+  sender       User       @relation("sender", fields: [senderId], references: [id])
+  senderId     String     @db.Uuid
+  receiver     User       @relation("receiver", fields: [receiverId], references: [id])
+  receiverId   String     @db.Uuid
+  documentId   String?    @unique @db.Uuid
+  document     Document?  @relation(fields: [documentId], references: [id])
+  timestamp    DateTime   @default(now())
+  content      String
 }
