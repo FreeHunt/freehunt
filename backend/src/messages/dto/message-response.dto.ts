@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ConversationResponseDto } from 'src/conversations/dto/conversation-response.dto';
-import { UserResponseDto } from 'src/users/dto/user-response.dto';
+import { ConversationResponseDto } from '../../conversations/dto/conversation-response.dto';
+import { UserResponseDto } from '../../users/dto/user-response.dto';
 
 export class MessageResponseDto {
   @ApiProperty({

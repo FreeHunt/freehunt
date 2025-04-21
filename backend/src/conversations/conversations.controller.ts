@@ -10,8 +10,8 @@ import {
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ConversationsService } from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
-import { ChatService } from 'src/common/chat/chat.service';
-import { AuthentikAuthGuard } from 'src/auth/auth.guard';
+import { ChatService } from '../common/chat/chat.service';
+import { AuthentikAuthGuard } from '../auth/auth.guard';
 @ApiTags('conversations')
 @Controller('conversations')
 @UseGuards(AuthentikAuthGuard)

@@ -7,6 +7,7 @@ import Decimal from 'decimal.js';
 export function fakeUser() {
   return {
     email: faker.internet.email(),
+    username: faker.internet.userName(),
     role: faker.helpers.arrayElement([Role.FREELANCE, Role.COMPANY] as const),
   };
 }
@@ -14,6 +15,7 @@ export function fakeUserComplete() {
   return {
     id: faker.string.uuid(),
     email: faker.internet.email(),
+    username: faker.internet.userName(),
     role: faker.helpers.arrayElement([Role.FREELANCE, Role.COMPANY] as const),
   };
 }
@@ -109,6 +111,8 @@ export function fakeProjectComplete() {
     endDate: undefined,
     jobPostingId: faker.string.uuid(),
     freelanceId: undefined,
+    companyId: undefined,
+    conversationId: undefined,
   };
 }
 export function fakeCheckpoint() {
@@ -186,5 +190,28 @@ export function fakeLogComplete() {
     timestamp: new Date(),
     tableName: faker.lorem.words(5),
     action: faker.lorem.words(5),
+  };
+}
+export function fakeConversationComplete() {
+  return {
+    id: faker.string.uuid(),
+    senderId: faker.string.uuid(),
+    receiverId: faker.string.uuid(),
+  };
+}
+export function fakeMessage() {
+  return {
+    content: faker.lorem.words(5),
+  };
+}
+export function fakeMessageComplete() {
+  return {
+    id: faker.string.uuid(),
+    conversationId: faker.string.uuid(),
+    senderId: faker.string.uuid(),
+    receiverId: faker.string.uuid(),
+    documentId: undefined,
+    timestamp: new Date(),
+    content: faker.lorem.words(5),
   };
 }

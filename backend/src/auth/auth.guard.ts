@@ -7,7 +7,7 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { catchError, map, firstValueFrom } from 'rxjs';
 import { UserResponseDto } from './dto/user-response.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthentikAuthGuard implements CanActivate {

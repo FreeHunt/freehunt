@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { MessageResponseDto } from 'src/messages/dto/message-response.dto';
+import { MessageResponseDto } from '../../messages/dto/message-response.dto';
+import { ProjectResponseDto } from '../../projects/dto/project-response.dto';
 
 export class ConversationResponseDto {
   @ApiProperty({
@@ -14,9 +15,9 @@ export class ConversationResponseDto {
   })
   messages: MessageResponseDto[];
 
-  //@ApiProperty({
-  //  description: 'The project associated with the conversation',
-  //  type: ProjectResponseDto,
-  //})
-  //project: ProjectResponseDto;
+  @ApiProperty({
+    description: 'The project associated with the conversation',
+    type: ProjectResponseDto,
+  })
+  project: ProjectResponseDto;
 }
