@@ -35,7 +35,7 @@ export class AuthentikAuthGuard implements CanActivate {
             },
           })
           .pipe(
-            map(async (res) => {
+            mergeMap(async (res) => {
               const user = res.data as UserResponseDto;
               const userData = await this.usersService.getUserByEmail(
                 user.user.email,
