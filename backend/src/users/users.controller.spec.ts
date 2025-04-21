@@ -29,6 +29,7 @@ describe('UsersController', () => {
   const createUserDto: CreateUserDto = {
     email: 'john.doe@freehunt.fr',
     role: 'FREELANCE',
+    username: 'John Doe',
   };
 
   const user: User = {

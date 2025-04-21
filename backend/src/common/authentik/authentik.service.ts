@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { LoginDto } from 'src/auth/dto/login.dto';
+import { LoginDto } from '../../auth/dto/login.dto';
 import { HttpService } from '@nestjs/axios';
 import { AxiosRequestConfig } from 'axios';
-import { RegisterDto } from 'src/auth/dto/register.dto';
-import { AuthSuccessResponse } from 'src/auth/types/auth-success-response.interface';
-import { AuthFlowResponse } from 'src/auth/types/auth-flow-response.interface';
-import { AuthErrorResponse } from 'src/auth/types/auth-error-response.interface';
+import { RegisterDto } from '../../auth/dto/register.dto';
+import { AuthSuccessResponse } from '../../auth/types/auth-success-response.interface';
+import { AuthFlowResponse } from '../../auth/types/auth-flow-response.interface';
+import { AuthErrorResponse } from '../../auth/types/auth-error-response.interface';
 
 @Injectable()
 export class AuthentikService {
@@ -50,11 +50,13 @@ export class AuthentikService {
         },
       );
 
+      const cookiesResponse = loginResponse.headers['set-cookie'];
+
       return {
         success:
           (loginResponse.data as AuthFlowResponse).component ===
           'xak-flow-redirect',
-        cookies: cookies || [],
+        cookies: cookiesResponse || [],
         response: loginResponse.data as AuthFlowResponse,
       };
     } catch (error) {
@@ -91,11 +93,13 @@ export class AuthentikService {
         },
       );
 
+      const cookiesResponse = registerResponse.headers['set-cookie'];
+
       return {
         success:
           (registerResponse.data as AuthFlowResponse).component ===
           'xak-flow-redirect',
-        cookies: cookies || [],
+        cookies: cookiesResponse || [],
         response: registerResponse.data as AuthFlowResponse,
       };
     } catch (error) {

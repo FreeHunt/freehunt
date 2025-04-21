@@ -8,6 +8,7 @@ import { FreelancesService } from '../src/freelances/freelances.service';
 import { PrismaService } from '../src/common/prisma/prisma.service';
 import { PrismaServiceMock } from './mocks/prisma.mock';
 import { SearchFreelanceDto } from '../src/freelances/dto/search-freelance.dto';
+import { FreelanceSearchResult } from 'src/freelances/dto/freelance-search-result.dto';
 
 describe('FreelancesController (e2e)', () => {
   let app: INestApplication<App>;
@@ -35,6 +36,10 @@ describe('FreelancesController (e2e)', () => {
       },
     ],
   };
+  const freelanceSearchResult = {
+    data: [freelanceResponse],
+    total: 1,
+  };
 
   const freelancesService = {
     findAll: jest.fn((): [FreelanceResponseDto] => [freelanceResponse]),
@@ -42,7 +47,7 @@ describe('FreelancesController (e2e)', () => {
     create: jest.fn((): FreelanceResponseDto => freelanceResponse),
     update: jest.fn((): FreelanceResponseDto => freelanceResponse),
     remove: jest.fn((): FreelanceResponseDto => freelanceResponse),
-    search: jest.fn((): [FreelanceResponseDto] => [freelanceResponse]),
+    search: jest.fn((): FreelanceSearchResult => freelanceSearchResult),
   };
 
   beforeEach(async () => {
@@ -125,7 +130,7 @@ describe('FreelancesController (e2e)', () => {
       .post('/freelances/search')
       .send(searchDto)
       .expect(200)
-      .expect([freelanceResponse]);
+      .expect(freelanceSearchResult);
   });
 
   it('/freelances/search with jobTitle (POST)', () => {
@@ -137,7 +142,7 @@ describe('FreelancesController (e2e)', () => {
       .post('/freelances/search')
       .send(searchDto)
       .expect(200)
-      .expect([freelanceResponse]);
+      .expect(freelanceSearchResult);
   });
 
   it('/freelances/search with daily rate range (POST)', () => {
@@ -150,7 +155,7 @@ describe('FreelancesController (e2e)', () => {
       .post('/freelances/search')
       .send(searchDto)
       .expect(200)
-      .expect([freelanceResponse]);
+      .expect(freelanceSearchResult);
   });
 
   it('/freelances/search with seniority range (POST)', () => {
@@ -163,7 +168,7 @@ describe('FreelancesController (e2e)', () => {
       .post('/freelances/search')
       .send(searchDto)
       .expect(200)
-      .expect([freelanceResponse]);
+      .expect(freelanceSearchResult);
   });
 
   it('/freelances/search with just query (POST)', () => {
@@ -175,6 +180,6 @@ describe('FreelancesController (e2e)', () => {
       .post('/freelances/search')
       .send(searchDto)
       .expect(200)
-      .expect([freelanceResponse]);
+      .expect(freelanceSearchResult);
   });
 });
