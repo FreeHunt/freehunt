@@ -219,6 +219,8 @@ export function fakeConversationComplete() {
     id: faker.string.uuid(),
     senderId: faker.string.uuid(),
     receiverId: faker.string.uuid(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 export function fakeMessage() {
@@ -235,5 +237,7 @@ export function fakeMessageComplete() {
     documentId: undefined,
     timestamp: new Date(),
     content: faker.lorem.words(5),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
