@@ -15,6 +15,7 @@ import { UpdateFreelanceDto } from './dto/update-freelance.dto';
 import { SearchFreelanceDto } from './dto/search-freelance.dto';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FreelanceResponseDto } from './dto/freelance-response.dto';
+import { FreelanceSearchResult } from './dto/freelance-search-result.dto';
 
 @ApiTags('freelances')
 @Controller('freelances')
@@ -146,11 +147,11 @@ export class FreelancesController {
   @ApiResponse({
     status: 200,
     description: 'Returns freelances matching the search criteria',
-    type: [FreelanceResponseDto],
+    type: FreelanceSearchResult,
   })
   async search(
     @Body() searchFreelanceDto: SearchFreelanceDto,
-  ): Promise<FreelanceResponseDto[]> {
+  ): Promise<FreelanceSearchResult> {
     return this.freelancesService.search(searchFreelanceDto);
   }
 }

@@ -119,6 +119,10 @@ describe('FreelancesController', () => {
         userId: '550e8400-e29b-41d4-a716-446655440001',
       },
     ];
+    const freelanceSearchResult = {
+      data: freelances,
+      total: freelances.length,
+    };
 
     it('should search freelances using generic query', async () => {
       const searchDto: SearchFreelanceDto = {
@@ -126,12 +130,12 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[0]]);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[0]]);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should search freelances by job title', async () => {
@@ -140,12 +144,12 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[1]]);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[1]]);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should search freelances by skill names', async () => {
@@ -154,12 +158,12 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[0]]);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[0]]);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should search freelances by daily rate range', async () => {
@@ -169,12 +173,12 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue(freelances);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual(freelances);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should search freelances with pagination parameters', async () => {
@@ -184,12 +188,12 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[1]]);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[1]]);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should search freelances with multiple search parameters', async () => {
@@ -203,24 +207,24 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[0]]);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[0]]);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should return all freelances when no search parameters are provided', async () => {
       const searchDto: SearchFreelanceDto = {};
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue(freelances);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual(freelances);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should search freelances by seniority range', async () => {
@@ -230,12 +234,12 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[0]]);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[0]]);
+      expect(result).toEqual(freelanceSearchResult);
     });
 
     it('should search freelances with multiple search parameters including query and jobTitle', async () => {
@@ -250,12 +254,12 @@ describe('FreelancesController', () => {
       };
 
       const searchSpy = jest.spyOn(freelancesService, 'search');
-      searchSpy.mockResolvedValue([freelances[0]]);
+      searchSpy.mockResolvedValue(freelanceSearchResult);
 
       const result = await freelancesController.search(searchDto);
 
       expect(searchSpy).toHaveBeenCalledWith(searchDto);
-      expect(result).toEqual([freelances[0]]);
+      expect(result).toEqual(freelanceSearchResult);
     });
   });
 });

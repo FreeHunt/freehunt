@@ -1,7 +1,7 @@
 "use server";
 
 import { api } from "@/lib/api";
-import { Freelance, Skill } from "@/lib/interfaces";
+import { FreelanceSearchResult, Skill } from "@/lib/interfaces";
 
 interface SearchFreelanceParams {
   query?: string;
@@ -10,6 +10,8 @@ interface SearchFreelanceParams {
   skills?: Skill[];
   minSeniority?: number;
   maxSeniority?: number;
+  page?: number;
+  pageSize?: number;
 }
 
 export const searchFreelances = async ({
@@ -19,7 +21,11 @@ export const searchFreelances = async ({
   skills,
   minSeniority,
   maxSeniority,
-}: SearchFreelanceParams): Promise<Freelance[]> => {
+  page = 1,
+  pageSize = 10,
+}: SearchFreelanceParams): Promise<FreelanceSearchResult> => {
+  const skip = (page - 1) * pageSize;
+
   const response = await api.post("/freelances/search", {
     query,
     minDailyRate: minimumAverageDailyRate,
@@ -27,6 +33,8 @@ export const searchFreelances = async ({
     skillNames: skills?.map((skill) => skill.name),
     minSeniority,
     maxSeniority,
+    skip,
+    take: pageSize,
   });
 
   return response.data;
