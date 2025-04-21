@@ -22,8 +22,11 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
     const loginResponse = await this.authService.login(loginDto);
-    const rawCookie = loginResponse.cookies[1].split(';')[0]; // Récupère le cookie brut authentik_session
-    const token = decodeURIComponent(rawCookie.split('=')[1]); // Décode la valeur du cookie
+    const rawCookie = loginResponse.cookies.find(cookie => cookie.startsWith('authentik_session=')); // Search for the authentik_session cookie
+    if (!rawCookie) {
+      throw new Error('authentik_session cookie not found'); // Handle missing cookie
+    }
+    const token = decodeURIComponent(rawCookie.split('=')[1].split(';')[0]); // Decode the cookie value
     response.cookie('authentik_session', token, {
       httpOnly: true,
     }); // on va stocker un cookie avec le token
