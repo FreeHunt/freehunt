@@ -9,7 +9,7 @@ import { SearchInput } from "@/components/common/input";
 import { Badge } from "@/components/ui/badge";
 import { searchFreelances } from "@/actions/freelances";
 import { useState, useEffect, useCallback } from "react";
-import { Freelance, Skill } from "@/lib/interfaces";
+import { FreelanceSearchResult, Skill } from "@/lib/interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleBadge } from "@/components/common/toggle-badge";
 import { getSkills } from "@/actions/skills";
@@ -19,11 +19,21 @@ import { X, Filter } from "lucide-react";
 import { Button as FreeHuntButton } from "@/components/common/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
 const SLIDER_STEP = 100;
 const DEBOUNCE_DELAY = 300;
+const DEFAULT_PAGE_SIZE = 6;
 
 type SeniorityOption = {
   value: string;
@@ -48,7 +58,12 @@ function Page() {
     MAXIMUM_AVERAGE_DAILY_RATE
   );
   const [freelancesLoading, setFreelancesLoading] = useState(true);
-  const [freelances, setFreelances] = useState<Freelance[]>([]);
+  const [freelanceResults, setFreelanceResults] =
+    useState<FreelanceSearchResult>({
+      data: [],
+      total: 0,
+    });
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSeniority, setSelectedSeniority] = useState<string>("any");
 
@@ -70,22 +85,25 @@ function Page() {
   }, []);
 
   const fetchFreelances = useCallback(
-    async (query = "") => {
+    async (query = "", page = 1) => {
+      setFreelancesLoading(true);
       // Get seniority range based on selection
       const selectedOption = SENIORITY_OPTIONS.find(
         (option) => option.value === selectedSeniority
       );
 
-      const freelances = await searchFreelances({
+      const results = await searchFreelances({
         query,
         minimumAverageDailyRate,
         maximumAverageDailyRate,
         skills: selectedSkills,
         minSeniority: selectedOption?.min,
         maxSeniority: selectedOption?.max,
+        page,
+        pageSize: DEFAULT_PAGE_SIZE,
       });
 
-      setFreelances(freelances);
+      setFreelanceResults(results);
       setFreelancesLoading(false);
     },
     [
@@ -96,26 +114,27 @@ function Page() {
     ]
   );
 
-  // Debounced version of fetchFreelances
+  // Debounced version of fetchFreelances for text search
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchFreelances = useCallback(
-    debounce((query: string) => {
-      fetchFreelances(query);
+    debounce((query: string, page: number) => {
+      fetchFreelances(query, page);
     }, DEBOUNCE_DELAY),
     [fetchFreelances]
   );
 
   // Initial load and when filters change
   useEffect(() => {
-    debouncedFetchFreelances(searchQuery);
+    debouncedFetchFreelances(searchQuery, currentPage);
     // Cancel any pending debounced calls when component unmounts
     return () => debouncedFetchFreelances.clear();
-  }, [debouncedFetchFreelances, searchQuery]);
+  }, [debouncedFetchFreelances, searchQuery, currentPage]);
 
   // Handle search form submission
   const handleSearch = async (formData: FormData) => {
     const query = formData.get("search") as string;
     setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page when changing search
   };
 
   // Handle skill selection with debounce
@@ -125,18 +144,30 @@ function Page() {
         ? prev.filter((s) => s.id !== skill.id)
         : [...prev, skill]
     );
+    setCurrentPage(1); // Reset to first page when changing filters
   }, []);
 
   // Handle slider value change with debounce
   const handleSliderValueChange = useCallback((value: number[]) => {
     setMinimumAverageDailyRate(value[0]);
     setMaximumAverageDailyRate(value[1]);
+    setCurrentPage(1); // Reset to first page when changing filters
   }, []);
 
   // Handle seniority selection
   const handleSeniorityChange = useCallback((value: string) => {
     setSelectedSeniority(value);
+    setCurrentPage(1); // Reset to first page when changing filters
   }, []);
+
+  // Handle page change
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(freelanceResults.total / DEFAULT_PAGE_SIZE);
 
   return (
     <BasePage>
@@ -285,7 +316,7 @@ function Page() {
               Freelances
             </h1>
             <Badge className="bg-freehunt-main font-bold text-white">
-              {freelances.length}
+              {freelanceResults.total}
             </Badge>
           </div>
 
@@ -298,16 +329,135 @@ function Page() {
                   className="w-[362px] h-[300px] rounded-[30px]"
                 />
               ))}
-            {freelances.length > 0 &&
-              freelances.map((freelance) => (
+            {freelanceResults.data.length > 0 &&
+              !freelancesLoading &&
+              freelanceResults.data.map((freelance) => (
                 <FreelanceCard key={freelance.id} {...freelance} />
               ))}
-            {!freelancesLoading && freelances.length === 0 && (
+            {!freelancesLoading && freelanceResults.data.length === 0 && (
               <p className="text-freehunt-black-two col-span-full text-center py-8">
                 Aucun freelance trouvé.
               </p>
             )}
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && !freelancesLoading && (
+            <div className="flex justify-center mt-6">
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage - 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+
+                  {/* First page */}
+                  {currentPage > 2 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(1);
+                        }}
+                      >
+                        1
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {/* Ellipsis if needed */}
+                  {currentPage > 3 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  {/* Previous page if not first */}
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage - 1);
+                        }}
+                      >
+                        {currentPage - 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {/* Current page */}
+                  <PaginationItem>
+                    <PaginationLink
+                      href="#"
+                      isActive
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      {currentPage}
+                    </PaginationLink>
+                  </PaginationItem>
+
+                  {/* Next page if not last */}
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage + 1);
+                        }}
+                      >
+                        {currentPage + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {/* Ellipsis if needed */}
+                  {currentPage < totalPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  {/* Last page */}
+                  {currentPage < totalPages - 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(totalPages);
+                        }}
+                      >
+                        {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </main>
       </div>
     </BasePage>

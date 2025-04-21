@@ -4,6 +4,7 @@ import { UpdateFreelanceDto } from './dto/update-freelance.dto';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { Freelance, Prisma } from '@prisma/client';
 import { SearchFreelanceDto } from './dto/search-freelance.dto';
+import { FreelanceSearchResult } from './dto/freelance-search-result.dto';
 
 @Injectable()
 export class FreelancesService {
@@ -79,7 +80,9 @@ export class FreelancesService {
     });
   }
 
-  async search(searchParams: SearchFreelanceDto): Promise<Freelance[]> {
+  async search(
+    searchParams: SearchFreelanceDto,
+  ): Promise<FreelanceSearchResult> {
     const {
       query,
       jobTitle,
@@ -179,8 +182,11 @@ export class FreelancesService {
       }
     }
 
+    // Get total count for pagination
+    const total = await this.prisma.freelance.count({ where });
+
     // Execute the search query
-    return this.prisma.freelance.findMany({
+    const data = await this.prisma.freelance.findMany({
       where,
       include: {
         user: true,
@@ -199,5 +205,10 @@ export class FreelancesService {
         },
       }),
     });
+
+    return {
+      data,
+      total,
+    };
   }
 }
