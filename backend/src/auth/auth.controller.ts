@@ -22,7 +22,9 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
     const loginResponse = await this.authService.login(loginDto);
-    const rawCookie = loginResponse.cookies.find(cookie => cookie.startsWith('authentik_session=')); // Search for the authentik_session cookie
+    const rawCookie = loginResponse.cookies.find((cookie) =>
+      cookie.startsWith('authentik_session='),
+    ); // Search for the authentik_session cookie
     if (!rawCookie) {
       throw new Error('authentik_session cookie not found'); // Handle missing cookie
     }
@@ -39,7 +41,9 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
     const registerResponse = await this.authService.register(registerDto);
-    const rawCookie = registerResponse.cookies.find(cookie => cookie.startsWith('authentik_session=')); // Locate the authentik_session cookie
+    const rawCookie = registerResponse.cookies.find((cookie) =>
+      cookie.startsWith('authentik_session='),
+    ); // Locate the authentik_session cookie
     if (!rawCookie) {
       throw new Error('authentik_session cookie not found'); // Handle missing cookie
     }

@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { catchError, map, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, mergeMap } from 'rxjs';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersService } from '../users/users.service';
 
