@@ -28,6 +28,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { useSearchParams } from "next/navigation";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
@@ -51,6 +52,8 @@ const SENIORITY_OPTIONS: SeniorityOption[] = [
 ];
 
 function Page() {
+  const searchParams = useSearchParams();
+
   const [minimumAverageDailyRate, setMinimumAverageDailyRate] = useState(
     MINIMUM_AVERAGE_DAILY_RATE,
   );
@@ -76,12 +79,25 @@ function Page() {
   // Fetch skills
   useEffect(() => {
     const fetchSkills = async () => {
-      const skills = await getSkills();
-      setSkills(skills.slice(0, 10)); // Limit to 10 skills for display
+      let localSkills = await getSkills();
+      localSkills = localSkills.slice(0, 10); // Limit to 10 skills for display
+
+      // Get skill parameters from URL
+      const skillParameters = searchParams.getAll("skills");
+
+      if (localSkills.length > 0 && skillParameters.length > 0) {
+        const selectedSkills = localSkills.filter((skill) =>
+          skillParameters.includes(skill.name),
+        );
+        setSelectedSkills(selectedSkills);
+      }
+
+      setSkills(localSkills);
       setSkillsLoading(false);
     };
 
     fetchSkills();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchFreelances = useCallback(
@@ -102,6 +118,18 @@ function Page() {
         page,
         pageSize: DEFAULT_PAGE_SIZE,
       });
+
+      // Update URL search params
+      const params = new URLSearchParams();
+      params.set("query", query);
+      params.set("page", page.toString());
+      selectedSkills.forEach((skill) => {
+        params.append("skills", skill.name);
+      });
+      if (selectedSeniority) {
+        params.set("seniority", selectedSeniority);
+      }
+      window.history.replaceState({}, "", `?${params.toString()}`);
 
       setFreelanceResults(results);
       setFreelancesLoading(false);
@@ -129,6 +157,28 @@ function Page() {
     // Cancel any pending debounced calls when component unmounts
     return () => debouncedFetchFreelances.clear();
   }, [debouncedFetchFreelances, searchQuery, currentPage]);
+
+  // Upon page load if there are any search parameters
+  useEffect(() => {
+    const query = searchParams.get("query");
+    const page = searchParams.get("page");
+    const seniority = searchParams.get("seniority");
+
+    if (query) {
+      setSearchQuery(query);
+    }
+
+    if (page) {
+      const pageNumber = parseInt(page, 10);
+      if (!isNaN(pageNumber)) {
+        setCurrentPage(pageNumber);
+      }
+    }
+
+    if (seniority) {
+      setSelectedSeniority(seniority);
+    }
+  }, [searchParams]);
 
   // Handle search form submission
   const handleSearch = async (formData: FormData) => {
@@ -241,6 +291,7 @@ function Page() {
                     key={skill.id}
                     value={skill.name}
                     onClick={() => handleSkillToggle(skill)}
+                    isActive={selectedSkills.some((s) => s.id === skill.id)}
                   />
                 ))}
             </div>
