@@ -41,6 +41,13 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
     const registerResponse = await this.authService.register(registerDto);
+    if (registerResponse.success === false) {
+      return {
+        success: false,
+        cookies: [],
+        response: registerResponse.response,
+      } as AuthErrorResponse;
+    }
     const rawCookie = registerResponse.cookies.find((cookie) =>
       cookie.startsWith('authentik_session='),
     ); // Locate the authentik_session cookie
@@ -51,11 +58,19 @@ export class AuthController {
     response.cookie('authentik_session', token, {
       httpOnly: true,
     }); // on va stocker un cookie avec le token
-    await this.usersService.create({
-      email: registerDto.email,
-      username: registerDto.username,
-      role: Role.FREELANCE,
-    });
+    if (registerDto.role === Role.FREELANCE) {
+      await this.usersService.create({
+        email: registerDto.email,
+        username: registerDto.username,
+        role: Role.FREELANCE,
+      });
+    } else if (registerDto.role === Role.COMPANY) {
+      await this.usersService.create({
+        email: registerDto.email,
+        username: registerDto.username,
+        role: Role.COMPANY,
+      });
+    }
     return registerResponse;
   }
 }
