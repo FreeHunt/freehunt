@@ -4,7 +4,7 @@ import { Banner } from "@/components/common/banner";
 import { FreelanceCard } from "@/components/freelance/card";
 import { Slider } from "@/components/ui/slider";
 import { formatNumberToEuros } from "@/lib/utils";
-import { SearchInput } from "@/components/common/input";
+import { SearchInput } from "@/components/common/search-input";
 import { Badge } from "@/components/ui/badge";
 import { searchFreelances } from "@/actions/freelances";
 import { useState, useEffect, useCallback } from "react";

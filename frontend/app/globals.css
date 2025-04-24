@@ -48,6 +48,10 @@
   --color-freehunt-black-two: var(--freehunt-black-two);
   --color-freehunt-beige-dark: var(--freehunt-beige-dark);
   --color-freehunt-grey: var(--freehunt-grey);
+  --color-freehunt-grey-dark: var(--freehunt-grey-dark);
+  --color-freehunt-blue: var(--freehunt-blue);
+  --color-freehunt-yellow: var(--freehunt-yellow);
+  --color-freehunt-green: var(--freehunt-green);
 }
 
 :root {
@@ -90,6 +94,10 @@
   --freehunt-black-two: #3e3e3e;
   --freehunt-beige-dark: #f2ede4;
   --freehunt-grey: #d9d9d9;
+  --freehunt-grey-dark: #b5b5b5;
+  --freehunt-blue: #0277ef;
+  --freehunt-yellow: #ffd63e;
+  --freehunt-green: #6dce92;
 }
 
 .dark {

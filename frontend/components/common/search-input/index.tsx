@@ -8,8 +8,13 @@ import { Button } from "../button";
 
 function SearchInput({
   className,
+  buttonText = "Rechercher",
+  buttonClassName,
   ...props
-}: ComponentProps<typeof ShadcnInput>) {
+}: ComponentProps<typeof ShadcnInput> & {
+  buttonText?: string; // Optional prop for button text
+  buttonClassName?: string; // Optional prop for button class
+}) {
   const { onChange } = props;
 
   const [value, setValue] = useState("");
@@ -39,10 +44,13 @@ function SearchInput({
       />
       <Button
         variant="secondary"
-        className="absolute top-1/2 right-4 -translate-y-1/2  rounded-full font-semibold lg:px-8 lg:py-5"
+        className={cn(
+          "absolute top-1/2 right-4 -translate-y-1/2  rounded-full font-semibold lg:px-8 lg:py-5",
+          buttonClassName,
+        )}
       >
         <Search size={20} className="lg:hidden" />
-        <span className="hidden lg:block">Rechercher</span>
+        <span className="hidden lg:block">{buttonText}</span>
       </Button>
     </div>
   );
