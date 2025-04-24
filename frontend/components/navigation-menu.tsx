@@ -5,7 +5,12 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 // Navigation links configuration
 const NAV_LINKS: { href: string; label: string }[] = [
@@ -101,6 +106,7 @@ export default function NavigationMenu() {
             side="right"
             className="w-[300px] sm:w-[400px] [&>button:first-of-type]:hidden"
           >
+            <SheetTitle className="sr-only">Navigation menu</SheetTitle>
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between border-b pb-4">
                 <Link
