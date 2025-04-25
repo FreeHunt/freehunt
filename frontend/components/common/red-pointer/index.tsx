@@ -22,4 +22,25 @@ function RedPointer({
   );
 }
 
-export { RedPointer };
+function RedPointerWithSpiral({
+  width = 327,
+  height = 297,
+  className,
+}: {
+  width?: number;
+  height?: number;
+  className?: string;
+}) {
+  return (
+    <Image
+      src="/assets/red-pointer-with-spiral.svg"
+      alt=""
+      className={cn("hidden lg:block absolute -right-53 -bottom-38", className)}
+      width={width}
+      height={height}
+      loading="eager"
+    />
+  );
+}
+
+export { RedPointer, RedPointerWithSpiral };
