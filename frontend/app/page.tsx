@@ -2,7 +2,10 @@ import { ReactNode } from "react";
 import { SearchInput } from "@/components/common/search-input";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { RedPointerWithSpiral } from "@/components/common/red-pointer";
+import {
+  RedPointer,
+  RedPointerWithSpiral,
+} from "@/components/common/red-pointer";
 
 function HomeCardColumn({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-3 lg:gap-[34px]">{children}</div>;
@@ -49,6 +52,7 @@ export default function Home() {
           <h1 className="text-4xl lg:text-6xl font-bold relative">
             Trouvez votre prochain challenge
             <RedPointerWithSpiral />
+            <RedPointer className="lg:hidden right-0 md:-right-15" />
           </h1>
 
           {/* Subtitle */}
