@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="fr">
       <body className={`${montserrat.className} antialiased min-h-screen`}>
         <NavigationMenu />
         <main>{children}</main>
