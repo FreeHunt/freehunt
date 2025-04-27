@@ -27,7 +27,7 @@ export function DatePicker() {
           )}
         >
           <CalendarIcon />
-          {date ? format(date, "PPP") : <span>Choissiez une date</span>}
+          {date ? format(date, "dd-MM-yyyy") : <span>Choissiez une date</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">

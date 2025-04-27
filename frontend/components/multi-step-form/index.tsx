@@ -107,14 +107,8 @@ export default function MultiStepForm() {
                   réalisation de la mission.
                 </p>
               </div>
-              <Input
-                className="text-freehunt-main rounded-full"
-                placeholder="Exemple : Développeur Front-End React"
-              />
+              <MultiSelect />
             </div>
-
-            <MultiSelect />
-            <DatePicker />
 
             {/* Input TJM */}
             <div className="flex flex-col gap-3">
@@ -127,44 +121,39 @@ export default function MultiStepForm() {
                   cette mission.
                 </p>
               </div>
-              <Textarea
-                className="w-full p-2 border rounded-xl h-32"
-                placeholder="Exemple : Nous recherchons un développeur Front-End React pour accompagner la refonte de notre site e-commerce. Le freelance devra collaborer avec notre UX designer et intégrer les maquettes Figma."
-              ></Textarea>
+              <Input
+                className="text-freehunt-main rounded-full"
+                placeholder="Exemple : 500 €/jour"
+                type="number"
+              />
             </div>
 
-            {/* Input Date début */}
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-bold text-freehunt-main">
-                  Date de début
-                </h2>
-                <p className="text-gray-400">
-                  Indiquer la date à laquelle vous souhaitez que le freelance
-                  commence.
-                </p>
+            <div className="flex gap-24">
+              {/* Input Date de Début */}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-xl font-bold text-freehunt-main">
+                    Date de début
+                  </h2>
+                  <p className="text-gray-400">
+                    Sélectionnez une date de début de mission.
+                  </p>
+                </div>
+                <DatePicker />
               </div>
-              <Textarea
-                className="w-full p-2 border rounded-xl h-32"
-                placeholder="Exemple : Nous recherchons un développeur Front-End React pour accompagner la refonte de notre site e-commerce. Le freelance devra collaborer avec notre UX designer et intégrer les maquettes Figma."
-              ></Textarea>
-            </div>
 
-            {/* Input Date fin */}
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-xl font-bold text-freehunt-main">
-                  Date de fin (optionnelle)
-                </h2>
-                <p className="text-gray-400">
-                  Indiquer la date à laquelle vous souhaitez que le freelance
-                  termine.
-                </p>
+              {/* Input Date de Début */}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <h2 className="text-xl font-bold text-freehunt-main">
+                    Date de fin (optionnelle)
+                  </h2>
+                  <p className="text-gray-400">
+                    Sélectionnez une date de fin de mission.
+                  </p>
+                </div>
+                <DatePicker />
               </div>
-              <Textarea
-                className="w-full p-2 border rounded-xl h-32"
-                placeholder="Exemple : Nous recherchons un développeur Front-End React pour accompagner la refonte de notre site e-commerce. Le freelance devra collaborer avec notre UX designer et intégrer les maquettes Figma."
-              ></Textarea>
             </div>
 
             {/* Input Type de Présence */}
