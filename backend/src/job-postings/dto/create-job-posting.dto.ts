@@ -5,6 +5,8 @@ import {
   IsUUID,
   IsArray,
   IsOptional,
+  IsNumber,
+  Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { JobPostingLocation } from '@prisma/client';
@@ -38,6 +40,22 @@ export class CreateJobPostingDto {
     example: false,
   })
   isPromoted: boolean;
+
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'The average daily rate for the job posting',
+    example: 500,
+  })
+  averageDailyRate: number;
+
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'The seniority level required for the job posting (in years)',
+    example: 5,
+  })
+  seniority: number;
 
   @IsUUID()
   @ApiProperty({

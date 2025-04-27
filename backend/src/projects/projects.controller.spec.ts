@@ -56,12 +56,14 @@ describe('ProjectController', () => {
       title: 'Frontend Dev',
       location: JobPostingLocation.REMOTE,
       isPromoted: false,
+      averageDailyRate: 600,
+      seniority: 3,
     },
     freelance: null,
     company: null,
     conversation: null,
   };
-  
+
   const updatedProjectWithRelations = {
     ...projectWithRelationsMock,
     name: 'Updated Project Title',
@@ -69,28 +71,42 @@ describe('ProjectController', () => {
 
   describe('create', () => {
     it('should create a project', async () => {
-      jest.spyOn(projectsService, 'create').mockResolvedValue(projectWithRelationsMock);
-      expect(await projectController.create(createProjectDto)).toEqual(projectWithRelationsMock);
+      jest
+        .spyOn(projectsService, 'create')
+        .mockResolvedValue(projectWithRelationsMock);
+      expect(await projectController.create(createProjectDto)).toEqual(
+        projectWithRelationsMock,
+      );
     });
   });
 
   describe('findAll', () => {
     it('should return an array of projects', async () => {
-      jest.spyOn(projectsService, 'findAll').mockResolvedValue([projectWithRelationsMock]);
-      expect(await projectController.findAll()).toEqual([projectWithRelationsMock]);
+      jest
+        .spyOn(projectsService, 'findAll')
+        .mockResolvedValue([projectWithRelationsMock]);
+      expect(await projectController.findAll()).toEqual([
+        projectWithRelationsMock,
+      ]);
     });
   });
 
   describe('findOne', () => {
     it('should return a project', async () => {
-      jest.spyOn(projectsService, 'findOne').mockResolvedValue(projectWithRelationsMock);
-      expect(await projectController.findOne(projectWithRelationsMock.id)).toEqual(projectWithRelationsMock);
+      jest
+        .spyOn(projectsService, 'findOne')
+        .mockResolvedValue(projectWithRelationsMock);
+      expect(
+        await projectController.findOne(projectWithRelationsMock.id),
+      ).toEqual(projectWithRelationsMock);
     });
   });
 
   describe('update', () => {
     it('should update a project', async () => {
-      jest.spyOn(projectsService, 'update').mockResolvedValue(updatedProjectWithRelations);
+      jest
+        .spyOn(projectsService, 'update')
+        .mockResolvedValue(updatedProjectWithRelations);
       expect(
         await projectController.update(projectWithRelationsMock.id, {
           name: 'Updated Project Title',
@@ -101,8 +117,12 @@ describe('ProjectController', () => {
 
   describe('remove', () => {
     it('should remove a project', async () => {
-      jest.spyOn(projectsService, 'remove').mockResolvedValue(projectWithRelationsMock);
-      expect(await projectController.remove(projectWithRelationsMock.id)).toEqual(projectWithRelationsMock);
+      jest
+        .spyOn(projectsService, 'remove')
+        .mockResolvedValue(projectWithRelationsMock);
+      expect(
+        await projectController.remove(projectWithRelationsMock.id),
+      ).toEqual(projectWithRelationsMock);
     });
   });
 });

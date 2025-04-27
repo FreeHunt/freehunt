@@ -37,6 +37,18 @@ export class JobPostingResponseDto {
   isPromoted: boolean;
 
   @ApiProperty({
+    description: 'The average daily rate for the job posting',
+    example: 500,
+  })
+  averageDailyRate: number;
+
+  @ApiProperty({
+    description: 'The seniority level required for the job posting (in years)',
+    example: 5,
+  })
+  seniority: number;
+
+  @ApiProperty({
     description: 'The company associated with the job posting',
     type: CompanyResponseDto,
   })
