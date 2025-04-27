@@ -1,25 +1,213 @@
 "use client";
-import { BasePage } from "@/components/common/base-page";
-import { useRouter } from "next/navigation";
+
+import { useState, useEffect, ChangeEvent } from "react";
+import { AnimatePresence } from "framer-motion";
+import {
+  ProfileFormData,
+  BlurStates,
+  SectionTitle as SectionTitleType,
+} from "@/actions/register";
+import { PreviewCard } from "@/components/common/card/PreviewCard";
+import { SectionIndicator } from "@/components/common/Section/SectionIndicator";
+import { NavigationButtons } from "@/components/common/Navigation/NavigatorButton";
+import { SectionTitle } from "@/components/register/form/SectionTitle";
+import { FormSection } from "@/components/register/form/FormSection";
+import { IdentitySection } from "@/components/register/form/IdentitySection";
+import { LocationRateSection } from "@/components/register/form/LocationSection";
+import { SkillsSection } from "@/components/register/form/SkillSection";
+import { AvatarSection } from "@/components/register/form/AvatarSection";
+
 function Page() {
-  const router = useRouter();
+  // État initial du formulaire
+  const [formData, setFormData] = useState<ProfileFormData>({
+    firstName: "",
+    lastName: "",
+    workField: "",
+    location: "",
+    averageDailyRate: 0,
+    avatar: "",
+    skills: [],
+  });
+
+  // États pour l'affichage flou
+  const [blurStates, setBlurStates] = useState<BlurStates>({
+    isFirstNameBlurred: true,
+    isLastNameBlurred: true,
+    isWorkFieldBlurred: true,
+    isLocationBlurred: true,
+    isAverageDailyRateBlurred: true,
+    isAvatarBlurred: true,
+    isSkillsBlurred: true,
+  });
+
+  // État pour suivre la section active
+  const [currentSection, setCurrentSection] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const totalSections = 4;
+
+  // Titres dynamiques pour chaque section
+  const sectionTitles: SectionTitleType[] = [
+    { highlight: "Définissez", regular: "-vous !" },
+    { highlight: "Quel est votre ", regular: " TJM ?" },
+    { highlight: "Vos compétences", regular: " clés ?" },
+    { highlight: "Mettons un visage", regular: " sur votre nom ?" },
+  ];
+
+  // Vérifier si c'est la dernière section
+  const isLastSection = currentSection === totalSections - 1;
+  const isFirstSection = currentSection === 0;
+
+  // Gestionnaires pour les champs de formulaire
+  const handleFirstNameChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setFormData({ ...formData, firstName: e.target.value });
+
+  const handleLastNameChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setFormData({ ...formData, lastName: e.target.value });
+
+  const handleWorkFieldChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setFormData({ ...formData, workField: e.target.value });
+
+  const handleLocationChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setFormData({ ...formData, location: e.target.value });
+
+  const handleRateChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setFormData({ ...formData, averageDailyRate: Number(e.target.value) });
+
+  const handleAvatarChange = (fileUrl: string) =>
+    setFormData({ ...formData, avatar: fileUrl });
+
+  const handleSkillsChange = (newSkills: string[]) =>
+    setFormData({ ...formData, skills: newSkills });
+
+  // Gérer la navigation entre les sections
+  const goToNextSection = () => {
+    if (currentSection < totalSections - 1) {
+      setDirection(1);
+      setCurrentSection(currentSection + 1);
+    } else {
+      handleFormSubmit();
+    }
+  };
+
+  const goToPreviousSection = () => {
+    if (currentSection > 0) {
+      setDirection(-1);
+      setCurrentSection(currentSection - 1);
+    }
+  };
+
+  // Naviguer vers une section spécifique
+  const navigateToSection = (nextSection: number) => {
+    setDirection(nextSection > currentSection ? 1 : -1);
+    setCurrentSection(nextSection);
+  };
+
+  // Soumettre le formulaire
+  const handleFormSubmit = () => {
+    console.log("Formulaire soumis", formData);
+    alert("Formulaire soumis avec succès!");
+  };
+
+  // Mettre à jour les états de floutage en fonction des valeurs
+  useEffect(() => {
+    setBlurStates({
+      isFirstNameBlurred: formData.firstName.trim() === "",
+      isLastNameBlurred: formData.lastName.trim() === "",
+      isWorkFieldBlurred: formData.workField.trim() === "",
+      isLocationBlurred: formData.location.trim() === "",
+      isAverageDailyRateBlurred: formData.averageDailyRate === 0,
+      isAvatarBlurred: formData.avatar === "",
+      isSkillsBlurred: formData.skills.length === 0,
+    });
+  }, [formData]);
 
   return (
-    <BasePage>
-      <div className="flex flex-col items-center gap-8 md:gap-20 my-10 md:my-28">
-        <div className="flex flex-col justify-center items-center gap-2 self-stretch px-4">
-          <div className="flex p-5 justify-center items-center gap-2">
-            <p className="text-freehunt-main text-2xl md:text-4xl text-center font-bold">
-              Bienvenue !
-            </p>
-          </div>
-          <p className="text-freehunt-black-two text-xl md:text-2xl text-center font-normal">
-            Quel type de profil êtes-vous ?
-          </p>
+    <div className="flex flex-col items-center gap-4 md:gap-8 lg:gap-20 my-6 md:my-10 lg:my-28">
+      <div className="flex flex-col justify-center items-center gap-2 self-stretch px-4">
+        <div className="flex p-3 md:p-5 justify-center items-center gap-2 h-16">
+          <AnimatePresence mode="wait">
+            <SectionTitle
+              title={sectionTitles[currentSection]}
+              currentSection={currentSection}
+            />
+          </AnimatePresence>
         </div>
-        <div className="flex flex-row justify-center items-center gap-4 md:gap-20 self-stretch px-4 overflow-x-auto"></div>
       </div>
-    </BasePage>
+
+      <div className="flex flex-col justify-center items-center gap-4 md:gap-8 lg:gap-20 p-4 max-md:w-full">
+        <div className="flex justify-end self-start gap-5">
+          {/* Preview card */}
+          <PreviewCard formData={formData} blurStates={blurStates} />
+
+          {/* Form sections with animations */}
+          <div className="flex flex-col items-center gap-10 self-stretch w-full md:w-[600px] lg:w-[700px] relative min-h-[500px]">
+            <AnimatePresence custom={direction} mode="wait">
+              <FormSection
+                isActive={currentSection === 0}
+                direction={direction}
+                key="section1"
+              >
+                <IdentitySection
+                  firstName={formData.firstName}
+                  lastName={formData.lastName}
+                  workField={formData.workField}
+                  onFirstNameChange={handleFirstNameChange}
+                  onLastNameChange={handleLastNameChange}
+                  onWorkFieldChange={handleWorkFieldChange}
+                />
+              </FormSection>
+
+              <FormSection
+                isActive={currentSection === 1}
+                direction={direction}
+                key="section2"
+              >
+                <LocationRateSection
+                  location={formData.location}
+                  averageDailyRate={formData.averageDailyRate}
+                  onLocationChange={handleLocationChange}
+                  onRateChange={handleRateChange}
+                />
+              </FormSection>
+
+              <FormSection
+                isActive={currentSection === 2}
+                direction={direction}
+                key="section3"
+              >
+                <SkillsSection
+                  skills={formData.skills}
+                  onSkillsChange={handleSkillsChange}
+                />
+              </FormSection>
+
+              <FormSection
+                isActive={currentSection === 3}
+                direction={direction}
+                key="section4"
+              >
+                <AvatarSection onAvatarChange={handleAvatarChange} />
+              </FormSection>
+            </AnimatePresence>
+
+            {/* Section indicator */}
+            <SectionIndicator
+              currentSection={currentSection}
+              totalSections={totalSections}
+              onSectionChange={navigateToSection}
+            />
+
+            {/* Navigation buttons */}
+            <NavigationButtons
+              onPrevious={goToPreviousSection}
+              onNext={goToNextSection}
+              isFirstSection={isFirstSection}
+              isLastSection={isLastSection}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
