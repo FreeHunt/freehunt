@@ -1,11 +1,10 @@
 "use client";
 
 import { Banner } from "@/components/common/banner";
-import { BasePage } from "@/components/common/base-page";
 import { FreelanceCard } from "@/components/freelance/card";
 import { Slider } from "@/components/ui/slider";
 import { formatNumberToEuros } from "@/lib/utils";
-import { SearchInput } from "@/components/common/input";
+import { SearchInput } from "@/components/common/search-input";
 import { Badge } from "@/components/ui/badge";
 import { searchFreelances } from "@/actions/freelances";
 import { useState, useEffect, useCallback } from "react";
@@ -220,7 +219,7 @@ function Page() {
   const totalPages = Math.ceil(freelanceResults.total / DEFAULT_PAGE_SIZE);
 
   return (
-    <BasePage>
+    <>
       {/* Decoration Banner */}
       <Banner text="Trouvez le freelance de vos rêves." />
 
@@ -511,7 +510,7 @@ function Page() {
           )}
         </main>
       </div>
-    </BasePage>
+    </>
   );
 }
 
