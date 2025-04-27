@@ -6,6 +6,8 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { MultiSelect } from "../common/multi-select";
 import { DatePicker } from "../common/date-picker";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { Label } from "../ui/label";
 
 type Step = {
   id: string;
@@ -166,10 +168,29 @@ export default function MultiStepForm() {
                   Quel mode de travail est attendu pour cette mission ?
                 </p>
               </div>
-              <Textarea
-                className="w-full p-2 border rounded-xl h-32"
-                placeholder="Exemple : Nous recherchons un développeur Front-End React pour accompagner la refonte de notre site e-commerce. Le freelance devra collaborer avec notre UX designer et intégrer les maquettes Figma."
-              ></Textarea>
+              <RadioGroup defaultValue="option-one">
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="on-site" id="on-site" />
+                  <Label htmlFor="on-site" className="text-freehunt-black-two">
+                    Sur site
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="on-remote" id="on-remote" />
+                  <Label
+                    htmlFor="on-remote"
+                    className="text-freehunt-black-two"
+                  >
+                    Télétravail
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="hybrid" id="hybrid" />
+                  <Label htmlFor="hybrid" className="text-freehunt-black-two">
+                    Hybride
+                  </Label>
+                </div>
+              </RadioGroup>
             </div>
           </div>
         )}
