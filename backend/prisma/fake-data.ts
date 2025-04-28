@@ -1,10 +1,8 @@
-import {
-  Role,
-  SkillType,
-  JobPostingLocation,
-  DocumentType,
-} from '@prisma/client';
+import { Role, SkillType, JobPostingLocation, DocumentType } from '@prisma/client';
 import { faker } from '@faker-js/faker';
+import Decimal from 'decimal.js';
+
+
 
 export function fakeUser() {
   return {
@@ -28,10 +26,7 @@ export function fakeSkill() {
     name: faker.person.fullName(),
     normalizedName: faker.lorem.words(5),
     aliases: faker.lorem.words(5).split(' '),
-    type: faker.helpers.arrayElement([
-      SkillType.TECHNICAL,
-      SkillType.SOFT,
-    ] as const),
+    type: faker.helpers.arrayElement([SkillType.TECHNICAL, SkillType.SOFT] as const),
   };
 }
 export function fakeSkillComplete() {
@@ -40,10 +35,7 @@ export function fakeSkillComplete() {
     name: faker.person.fullName(),
     normalizedName: faker.lorem.words(5),
     aliases: faker.lorem.words(5).split(' '),
-    type: faker.helpers.arrayElement([
-      SkillType.TECHNICAL,
-      SkillType.SOFT,
-    ] as const),
+    type: faker.helpers.arrayElement([SkillType.TECHNICAL, SkillType.SOFT] as const),
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -53,11 +45,7 @@ export function fakeFreelance() {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     jobTitle: faker.person.jobTitle(),
-    averageDailyRate: faker.number.float({
-      min: 50,
-      max: 1000,
-      multipleOf: 50,
-    }),
+    averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     location: faker.location.city(),
   };
@@ -69,11 +57,7 @@ export function fakeFreelanceComplete() {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     jobTitle: faker.person.jobTitle(),
-    averageDailyRate: faker.number.float({
-      min: 50,
-      max: 1000,
-      multipleOf: 50,
-    }),
+    averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     location: faker.location.city(),
     createdAt: new Date(),
@@ -104,17 +88,9 @@ export function fakeJobPosting() {
   return {
     title: faker.lorem.words(5),
     description: faker.lorem.words(5),
-    location: faker.helpers.arrayElement([
-      JobPostingLocation.HYBRID,
-      JobPostingLocation.ONSITE,
-      JobPostingLocation.REMOTE,
-    ] as const),
+    location: faker.helpers.arrayElement([JobPostingLocation.HYBRID, JobPostingLocation.ONSITE, JobPostingLocation.REMOTE] as const),
     isPromoted: faker.datatype.boolean(),
-    averageDailyRate: faker.number.float({
-      min: 50,
-      max: 1000,
-      multipleOf: 50,
-    }),
+    averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
   };
 }
@@ -124,17 +100,9 @@ export function fakeJobPostingComplete() {
     companyId: faker.string.uuid(),
     title: faker.lorem.words(5),
     description: faker.lorem.words(5),
-    location: faker.helpers.arrayElement([
-      JobPostingLocation.HYBRID,
-      JobPostingLocation.ONSITE,
-      JobPostingLocation.REMOTE,
-    ] as const),
+    location: faker.helpers.arrayElement([JobPostingLocation.HYBRID, JobPostingLocation.ONSITE, JobPostingLocation.REMOTE] as const),
     isPromoted: faker.datatype.boolean(),
-    averageDailyRate: faker.number.float({
-      min: 50,
-      max: 1000,
-      multipleOf: 50,
-    }),
+    averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -218,10 +186,7 @@ export function fakeDocument() {
   return {
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
-    type: faker.helpers.arrayElement([
-      DocumentType.INVOICE,
-      DocumentType.QUOTE,
-    ] as const),
+    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE] as const),
   };
 }
 export function fakeDocumentComplete() {
@@ -229,10 +194,7 @@ export function fakeDocumentComplete() {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
-    type: faker.helpers.arrayElement([
-      DocumentType.INVOICE,
-      DocumentType.QUOTE,
-    ] as const),
+    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE] as const),
     freelanceId: faker.string.uuid(),
     invoiceId: faker.string.uuid(),
     quoteId: faker.string.uuid(),

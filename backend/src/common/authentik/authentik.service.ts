@@ -81,8 +81,8 @@ export class AuthentikService {
           component: 'ak-stage-prompt',
           email: registerDto.email,
           password: registerDto.password,
-          password_repeat: registerDto.password,
-          username: registerDto.email,
+          password_repeat: registerDto.password_repeat,
+          username: registerDto.username,
         },
         {
           ...this.axiosConfig,

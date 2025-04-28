@@ -1,0 +1,139 @@
+import Image from "next/image";
+import { Button } from "@/components/common/button";
+import { LocationIcon } from "@/components/common/icons/LocationIcon";
+import { ProfileFormData, BlurStates } from "@/actions/register";
+
+interface PreviewCardProps {
+  formData: ProfileFormData;
+  blurStates: BlurStates;
+}
+
+export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
+  // Fonctions d'affichage pour les champs
+  const displayFirstName = () =>
+    formData.firstName.trim() === "" ? "John" : formData.firstName.trim();
+  const displayLastName = () =>
+    formData.lastName.trim() === "" ? "Doe" : formData.lastName.trim();
+  const displayWorkField = () =>
+    formData.workField.trim() === ""
+      ? "Développeur Full Stack"
+      : formData.workField.trim();
+  const displayLocation = () =>
+    formData.location.trim() === ""
+      ? "Paris, France"
+      : formData.location.trim();
+  const displayAverageDailyRate = () =>
+    formData.averageDailyRate === 0 ? "" : `${formData.averageDailyRate}`;
+  const displayAvatar = () =>
+    formData.avatar === "" ? "/images/avatar.png" : formData.avatar;
+
+  // Compétences par défaut
+  const defaultSkills = [
+    "Compétence 1",
+    "Compétence 2",
+    "Compétence 3",
+    "Compétence 4",
+    "Compétence 5",
+  ];
+
+  return (
+    <div className="flex w-80 h-full flex-col align-start border-black border rounded-2xl md:rounded-3xl lg:rounded-4xl bg-white">
+      <div className="flex p-6 flex-col items-start gap-5 self-stretch">
+        <div className="flex justify-start gap-5">
+          <div
+            className={`flex w-14 h-14 rounded-full bg-freehunt-main overflow-hidden ${
+              blurStates.isAvatarBlurred ? "blur-sm" : ""
+            }`}
+          >
+            <Image
+              src={displayAvatar()}
+              alt="Avatar"
+              width={56}
+              height={56}
+              className="rounded-full object-cover"
+            />
+          </div>
+          <div className="flex flex-col items-start gap-3">
+            <div className="flex flex-col items-start gap-2">
+              <div className="flex flex-row items-start gap-2">
+                <p
+                  className={`text-freehunt-black-two text-xl font-bold ${
+                    blurStates.isFirstNameBlurred ? "blur-sm" : ""
+                  }`}
+                >
+                  {displayFirstName()}
+                </p>
+                <p
+                  className={`text-freehunt-black-two text-xl font-bold ${
+                    blurStates.isLastNameBlurred ? "blur-sm" : ""
+                  }`}
+                >
+                  {displayLastName()}
+                </p>
+              </div>
+              <p
+                className={`text-freehunt-black-two text-sm font-normal ${
+                  blurStates.isWorkFieldBlurred ? "blur-sm" : ""
+                }`}
+              >
+                {displayWorkField()}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <LocationIcon />
+              <p
+                className={`text-freehunt-black-two text-sm font-normal ${
+                  blurStates.isLocationBlurred ? "blur-sm" : ""
+                }`}
+              >
+                {displayLocation()}
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex w-full justify-start items-center gap-2 flex-wrap">
+          {formData.skills.length > 0
+            ? formData.skills.map((skill, index) => (
+                <div
+                  key={index}
+                  className="flex py-1.5 px-2.5 justify-center items-center rounded-lg border border-freehunt-black-two bg-gray-100 mb-2"
+                >
+                  <p className="text-freehunt-black-two text-xs font-normal truncate max-w-16">
+                    {skill}
+                  </p>
+                </div>
+              ))
+            : defaultSkills.map((skill, index) => (
+                <div
+                  key={index}
+                  className={`flex py-1.5 px-2.5 justify-center items-center rounded-lg border border-freehunt-black-two bg-gray-100 mb-2 ${
+                    blurStates.isSkillsBlurred ? "blur-sm" : ""
+                  }`}
+                >
+                  <p className="text-freehunt-black-two text-xs font-normal truncate max-w-16">
+                    {skill}
+                  </p>
+                </div>
+              ))}
+        </div>
+      </div>
+      <div className="flex h-16 p-6 justify-between items-center self-stretch border-t border-black">
+        <div
+          className={`flex items-start ${
+            blurStates.isAverageDailyRateBlurred ? "blur-sm" : ""
+          }`}
+        >
+          <p className="text-freehunt-black-two text-sm font-bold">
+            {displayAverageDailyRate()} €
+          </p>
+          <p className="text-freehunt-black-two text-sm font-normal">/ jour</p>
+        </div>
+        <div className="flex p-2 justify-center items-center gap-3">
+          <Button className="bg-freehunt-main text-sm font-bold border border-freehunt-main text-white rounded-full px-4 py-2">
+            Voir votre profil
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
