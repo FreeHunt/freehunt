@@ -4,6 +4,7 @@ import { JobPosting, Prisma } from '@prisma/client';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { SearchJobPostingDto } from './dto/search-job-posting.dto';
+import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
 
 @Injectable()
 export class JobPostingsService {
@@ -99,8 +100,20 @@ export class JobPostingsService {
     });
   }
 
-  async search(searchParams: SearchJobPostingDto): Promise<JobPosting[]> {
-    const { title, skillNames, location, skip, take } = searchParams;
+  async search(
+    searchParams: SearchJobPostingDto,
+  ): Promise<JobPostingSearchResult> {
+    const {
+      title,
+      skillNames,
+      location,
+      minDailyRate,
+      maxDailyRate,
+      minSeniority,
+      maxSeniority,
+      skip,
+      take,
+    } = searchParams;
 
     const where: Prisma.JobPostingWhereInput = {};
 
@@ -120,7 +133,25 @@ export class JobPostingsService {
       where.location = location;
     }
 
-    return this.prisma.jobPosting.findMany({
+    // Handle daily rate range
+    if (minDailyRate !== undefined || maxDailyRate !== undefined) {
+      where.averageDailyRate = {
+        ...(minDailyRate !== undefined && { gte: minDailyRate }),
+        ...(maxDailyRate !== undefined && { lte: maxDailyRate }),
+      } as Prisma.FloatFilter;
+    }
+
+    // Handle seniority range
+    if (minSeniority !== undefined || maxSeniority !== undefined) {
+      where.seniority = {
+        ...(minSeniority !== undefined && { gte: minSeniority }),
+        ...(maxSeniority !== undefined && { lte: maxSeniority }),
+      } as Prisma.IntFilter;
+    }
+
+    const total = await this.prisma.jobPosting.count({ where });
+
+    const data = await this.prisma.jobPosting.findMany({
       where,
       include: {
         skills: true,
@@ -132,6 +163,20 @@ export class JobPostingsService {
       },
       skip,
       take,
+      ...(title && {
+        orderBy: {
+          _relevance: {
+            fields: ['title', 'description'],
+            search: title,
+            sort: 'desc',
+          },
+        },
+      }),
     });
+
+    return {
+      data,
+      total,
+    };
   }
 }

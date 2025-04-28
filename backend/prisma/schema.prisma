@@ -18,18 +18,18 @@ enum Role {
 }
 
 model User {
-  id        String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email     String     @unique
-  username  String
-  role      Role
-  freelance Freelance?
-  company   Company?
-  sentMessages  Message[] @relation("sender")
-  receivedMessages  Message[] @relation("receiver")
-  conversations Conversation[] @relation("sender")
+  id                    String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                 String         @unique
+  username              String
+  role                  Role
+  freelance             Freelance?
+  company               Company?
+  sentMessages          Message[]      @relation("sender")
+  receivedMessages      Message[]      @relation("receiver")
+  conversations         Conversation[] @relation("sender")
   conversationsReceived Conversation[] @relation("receiver")
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now()) @updatedAt
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @default(now()) @updatedAt
 }
 
 enum SkillType {
@@ -94,37 +94,41 @@ enum JobPostingLocation {
 }
 
 model JobPosting {
-  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  company     Company            @relation(fields: [companyId], references: [id])
-  companyId   String             @db.Uuid
-  title       String
-  description String
-  location    JobPostingLocation
-  isPromoted  Boolean
-  skills      Skill[]
-  checkpoints Checkpoint[]
-  project     Project?
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @default(now()) @updatedAt
+  id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company          Company            @relation(fields: [companyId], references: [id])
+  companyId        String             @db.Uuid
+  title            String
+  description      String
+  location         JobPostingLocation
+  isPromoted       Boolean
+  ///FAKE:faker.number.float({ min: 50, max: 1000, multipleOf: 50 })
+  averageDailyRate Float // TJM
+  ///FAKE:faker.number.int({ min: 0, max: 10 })
+  seniority        Int
+  skills           Skill[]
+  checkpoints      Checkpoint[]
+  project          Project?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
 }
 
 model Project {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  description  String
-  startDate    DateTime
-  endDate      DateTime?
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
-  jobPostingId String     @unique @db.Uuid
-  freelance    Freelance? @relation(fields: [freelanceId], references: [id])
-  freelanceId  String?    @db.Uuid
-  company      Company?   @relation(fields: [companyId], references: [id])
-  companyId    String?    @db.Uuid
-  invoice      Invoice?
-  conversation Conversation? @relation(fields: [conversationId], references: [id])
-  conversationId String?    @unique @db.Uuid
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  description    String
+  startDate      DateTime
+  endDate        DateTime?
+  jobPosting     JobPosting    @relation(fields: [jobPostingId], references: [id])
+  jobPostingId   String        @unique @db.Uuid
+  freelance      Freelance?    @relation(fields: [freelanceId], references: [id])
+  freelanceId    String?       @db.Uuid
+  company        Company?      @relation(fields: [companyId], references: [id])
+  companyId      String?       @db.Uuid
+  invoice        Invoice?
+  conversation   Conversation? @relation(fields: [conversationId], references: [id])
+  conversationId String?       @unique @db.Uuid
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now()) @updatedAt
 }
 
 model Checkpoint {
@@ -181,7 +185,7 @@ model Document {
   invoiceId   String       @unique @db.Uuid
   quote       Quote?       @relation(fields: [quoteId], references: [id])
   quoteId     String       @unique @db.Uuid
-  message     Message?     
+  message     Message?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now()) @updatedAt
 }
@@ -193,34 +197,32 @@ model Log {
   action    String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-
 }
 
 model Conversation {
-  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  messages  Message[]
-  project   Project? 
-  sender    User        @relation("sender", fields: [senderId], references: [id])
-  senderId  String      @db.Uuid
-  receiver  User        @relation("receiver", fields: [receiverId], references: [id])
-  receiverId String     @db.Uuid
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @default(now()) @updatedAt
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messages   Message[]
+  project    Project?
+  sender     User      @relation("sender", fields: [senderId], references: [id])
+  senderId   String    @db.Uuid
+  receiver   User      @relation("receiver", fields: [receiverId], references: [id])
+  receiverId String    @db.Uuid
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now()) @updatedAt
 }
 
 model Message {
-  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  conversation Conversation @relation(fields: [conversationId], references: [id])
-  conversationId String     @db.Uuid
-  sender       User         @relation("sender", fields: [senderId], references: [id])
-  senderId     String       @db.Uuid
-  receiver     User         @relation("receiver", fields: [receiverId], references: [id])
-  receiverId   String       @db.Uuid
-  documentId   String?      @unique @db.Uuid
-  document     Document?    @relation(fields: [documentId], references: [id])
-  timestamp    DateTime     @default(now())
-  content      String
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @default(now()) @updatedAt
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String       @db.Uuid
+  sender         User         @relation("sender", fields: [senderId], references: [id])
+  senderId       String       @db.Uuid
+  receiver       User         @relation("receiver", fields: [receiverId], references: [id])
+  receiverId     String       @db.Uuid
+  documentId     String?      @unique @db.Uuid
+  document       Document?    @relation(fields: [documentId], references: [id])
+  timestamp      DateTime     @default(now())
+  content        String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now()) @updatedAt
 }
-

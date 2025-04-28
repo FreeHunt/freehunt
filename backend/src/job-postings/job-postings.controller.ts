@@ -14,6 +14,7 @@ import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { SearchJobPostingDto } from './dto/search-job-posting.dto';
 import { JobPostingResponseDto } from './dto/job-posting-response.dto';
+import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 
 @ApiTags('job-postings')
@@ -139,17 +140,18 @@ export class JobPostingsController {
   @Post('search')
   @ApiOperation({
     summary: 'Search job postings',
-    description: 'Search job postings by title, skills, and/or location',
+    description:
+      'Search job postings by title, skills, location, daily rate, and/or seniority',
   })
   @ApiResponse({
     status: 200,
     description: 'Returns job postings matching the search criteria',
-    type: [JobPostingResponseDto],
+    type: JobPostingSearchResult,
   })
   @HttpCode(200)
   search(
     @Body() searchJobPostingDto: SearchJobPostingDto,
-  ): Promise<JobPostingResponseDto[]> {
+  ): Promise<JobPostingSearchResult> {
     return this.jobPostingsService.search(searchJobPostingDto);
   }
 }

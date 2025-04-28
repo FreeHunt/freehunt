@@ -1,4 +1,11 @@
-import { IsString, IsEnum, IsArray, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsArray,
+  IsOptional,
+  IsNumber,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { JobPostingLocation } from '@prisma/client';
 
@@ -48,4 +55,44 @@ export class SearchJobPostingDto extends PaginationParams {
     required: false,
   })
   location?: JobPostingLocation;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Minimum daily rate',
+    example: 400,
+    required: false,
+  })
+  minDailyRate?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Maximum daily rate',
+    example: 800,
+    required: false,
+  })
+  maxDailyRate?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Minimum seniority in years',
+    example: 2,
+    required: false,
+  })
+  minSeniority?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: 'Maximum seniority in years',
+    example: 10,
+    required: false,
+  })
+  maxSeniority?: number;
 }
