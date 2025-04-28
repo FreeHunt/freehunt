@@ -44,6 +44,7 @@ describe('AuthService', () => {
       password: 'test',
       password_repeat: 'test',
       username: 'test',
+      role: 'FREELANCE',
     };
     const authSuccessResponse: AuthSuccessResponse = {
       cookies: ['test_cookie'],
@@ -99,6 +100,7 @@ describe('AuthService', () => {
       password: 'test',
       password_repeat: 'test',
       username: 'test',
+      role: 'FREELANCE',
     };
     const authErrorResponse: AuthErrorResponse = {
       cookies: [],
