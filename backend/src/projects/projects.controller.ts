@@ -7,11 +7,11 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { ProjectsService } from './projects.service';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
+import { ProjectsService } from '@/src/projects/projects.service';
+import { CreateProjectDto } from '@/src/projects/dto/create-project.dto';
+import { UpdateProjectDto } from '@/src/projects/dto/update-project.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { ProjectResponseDto } from './dto/project-response.dto';
+import { ProjectResponseDto } from '@/src/projects/dto/project-response.dto';
 
 @ApiTags('projects')
 @Controller('projects')

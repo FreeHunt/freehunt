@@ -1,11 +1,10 @@
 import { Test } from '@nestjs/testing';
-import { ProjectController } from './projects.controller';
-import { ProjectsService } from './projects.service';
-import { PrismaService } from '../common/prisma/prisma.service';
+import { ProjectsService } from '@/src/projects/projects.service';
+import { PrismaService } from '@/src/common/prisma/prisma.service';
 import { JobPostingLocation } from '@prisma/client';
-import { PrismaServiceMock } from '../../test/mocks/prisma.mock';
-import { CreateProjectDto } from './dto/create-project.dto';
-
+import { PrismaServiceMock } from '@/test/mocks/prisma.mock';
+import { CreateProjectDto } from '@/src/projects/dto/create-project.dto';
+import { ProjectController } from '@/src/projects/projects.controller';
 describe('ProjectController', () => {
   let projectController: ProjectController;
   let projectsService: ProjectsService;
