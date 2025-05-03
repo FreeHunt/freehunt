@@ -19,7 +19,7 @@ export function useMultiStepForm(totalSteps: number) {
   const goToPreviousSection = useCallback(() => {
     if (currentSection > 0) {
       setDirection(-1);
-      setCurrentSection(currentSection - 1);
+      setCurrentSection(prev => prev - 1);
     }
   }, [currentSection]);
 
