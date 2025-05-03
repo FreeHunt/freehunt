@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export function useMultiStepForm(totalSteps: number) {
   const [currentSection, setCurrentSection] = useState(0);
@@ -7,26 +7,26 @@ export function useMultiStepForm(totalSteps: number) {
   const isLastSection = currentSection === totalSteps - 1;
   const isFirstSection = currentSection === 0;
 
-  const goToNextSection = (onSubmit?: () => void) => {
+  const goToNextSection = useCallback((onSubmit?: () => void) => {
     if (currentSection < totalSteps - 1) {
       setDirection(1);
       setCurrentSection(currentSection + 1);
     } else if (onSubmit) {
       onSubmit();
     }
-  };
+  }, [currentSection, totalSteps]);
 
-  const goToPreviousSection = () => {
+  const goToPreviousSection = useCallback(() => {
     if (currentSection > 0) {
       setDirection(-1);
       setCurrentSection(currentSection - 1);
     }
-  };
+  }, [currentSection]);
 
-  const navigateToSection = (nextSection: number) => {
+  const navigateToSection = useCallback((nextSection: number) => {
     setDirection(nextSection > currentSection ? 1 : -1);
     setCurrentSection(nextSection);
-  };
+  }, [currentSection]);
 
   return {
     currentSection,
