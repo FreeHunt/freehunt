@@ -5,19 +5,24 @@ import { CompanyPreviewCardProps } from "@/actions/register";
 import { BuildingIcon } from "lucide-react";
 
 export function CompanyPreviewCard({ formData, companyBlurStates }: CompanyPreviewCardProps) {
+  const trimmedName = formData.name.trim();
+  const trimmedSiren = formData.siren.trim();
+  const trimmedAddress = formData.address.trim();
+  const trimmedDescription = formData.description.trim();
+  
   const displayName = () =>
-    formData.name.trim() === "" ? "Acme Inc" : formData.name.trim();
+    trimmedName === "" ? "Acme Inc" : trimmedName;
 
   const displaySiren = () =>
-    formData.siren.trim() === "" ? "123456789" : formData.siren.trim();
+    trimmedSiren === "" ? "123456789" : trimmedSiren;
 
   const displayAddress = () =>
-    formData.address.trim() === "" ? "Paris, France" : formData.address.trim();
+    trimmedAddress === "" ? "Paris, France" : trimmedAddress;
 
   const displayDescription = () =>
-    formData.description.trim() === "" 
+    trimmedDescription === "" 
       ? "Description de l'entreprise"
-      : formData.description.trim();
+      : trimmedDescription;
       
   const displayLogo = () =>
     formData.logo === "" ? "/images/company-logo.png" : formData.logo;
