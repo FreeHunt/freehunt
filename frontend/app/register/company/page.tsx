@@ -105,7 +105,7 @@ export default function CompanyRegisterPage() {
                 direction={direction}
                 key="section4"
               >
-                <CompanyLogoSection onLogoChange={handleLogoChange} />
+                <CompanyLogoSection onAvatarChange={handleLogoChange} />
               </FormSection>
             </AnimatePresence>
 
