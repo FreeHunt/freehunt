@@ -10,7 +10,7 @@ export function useMultiStepForm(totalSteps: number) {
   const goToNextSection = useCallback((onSubmit?: () => void) => {
     if (currentSection < totalSteps - 1) {
       setDirection(1);
-      setCurrentSection(currentSection + 1);
+      setCurrentSection(prev => prev + 1);
     } else if (onSubmit) {
       onSubmit();
     }
