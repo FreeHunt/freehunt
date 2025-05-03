@@ -1,6 +1,7 @@
 import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Montserrat } from "next/font/google";
+import { ZodError, ZodIssue } from "zod";
 const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
@@ -13,6 +14,9 @@ interface IdentitySectionProps {
   onFirstNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onLastNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onWorkFieldChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  errorFirstNameSection: ZodError | null;
+  errorLastNameSection: ZodError | null;
+  errorWorkFieldSection: ZodError | null;
 }
 
 export function IdentitySection({
@@ -22,6 +26,9 @@ export function IdentitySection({
   onFirstNameChange,
   onLastNameChange,
   onWorkFieldChange,
+  errorFirstNameSection,
+  errorLastNameSection,
+  errorWorkFieldSection,
 }: IdentitySectionProps) {
   return (
     <div className="flex flex-col items-center gap-10 w-full">
@@ -38,6 +45,19 @@ export function IdentitySection({
             value={firstName}
             onChange={onFirstNameChange}
           />
+          {errorFirstNameSection && (
+            <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+              <p
+                className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
+              >
+                {
+                  errorFirstNameSection.errors.find(
+                    (error: ZodIssue) => error.path[0] === "firstName",
+                  )?.message
+                }
+              </p>
+            </div>
+          )}
         </div>
         <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
           <p
@@ -51,6 +71,19 @@ export function IdentitySection({
             value={lastName}
             onChange={onLastNameChange}
           />
+          {errorLastNameSection && (
+            <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+              <p
+                className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
+              >
+                {
+                  errorLastNameSection.errors.find(
+                    (error: ZodIssue) => error.path[0] === "lastName",
+                  )?.message
+                }
+              </p>
+            </div>
+          )}
         </div>
       </div>
       <div className="flex flex-col justify-center items-center gap-5 self-stretch">
@@ -67,6 +100,19 @@ export function IdentitySection({
           onChange={onWorkFieldChange}
         />
       </div>
+      {errorWorkFieldSection && (
+        <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+          <p
+            className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
+          >
+            {
+              errorWorkFieldSection.errors.find(
+                (error: ZodIssue) => error.path[0] === "workField",
+              )?.message
+            }
+          </p>
+        </div>
+      )}
     </div>
   );
 }

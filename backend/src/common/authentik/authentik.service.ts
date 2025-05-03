@@ -6,6 +6,7 @@ import { RegisterDto } from '../../auth/dto/register.dto';
 import { AuthSuccessResponse } from '../../auth/types/auth-success-response.interface';
 import { AuthFlowResponse } from '../../auth/types/auth-flow-response.interface';
 import { AuthErrorResponse } from '../../auth/types/auth-error-response.interface';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthentikService {
@@ -106,5 +107,20 @@ export class AuthentikService {
       console.error("Erreur lors de l'inscription:", error);
       throw error;
     }
+  }
+
+  async getMe(cookies: string): Promise<User> {
+    const initialResponse = await this.httpService.axiosRef.get(
+      `${this.authentikUrl}/api/v3/core/users/me/`,
+      {
+        ...this.axiosConfig,
+        headers: {
+          ...this.axiosConfig.headers,
+          Cookie: cookies,
+        },
+      },
+    );
+    const user = initialResponse.data.user as User;
+    return user;
   }
 }

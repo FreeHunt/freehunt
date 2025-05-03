@@ -6,6 +6,7 @@ import {
   ProfileFormData,
   BlurStates,
   SectionTitle as SectionTitleType,
+  RegisterFreelance,
 } from "@/actions/register";
 import { PreviewCard } from "@/components/common/card/PreviewCard";
 import { SectionIndicator } from "@/components/common/Section/SectionIndicator";
@@ -16,6 +17,45 @@ import { IdentitySection } from "@/components/register/form/IdentitySection";
 import { LocationRateSection } from "@/components/register/form/LocationSection";
 import { SkillsSection } from "@/components/register/form/SkillSection";
 import { AvatarSection } from "@/components/register/form/AvatarSection";
+import { z } from "zod";
+import { Skill } from "@/lib/interfaces";
+
+const schemaFirstSection = z.object({
+  firstName: z.string().min(1, "Le prénom est obligatoire"),
+  lastName: z.string().min(1, "Le nom est obligatoire"),
+  workField: z.string().min(1, "Le domaine est obligatoire"),
+});
+
+const schemaSecondSection = z.object({
+  location: z.string().min(1, "La localisation est obligatoire"),
+  averageDailyRate: z.number().min(1, "Le TJM est obligatoire"),
+  experienceYear: z.number().min(1, "L'année d'expérience est obligatoire"),
+});
+
+const schemaThirdSection = z.object({
+  skills: z.array(
+    z.object({
+      name: z.string(),
+      type: z.enum(["TECHNICAL", "SOFT"]),
+    }),
+  ),
+});
+
+const schemaFourthSection = z.object({
+  avatar: z.string().min(1, "L'avatar est obligatoire"),
+});
+
+const schemaFifthSection = z.object({
+  experienceYear: z.number().min(1, "L'année d'expérience est obligatoire"),
+});
+
+const schema = [
+  schemaFirstSection,
+  schemaSecondSection,
+  schemaThirdSection,
+  schemaFourthSection,
+  schemaFifthSection,
+];
 
 function Page() {
   // État initial du formulaire
@@ -27,7 +67,24 @@ function Page() {
     averageDailyRate: 0,
     avatar: "",
     skills: [],
+    experienceYear: 0,
   });
+  const [errorFirstNameSection, setErrorFirstNameSection] =
+    useState<z.ZodError | null>(null);
+  const [errorLastNameSection, setErrorLastNameSection] =
+    useState<z.ZodError | null>(null);
+  const [errorWorkFieldSection, setErrorWorkFieldSection] =
+    useState<z.ZodError | null>(null);
+  const [errorLocationSection, setErrorLocationSection] =
+    useState<z.ZodError | null>(null);
+  const [errorAverageDailyRateSection, setErrorAverageDailyRateSection] =
+    useState<z.ZodError | null>(null);
+  const [errorSkillsSection, setErrorSkillsSection] =
+    useState<z.ZodError | null>(null);
+  const [errorAvatarSection, setErrorAvatarSection] =
+    useState<z.ZodError | null>(null);
+  const [errorExperienceYearSection, setErrorExperienceYearSection] =
+    useState<z.ZodError | null>(null);
 
   // États pour l'affichage flou
   const [blurStates, setBlurStates] = useState<BlurStates>({
@@ -38,6 +95,7 @@ function Page() {
     isAverageDailyRateBlurred: true,
     isAvatarBlurred: true,
     isSkillsBlurred: true,
+    isExperienceYearBlurred: true,
   });
 
   // État pour suivre la section active
@@ -58,29 +116,69 @@ function Page() {
   const isFirstSection = currentSection === 0;
 
   // Gestionnaires pour les champs de formulaire
-  const handleFirstNameChange = (e: ChangeEvent<HTMLInputElement>) =>
+  const handleFirstNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, firstName: e.target.value });
+    setErrorFirstNameSection(null);
+  };
 
-  const handleLastNameChange = (e: ChangeEvent<HTMLInputElement>) =>
+  const handleLastNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, lastName: e.target.value });
+    setErrorLastNameSection(null);
+  };
 
-  const handleWorkFieldChange = (e: ChangeEvent<HTMLInputElement>) =>
+  const handleWorkFieldChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, workField: e.target.value });
+    setErrorWorkFieldSection(null);
+  };
 
-  const handleLocationChange = (e: ChangeEvent<HTMLInputElement>) =>
+  const handleLocationChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, location: e.target.value });
+    setErrorLocationSection(null);
+  };
 
-  const handleRateChange = (e: ChangeEvent<HTMLInputElement>) =>
+  const handleRateChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, averageDailyRate: Number(e.target.value) });
+    setErrorAverageDailyRateSection(null);
+  };
 
-  const handleAvatarChange = (fileUrl: string) =>
+  const handleAvatarChange = (fileUrl: string) => {
     setFormData({ ...formData, avatar: fileUrl });
+    setErrorAvatarSection(null);
+  };
 
-  const handleSkillsChange = (newSkills: string[]) =>
+  const handleSkillsChange = (newSkills: Skill[]) => {
     setFormData({ ...formData, skills: newSkills });
+    setErrorSkillsSection(null);
+  };
+
+  const handleExperienceYearChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, experienceYear: Number(e.target.value) });
+    setErrorExperienceYearSection(null);
+  };
 
   // Gérer la navigation entre les sections
   const goToNextSection = () => {
+    const currentSchema = schema[currentSection];
+    const result = currentSchema.safeParse(formData);
+    if (currentSection === 0) {
+      setErrorFirstNameSection(result.error || null);
+      setErrorLastNameSection(result.error || null);
+      setErrorWorkFieldSection(result.error || null);
+    }
+    if (currentSection === 1) {
+      setErrorLocationSection(result.error || null);
+      setErrorAverageDailyRateSection(result.error || null);
+    }
+    if (currentSection === 2) {
+      setErrorSkillsSection(result.error || null);
+    }
+    if (currentSection === 3) {
+      setErrorAvatarSection(result.error || null);
+    }
+    if (!result.success) {
+      console.log(result.error);
+      return;
+    }
     if (currentSection < totalSections - 1) {
       setDirection(1);
       setCurrentSection(currentSection + 1);
@@ -103,8 +201,8 @@ function Page() {
   };
 
   // Soumettre le formulaire
-  const handleFormSubmit = () => {
-    console.log("Formulaire soumis", formData);
+  const handleFormSubmit = async () => {
+    await RegisterFreelance(formData);
     alert("Formulaire soumis avec succès!");
   };
 
@@ -118,6 +216,7 @@ function Page() {
       isAverageDailyRateBlurred: formData.averageDailyRate === 0,
       isAvatarBlurred: formData.avatar === "",
       isSkillsBlurred: formData.skills.length === 0,
+      isExperienceYearBlurred: formData.experienceYear === 0,
     });
   }, [formData]);
 
@@ -154,6 +253,9 @@ function Page() {
                   onFirstNameChange={handleFirstNameChange}
                   onLastNameChange={handleLastNameChange}
                   onWorkFieldChange={handleWorkFieldChange}
+                  errorFirstNameSection={errorFirstNameSection || null}
+                  errorLastNameSection={errorLastNameSection || null}
+                  errorWorkFieldSection={errorWorkFieldSection || null}
                 />
               </FormSection>
 
@@ -165,8 +267,13 @@ function Page() {
                 <LocationRateSection
                   location={formData.location}
                   averageDailyRate={formData.averageDailyRate}
+                  experienceYear={formData.experienceYear}
                   onLocationChange={handleLocationChange}
                   onRateChange={handleRateChange}
+                  onExperienceYearChange={handleExperienceYearChange}
+                  errorLocationSection={errorLocationSection}
+                  errorAverageDailyRateSection={errorAverageDailyRateSection}
+                  errorExperienceYearSection={errorExperienceYearSection}
                 />
               </FormSection>
 
@@ -178,6 +285,7 @@ function Page() {
                 <SkillsSection
                   skills={formData.skills}
                   onSkillsChange={handleSkillsChange}
+                  errorSkillsSection={errorSkillsSection}
                 />
               </FormSection>
 
@@ -186,7 +294,10 @@ function Page() {
                 direction={direction}
                 key="section4"
               >
-                <AvatarSection onAvatarChange={handleAvatarChange} />
+                <AvatarSection
+                  onAvatarChange={handleAvatarChange}
+                  errorAvatarSection={errorAvatarSection}
+                />
               </FormSection>
             </AnimatePresence>
 

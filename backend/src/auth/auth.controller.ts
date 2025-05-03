@@ -1,4 +1,4 @@
-import { Controller, Post, Res, Body } from '@nestjs/common';
+import { Controller, Post, Res, Body, Get, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -6,7 +6,7 @@ import { RegisterDto } from './dto/register.dto';
 import { Response } from 'express';
 import { AuthSuccessResponse } from './types/auth-success-response.interface';
 import { AuthErrorResponse } from './types/auth-error-response.interface';
-import { Role } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { UsersService } from '../users/users.service';
 @ApiTags('auth')
 @Controller('auth')
@@ -72,5 +72,18 @@ export class AuthController {
       });
     }
     return registerResponse;
+  }
+
+  @Get('getme')
+  async getMe(@Req() request: Request): Promise<User> {
+    // get cookies in session
+    const cookies = request.headers['cookie'] as string;
+    const userAuthentik = await this.authService.getMe(cookies);
+    const user = await this.usersService.getUserByEmail(userAuthentik.email);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
   }
 }

@@ -20,7 +20,7 @@ function Page() {
           Quel type de profil êtes-vous ?
         </p>
       </div>
-      <div className="flex flex-row justify-center items-center gap-4 md:gap-20 self-stretch px-4 overflow-x-auto">
+      <div className="flex flex-row justify-center items-center gap-4 md:gap-20 self-stretch px-4">
         <RegisterCard
           title="Entreprise"
           description="Je chasse des freelances"

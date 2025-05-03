@@ -1,4 +1,6 @@
 import { api } from "@/lib/api";
+import { getCurrentUser } from "./auth";
+import { Skill } from "@/lib/interfaces";
 
 export interface RegisterResponse {
   success: boolean;
@@ -86,7 +88,8 @@ export interface ProfileFormData {
   location: string;
   averageDailyRate: number;
   avatar: string;
-  skills: string[];
+  skills: Skill[];
+  experienceYear: number;
 }
 
 export interface BlurStates {
@@ -97,9 +100,25 @@ export interface BlurStates {
   isAverageDailyRateBlurred: boolean;
   isAvatarBlurred: boolean;
   isSkillsBlurred: boolean;
+  isExperienceYearBlurred: boolean;
 }
 
 export interface SectionTitle {
   highlight: string;
   regular: string;
 }
+export const RegisterFreelance = async (formData: ProfileFormData) => {
+  const user = await getCurrentUser();
+  const response = await api.post("/freelances", {
+    firstName: formData.firstName,
+    lastName: formData.lastName,
+    jobTitle: formData.workField,
+    averageDailyRate: formData.averageDailyRate,
+    location: formData.location,
+    seniority: formData.experienceYear,
+    userId: user.id,
+    skillIds: formData.skills.map((skill) => skill.id),
+  });
+
+  return response.data;
+};

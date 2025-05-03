@@ -30,6 +30,7 @@ model User {
   conversationsReceived Conversation[] @relation("receiver")
   createdAt             DateTime       @default(now())
   updatedAt             DateTime       @default(now()) @updatedAt
+  avatar                Document?
 }
 
 enum SkillType {
@@ -172,6 +173,7 @@ model Invoice {
 enum DocumentType {
   INVOICE
   QUOTE
+  AVATAR
 }
 
 model Document {
@@ -186,6 +188,8 @@ model Document {
   quote       Quote?       @relation(fields: [quoteId], references: [id])
   quoteId     String       @unique @db.Uuid
   message     Message?
+  userId      String       @unique @db.Uuid
+  user        User         @relation(fields: [userId], references: [id])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now()) @updatedAt
 }

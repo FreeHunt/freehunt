@@ -129,4 +129,11 @@ export class UsersController {
   remove(@Param('id', ParseUUIDPipe) id: string): Promise<UserResponseDto> {
     return this.usersService.remove(id);
   }
+
+  @Get('email/:email')
+  getUserByEmail(
+    @Param('email') email: string,
+  ): Promise<UserResponseDto | null> {
+    return this.usersService.getUserByEmail(email);
+  }
 }
