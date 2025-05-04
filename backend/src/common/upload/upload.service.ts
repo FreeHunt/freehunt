@@ -17,13 +17,17 @@ export class UploadService {
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadFile(
+    file: Express.Multer.File,
+    bucketName: string,
+  ): Promise<string> {
+    const uniqueKey = `${Date.now()}-${file.originalname}`;
     const command = new PutObjectCommand({
-      Bucket: 'test',
-      Key: file.originalname,
+      Bucket: bucketName,
+      Key: uniqueKey,
       Body: file.buffer,
     });
     await this.minioClient.send(command);
-    return file.originalname;
+    return uniqueKey;
   }
 }
