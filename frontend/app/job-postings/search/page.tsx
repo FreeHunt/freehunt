@@ -1,18 +1,18 @@
 "use client";
 
 import { Banner } from "@/components/common/banner";
-import { JobPostingCard } from "@/components/job-posting/card"; // Changed import
+import { JobPostingCard } from "@/components/job-posting/card";
 import { Slider } from "@/components/ui/slider";
 import { formatNumberToEuros } from "@/lib/utils";
 import { SearchInput } from "@/components/common/search-input";
 import { Badge } from "@/components/ui/badge";
-import { searchJobPostings } from "@/actions/jobPostings"; // Changed import
+import { searchJobPostings } from "@/actions/jobPostings";
 import { useState, useEffect, useCallback } from "react";
 import {
   JobPostingSearchResult,
   Skill,
   JobPostingLocation,
-} from "@/lib/interfaces"; // Changed import
+} from "@/lib/interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleBadge } from "@/components/common/toggle-badge";
 import { getSkills } from "@/actions/skills";
@@ -54,7 +54,6 @@ const SENIORITY_OPTIONS: SeniorityOption[] = [
   { value: "expert", label: "10 ans et +", min: 10 },
 ];
 
-// Added Location Options
 type LocationOption = {
   value: JobPostingLocation | "any";
   label: string;
@@ -76,18 +75,18 @@ function Page() {
   const [maximumAverageDailyRate, setMaximumAverageDailyRate] = useState(
     MAXIMUM_AVERAGE_DAILY_RATE,
   );
-  const [jobPostingsLoading, setJobPostingsLoading] = useState(true); // Renamed state
-  const [jobPostingResults, setJobPostingResults] = // Renamed state
+  const [jobPostingsLoading, setJobPostingsLoading] = useState(true);
+  const [jobPostingResults, setJobPostingResults] =
     useState<JobPostingSearchResult>({
       data: [],
       total: 0,
     });
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState(""); // Will be used for 'title'
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedSeniority, setSelectedSeniority] = useState<string>("any");
   const [selectedLocation, setSelectedLocation] = useState<
     JobPostingLocation | "any"
-  >("any"); // Added state for location
+  >("any");
 
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skills, setSkills] = useState<Skill[]>([]);
@@ -95,11 +94,10 @@ function Page() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Fetch skills (remains the same)
   useEffect(() => {
     const fetchSkills = async () => {
       let localSkills = await getSkills();
-      localSkills = localSkills.slice(0, 10); // Limit to 10 skills for display
+      localSkills = localSkills.slice(0, 10);
 
       const skillParameters = searchParams.getAll("skills");
 
@@ -115,10 +113,8 @@ function Page() {
     };
 
     fetchSkills();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Renamed and adapted fetch function
   const fetchJobPostings = useCallback(
     async (title = "", page = 1) => {
       setJobPostingsLoading(true);
@@ -127,12 +123,12 @@ function Page() {
       );
 
       const results = await searchJobPostings({
-        title: title || undefined, // Use searchQuery for title
+        title: title || undefined,
         skillNames:
           selectedSkills.length > 0
             ? selectedSkills.map((s) => s.name)
             : undefined,
-        location: selectedLocation === "any" ? undefined : selectedLocation, // Handle 'any' location
+        location: selectedLocation === "any" ? undefined : selectedLocation,
         minimumAverageDailyRate,
         maximumAverageDailyRate,
         minSeniority: selectedSeniorityOption?.min,
@@ -141,9 +137,8 @@ function Page() {
         pageSize: DEFAULT_PAGE_SIZE,
       });
 
-      // Update URL search params
       const params = new URLSearchParams();
-      if (title) params.set("title", title); // Changed from query to title
+      if (title) params.set("title", title);
       params.set("page", page.toString());
       selectedSkills.forEach((skill) => {
         params.append("skills", skill.name);
@@ -152,7 +147,7 @@ function Page() {
         params.set("seniority", selectedSeniority);
       }
       if (selectedLocation !== "any") {
-        params.set("location", selectedLocation); // Added location param
+        params.set("location", selectedLocation);
       }
       window.history.replaceState({}, "", `?${params.toString()}`);
 
@@ -164,12 +159,10 @@ function Page() {
       maximumAverageDailyRate,
       selectedSkills,
       selectedSeniority,
-      selectedLocation, // Added dependency
+      selectedLocation,
     ],
   );
 
-  // Debounced version of fetchJobPostings
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedFetchJobPostings = useCallback(
     debounce((query: string, page: number) => {
       fetchJobPostings(query, page);
@@ -177,18 +170,25 @@ function Page() {
     [fetchJobPostings],
   );
 
-  // Initial load and when filters change
   useEffect(() => {
     debouncedFetchJobPostings(searchQuery, currentPage);
     return () => debouncedFetchJobPostings.clear();
-  }, [debouncedFetchJobPostings, searchQuery, currentPage]);
+  }, [
+    debouncedFetchJobPostings,
+    searchQuery,
+    currentPage,
+    selectedSkills,
+    selectedSeniority,
+    selectedLocation,
+    minimumAverageDailyRate,
+    maximumAverageDailyRate,
+  ]);
 
-  // Upon page load if there are any search parameters
   useEffect(() => {
-    const title = searchParams.get("title"); // Changed from query to title
+    const title = searchParams.get("title");
     const page = searchParams.get("page");
     const seniority = searchParams.get("seniority");
-    const location = searchParams.get("location"); // Added location
+    const location = searchParams.get("location");
 
     if (title) {
       setSearchQuery(title);
@@ -209,18 +209,16 @@ function Page() {
       location &&
       Object.values(JobPostingLocation).includes(location as JobPostingLocation)
     ) {
-      setSelectedLocation(location as JobPostingLocation); // Added location handling
+      setSelectedLocation(location as JobPostingLocation);
     }
-  }, [searchParams]); // Removed skills dependency as it's handled in its own useEffect
+  }, [searchParams]);
 
-  // Handle search form submission
   const handleSearch = async (formData: FormData) => {
     const query = formData.get("search") as string;
-    setSearchQuery(query); // This state is used as 'title' in fetchJobPostings
+    setSearchQuery(query);
     setCurrentPage(1);
   };
 
-  // Handle skill selection (remains the same)
   const handleSkillToggle = useCallback((skill: Skill) => {
     setSelectedSkills((prev) =>
       prev.some((s) => s.id === skill.id)
@@ -230,20 +228,17 @@ function Page() {
     setCurrentPage(1);
   }, []);
 
-  // Handle slider value change (remains the same)
   const handleSliderValueChange = useCallback((value: number[]) => {
     setMinimumAverageDailyRate(value[0]);
     setMaximumAverageDailyRate(value[1]);
     setCurrentPage(1);
   }, []);
 
-  // Handle seniority selection (remains the same)
   const handleSeniorityChange = useCallback((value: string) => {
     setSelectedSeniority(value);
     setCurrentPage(1);
   }, []);
 
-  // Added handler for location selection
   const handleLocationChange = useCallback(
     (value: JobPostingLocation | "any") => {
       setSelectedLocation(value);
@@ -252,25 +247,20 @@ function Page() {
     [],
   );
 
-  // Handle page change (remains the same)
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  // Calculate total pages
   const totalPages = Math.ceil(jobPostingResults.total / DEFAULT_PAGE_SIZE);
 
   return (
     <>
-      {/* Decoration Banner */}
       <Banner
         text="Trouvez l'offre qui vous correspond."
         redPointerClassName="right-0"
       />
-      {/* Changed text */}
       <div className="flex flex-col lg:flex-row px-4 lg:px-5 gap-5 relative">
-        {/* Sidebar */}
         <aside
           className={`
           ${sidebarOpen ? "flex" : "hidden"}
@@ -295,7 +285,6 @@ function Page() {
             </Button>
           </div>
 
-          {/* Average Daily Rate (ADR) Slider */}
           <div className="flex flex-col gap-2.5 items-start w-full">
             <p className="font-semibold">Taux journalier moyen (TJM)</p>
             <Slider
@@ -319,7 +308,6 @@ function Page() {
             </div>
           </div>
 
-          {/* Technical skills */}
           <div className="flex flex-col gap-2.5 items-start w-full">
             <p className="font-semibold">Compétences techniques</p>
             <div className="flex flex-wrap gap-2.5 w-full">
@@ -342,7 +330,6 @@ function Page() {
             </div>
           </div>
 
-          {/* Location radio group */}
           <div className="flex flex-col gap-2.5 items-start w-full">
             <p className="font-semibold">Localisation</p>
             <RadioGroup
@@ -367,7 +354,6 @@ function Page() {
             </RadioGroup>
           </div>
 
-          {/* Seniority level radio group */}
           <div className="flex flex-col gap-2.5 items-start w-full">
             <p className="font-semibold">Niveau d&apos;expérience</p>
             <RadioGroup
@@ -392,7 +378,6 @@ function Page() {
             </RadioGroup>
           </div>
 
-          {/* Mobile apply filters button */}
           <FreeHuntButton
             className="mt-4 lg:hidden"
             onClick={() => setSidebarOpen(false)}
@@ -401,7 +386,6 @@ function Page() {
           </FreeHuntButton>
         </aside>
 
-        {/* Overlay */}
         {sidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 lg:hidden"
@@ -409,17 +393,16 @@ function Page() {
           ></div>
         )}
 
-        {/* Main Content */}
         <main className="flex flex-col gap-5 w-full py-2 lg:py-5">
           <form action={handleSearch} className="w-full">
             <SearchInput
               placeholder="Intitulé du poste, technologies..."
               className="w-full text-sm lg:text-base px-6 lg:px-12 mt-2 lg:mt-0"
-              defaultValue={searchQuery} // Ensure input reflects state/URL param
+              defaultValue={searchQuery}
+              name="search"
             />
           </form>
 
-          {/* Mobile Filter Toggle Button */}
           <FreeHuntButton
             variant="outline"
             theme="secondary"
@@ -430,31 +413,27 @@ function Page() {
             Filtres
           </FreeHuntButton>
 
-          {/* Title & Count */}
           <div className="flex items-center gap-1.5">
             <h1 className="font-bold text-freehunt-black-two text-xl">
-              Offres d&apos;emploi {/* Changed title */}
+              Offres d&apos;emploi
             </h1>
             <Badge className="bg-freehunt-main font-bold text-white">
-              {jobPostingResults.total} {/* Changed result source */}
+              {jobPostingResults.total}
             </Badge>
           </div>
 
-          {/* Job Posting Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {jobPostingsLoading &&
               Array.from({ length: 6 }).map((_, index) => (
                 <Skeleton
                   key={index}
-                  className="w-full max-w-[340px] h-[300px] rounded-[30px]" // Adjusted skeleton size
+                  className="w-full max-w-[340px] h-[300px] rounded-[30px]"
                 />
               ))}
             {jobPostingResults.data.length > 0 &&
               !jobPostingsLoading &&
-              // Sort job postings to show promoted ones first
               [...jobPostingResults.data]
                 .sort((a, b) => {
-                  // Sort by promotion status first (promoted items come first)
                   if (a.isPromoted && !b.isPromoted) return -1;
                   if (!a.isPromoted && b.isPromoted) return 1;
                   return 0;
@@ -465,12 +444,11 @@ function Page() {
             {!jobPostingsLoading &&
               jobPostingResults.data.length === 0 && (
                 <p className="text-freehunt-black-two col-span-full text-center py-8">
-                  Aucune offre d&apos;emploi trouvée. {/* Changed text */}
+                  Aucune offre d&apos;emploi trouvée.
                 </p>
               )}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 &&
             !jobPostingsLoading && (
               <div className="flex justify-center mt-6">
