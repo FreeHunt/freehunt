@@ -92,24 +92,29 @@ function JobPostingCard(jobPosting: JobPosting) {
         </div>
       </CardHeader>
 
-      <CardContent className="flex gap-2.5 flex-wrap flex-grow pt-4">
-        {/* Skills */}
-        {skills && skills.length > 0 ? (
-          skills
-            .slice(0, 5) // Limit displayed skills
-            .map((skill) => (
-              <SkillBadge key={skill.id}>{skill.name}</SkillBadge>
-            ))
-        ) : (
-          <p className="text-sm text-gray-400 italic">
-            Aucune compétence listée
-          </p>
-        )}
-        {skills && skills.length > 5 && (
-          <Badge variant="outline" className="text-xs">
-            +{skills.length - 5} autres
-          </Badge>
-        )}
+      <CardContent className="pt-4 flex-grow">
+        <div className="flex flex-wrap gap-2 items-start">
+          {/* Skills */}
+          {skills && skills.length > 0 ? (
+            skills
+              .slice(0, 5) // Limit displayed skills
+              .map((skill) => (
+                <SkillBadge key={skill.id}>{skill.name}</SkillBadge>
+              ))
+          ) : (
+            <p className="text-sm text-gray-400 italic">
+              Aucune compétence listée
+            </p>
+          )}
+          {skills && skills.length > 5 && (
+            <Badge 
+              variant="outline" 
+              className="text-xs py-0.5 px-2.5 flex items-center justify-center"
+            >
+              +{skills.length - 5} autres
+            </Badge>
+          )}
+        </div>
       </CardContent>
 
       <CardFooter className="bg-freehunt-main p-6 rounded-b-[30px] mt-4 flex-shrink-0">
