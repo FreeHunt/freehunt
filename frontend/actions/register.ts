@@ -103,3 +103,24 @@ export interface SectionTitle {
   highlight: string;
   regular: string;
 }
+
+export interface CompanyBlurStates {
+  isNameBlurred: boolean;
+  isSirenBlurred: boolean;
+  isDescriptionBlurred: boolean;
+  isAddressBlurred: boolean;
+  isLogoBlurred: boolean;
+}
+
+export interface CompanyFormData {
+  name: string;
+  siren: string;
+  description: string;
+  address: string;
+  logo: string;
+}
+
+export interface CompanyPreviewCardProps {
+  formData: CompanyFormData;
+  companyBlurStates: CompanyBlurStates;
+}
