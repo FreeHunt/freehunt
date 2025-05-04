@@ -264,7 +264,10 @@ function Page() {
   return (
     <>
       {/* Decoration Banner */}
-      <Banner text="Trouvez l'offre qui vous correspond." />{" "}
+      <Banner
+        text="Trouvez l'offre qui vous correspond."
+        redPointerClassName="right-0"
+      />
       {/* Changed text */}
       <div className="flex flex-col lg:flex-row px-4 lg:px-5 gap-5 relative">
         {/* Sidebar */}
