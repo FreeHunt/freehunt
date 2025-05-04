@@ -442,24 +442,28 @@ function Page() {
 
           {/* Job Posting Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {jobPostingsLoading && // Changed loading state
+            {jobPostingsLoading &&
               Array.from({ length: 6 }).map((_, index) => (
                 <Skeleton
                   key={index}
                   className="w-full max-w-[340px] h-[300px] rounded-[30px]" // Adjusted skeleton size
                 />
               ))}
-            {jobPostingResults.data.length > 0 && // Changed result source
-              !jobPostingsLoading && // Changed loading state
-              jobPostingResults.data.map(
-                (
-                  jobPosting, // Changed variable name
-                ) => (
-                  <JobPostingCard key={jobPosting.id} {...jobPosting} /> // Changed card component
-                ),
-              )}
+            {jobPostingResults.data.length > 0 &&
+              !jobPostingsLoading &&
+              // Sort job postings to show promoted ones first
+              [...jobPostingResults.data]
+                .sort((a, b) => {
+                  // Sort by promotion status first (promoted items come first)
+                  if (a.isPromoted && !b.isPromoted) return -1;
+                  if (!a.isPromoted && b.isPromoted) return 1;
+                  return 0;
+                })
+                .map((jobPosting) => (
+                  <JobPostingCard key={jobPosting.id} {...jobPosting} />
+                ))}
             {!jobPostingsLoading &&
-              jobPostingResults.data.length === 0 && ( // Changed loading state and result source
+              jobPostingResults.data.length === 0 && (
                 <p className="text-freehunt-black-two col-span-full text-center py-8">
                   Aucune offre d&apos;emploi trouvée. {/* Changed text */}
                 </p>
@@ -468,7 +472,7 @@ function Page() {
 
           {/* Pagination */}
           {totalPages > 1 &&
-            !jobPostingsLoading && ( // Changed loading state
+            !jobPostingsLoading && (
               <div className="flex justify-center mt-6">
                 <Pagination>
                   <PaginationContent>
