@@ -19,6 +19,7 @@ import { SkillsSection } from "@/components/register/form/SkillSection";
 import { AvatarSection } from "@/components/register/form/AvatarSection";
 import { z } from "zod";
 import { Skill } from "@/lib/interfaces";
+import router from "next/router";
 
 const schemaFirstSection = z.object({
   firstName: z.string().min(1, "Le prénom est obligatoire"),
@@ -33,20 +34,20 @@ const schemaSecondSection = z.object({
 });
 
 const schemaThirdSection = z.object({
-  skills: z.array(
-    z.object({
-      name: z.string(),
-      type: z.enum(["TECHNICAL", "SOFT"]),
-    }),
-  ),
+  skills: z
+    .array(
+      z.object({
+        name: z.string().min(1, "La compétence est obligatoire"),
+        type: z.enum(["TECHNICAL", "SOFT"]),
+      }),
+    )
+    .min(1, "Vous devez sélectionner au moins une compétence"),
 });
 
 const schemaFourthSection = z.object({
-  avatar: z.string().min(1, "L'avatar est obligatoire"),
-});
-
-const schemaFifthSection = z.object({
-  experienceYear: z.number().min(1, "L'année d'expérience est obligatoire"),
+  avatar: z.instanceof(File).refine((file) => file.size > 0, {
+    message: "L'avatar est obligatoire",
+  }),
 });
 
 const schema = [
@@ -54,7 +55,6 @@ const schema = [
   schemaSecondSection,
   schemaThirdSection,
   schemaFourthSection,
-  schemaFifthSection,
 ];
 
 function Page() {
@@ -65,7 +65,7 @@ function Page() {
     workField: "",
     location: "",
     averageDailyRate: 0,
-    avatar: "",
+    avatar: null,
     skills: [],
     experienceYear: 0,
   });
@@ -141,8 +141,8 @@ function Page() {
     setErrorAverageDailyRateSection(null);
   };
 
-  const handleAvatarChange = (fileUrl: string) => {
-    setFormData({ ...formData, avatar: fileUrl });
+  const handleAvatarChange = (file: File) => {
+    setFormData({ ...formData, avatar: file });
     setErrorAvatarSection(null);
   };
 
@@ -160,6 +160,7 @@ function Page() {
   const goToNextSection = () => {
     const currentSchema = schema[currentSection];
     const result = currentSchema.safeParse(formData);
+    console.log(currentSection);
     if (currentSection === 0) {
       setErrorFirstNameSection(result.error || null);
       setErrorLastNameSection(result.error || null);
@@ -168,6 +169,7 @@ function Page() {
     if (currentSection === 1) {
       setErrorLocationSection(result.error || null);
       setErrorAverageDailyRateSection(result.error || null);
+      setErrorExperienceYearSection(result.error || null);
     }
     if (currentSection === 2) {
       setErrorSkillsSection(result.error || null);
@@ -176,7 +178,6 @@ function Page() {
       setErrorAvatarSection(result.error || null);
     }
     if (!result.success) {
-      console.log(result.error);
       return;
     }
     if (currentSection < totalSections - 1) {
@@ -204,6 +205,7 @@ function Page() {
   const handleFormSubmit = async () => {
     await RegisterFreelance(formData);
     alert("Formulaire soumis avec succès!");
+    router.push("/");
   };
 
   // Mettre à jour les états de floutage en fonction des valeurs
@@ -214,7 +216,7 @@ function Page() {
       isWorkFieldBlurred: formData.workField.trim() === "",
       isLocationBlurred: formData.location.trim() === "",
       isAverageDailyRateBlurred: formData.averageDailyRate === 0,
-      isAvatarBlurred: formData.avatar === "",
+      isAvatarBlurred: formData.avatar === null,
       isSkillsBlurred: formData.skills.length === 0,
       isExperienceYearBlurred: formData.experienceYear === 0,
     });
@@ -285,7 +287,7 @@ function Page() {
                 <SkillsSection
                   skills={formData.skills}
                   onSkillsChange={handleSkillsChange}
-                  errorSkillsSection={errorSkillsSection}
+                  errorSkillsSection={errorSkillsSection || null}
                 />
               </FormSection>
 

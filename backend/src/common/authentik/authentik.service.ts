@@ -7,12 +7,13 @@ import { AuthSuccessResponse } from '../../auth/types/auth-success-response.inte
 import { AuthFlowResponse } from '../../auth/types/auth-flow-response.interface';
 import { AuthErrorResponse } from '../../auth/types/auth-error-response.interface';
 import { User } from '@prisma/client';
+import { UserResponse } from './dto/user-info.dto';
 
 @Injectable()
 export class AuthentikService {
   constructor(private readonly httpService: HttpService) {}
 
-  private readonly authentikUrl = 'http://localhost:9000';
+  private readonly authentikUrl = process.env.AUTHENTIK_URL || '';
   private readonly loginFlowUrl =
     '/api/v3/flows/executor/default-authentication-flow/';
   private readonly registerFlowUrl =
@@ -120,7 +121,7 @@ export class AuthentikService {
         },
       },
     );
-    const user = initialResponse.data.user as User;
+    const user = (initialResponse.data as UserResponse).user;
     return user;
   }
 }

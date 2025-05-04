@@ -61,7 +61,7 @@ export function LocationRateSection({
         )}
       </div>
       <div className="flex flex-row justify-center items-center gap-5 self-stretch">
-        <div className="flex flex-col justify-center items-center gap-5 self-stretch w-1/2">
+        <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
           <p
             className={`${montserrat.className} text-black text-center text-lg font-medium`}
           >
@@ -74,7 +74,7 @@ export function LocationRateSection({
             onChange={onRateChange}
           />
           {errorAverageDailyRateSection && (
-            <div className="flex flex-col justify-center items-center gap-5 self-stretch w-1/2">
+            <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
               <p
                 className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
               >
@@ -87,7 +87,7 @@ export function LocationRateSection({
             </div>
           )}
         </div>
-        <div className="flex flex-col justify-center items-center gap-5 self-stretch w-1/2">
+        <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
           <p
             className={`${montserrat.className} text-black text-center text-lg font-medium`}
           >

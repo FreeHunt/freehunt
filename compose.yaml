@@ -30,6 +30,21 @@ services:
       - uptime-kuma-data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
 
+  minio:
+    image: minio/minio
+    container_name: minio
+    restart: unless-stopped
+    ports:
+      - "10000:9000"
+      - "10001:10000"
+    volumes:
+      - minio-data:/data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    command: server /data --console-address ":10000"
+
 volumes:
   db:
   uptime-kuma-data:
+  minio-data:

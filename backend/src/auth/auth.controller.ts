@@ -25,6 +25,7 @@ export class AuthController {
     const rawCookie = loginResponse.cookies.find((cookie) =>
       cookie.startsWith('authentik_session='),
     ); // Search for the authentik_session cookie
+
     if (!rawCookie) {
       throw new Error('authentik_session cookie not found'); // Handle missing cookie
     }
@@ -48,13 +49,17 @@ export class AuthController {
         response: registerResponse.response,
       } as AuthErrorResponse;
     }
-    const rawCookie = registerResponse.cookies.find((cookie) =>
+    const loginResponse = await this.authService.login({
+      email: registerDto.email,
+      password: registerDto.password,
+    });
+    const rawCookie = loginResponse.cookies.find((cookie) =>
       cookie.startsWith('authentik_session='),
-    ); // Locate the authentik_session cookie
+    );
     if (!rawCookie) {
       throw new Error('authentik_session cookie not found'); // Handle missing cookie
     }
-    const token = decodeURIComponent(rawCookie.split(';')[0].split('=')[1]); // Decode the cookie value
+    const token = decodeURIComponent(rawCookie.split('=')[1].split(';')[0]); // Decode the cookie value
     response.cookie('authentik_session', token, {
       httpOnly: true,
     }); // on va stocker un cookie avec le token
@@ -71,6 +76,7 @@ export class AuthController {
         role: Role.COMPANY,
       });
     }
+
     return registerResponse;
   }
 

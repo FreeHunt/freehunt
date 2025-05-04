@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { PlusIcon } from "@/components/common/icons/PlusIcon";
 
 interface ProfileUploaderProps {
-  onFileChange: (fileUrl: string) => void;
+  onFileChange: (file: File) => void;
 }
 
 export function ProfileUploader({ onFileChange }: ProfileUploaderProps) {
@@ -13,10 +13,7 @@ export function ProfileUploader({ onFileChange }: ProfileUploaderProps) {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-
-      // Créer un URL pour la prévisualisation
-      const fileUrl = URL.createObjectURL(selectedFile);
-      onFileChange(fileUrl);
+      onFileChange(selectedFile);
     }
   };
 
@@ -36,9 +33,10 @@ export function ProfileUploader({ onFileChange }: ProfileUploaderProps) {
           <Input
             id="profile-photo"
             type="file"
-            accept="image/jpeg, image/png"
+            accept="image/jpeg, image/png, image/jpg, image/webp"
             className="hidden"
             onChange={handleFileChange}
+            multiple={false}
           />
         </label>
       </div>

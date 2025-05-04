@@ -8,7 +8,7 @@ const montserrat = Montserrat({
 });
 
 interface AvatarSectionProps {
-  onAvatarChange: (fileUrl: string) => void;
+  onAvatarChange: (file: File) => void;
   errorAvatarSection: ZodError | null;
 }
 

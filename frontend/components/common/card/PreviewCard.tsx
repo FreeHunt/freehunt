@@ -24,8 +24,6 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
       : formData.location.trim();
   const displayAverageDailyRate = () =>
     formData.averageDailyRate === 0 ? "" : `${formData.averageDailyRate}`;
-  const displayAvatar = () =>
-    formData.avatar === "" ? "/images/avatar.png" : formData.avatar;
   const displayExperience = () =>
     formData.experienceYear === 0 ? "1" : `${formData.experienceYear}`;
 
@@ -46,6 +44,8 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
         .map((skill) => skill.name)
     : [];
 
+  const fileUrl = formData.avatar ? URL.createObjectURL(formData.avatar) : "";
+
   return (
     <div className="flex w-80 h-full flex-col align-start border-black border rounded-2xl md:rounded-3xl lg:rounded-4xl bg-white">
       <div className="flex p-6 flex-col items-start gap-5 self-stretch">
@@ -56,7 +56,7 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
             }`}
           >
             <Image
-              src={displayAvatar()}
+              src={fileUrl}
               alt="Avatar"
               width={56}
               height={56}

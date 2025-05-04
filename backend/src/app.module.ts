@@ -11,9 +11,11 @@ import { AuthentikModule } from './common/authentik/authentik.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ConversationsModule } from './conversations/conversations.module';
 import { MessagesModule } from './messages/message.module';
-
+import { UploadModule } from './common/upload/upload.module';
+import { ConfigModule } from '@nestjs/config';
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     PrismaModule,
     UsersModule,
     CompaniesModule,
@@ -26,6 +28,7 @@ import { MessagesModule } from './messages/message.module';
     ProjectsModule,
     ChatModule,
     MessagesModule,
+    UploadModule,
   ],
   controllers: [],
   providers: [],

@@ -22,7 +22,7 @@ const NAV_LINKS: { href: string; label: string }[] = [
 // Auth links configuration
 const AUTH_LINKS = [
   { href: "/login", label: "Se connecter", variant: "outline" },
-  { href: "/register", label: "S'inscrire", variant: "default" },
+  { href: "/register/choice", label: "S'inscrire", variant: "default" },
 ];
 
 export default function NavigationMenu() {

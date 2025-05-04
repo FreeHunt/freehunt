@@ -87,7 +87,7 @@ export interface ProfileFormData {
   workField: string;
   location: string;
   averageDailyRate: number;
-  avatar: string;
+  avatar: File | null;
   skills: Skill[];
   experienceYear: number;
 }
@@ -108,17 +108,45 @@ export interface SectionTitle {
   regular: string;
 }
 export const RegisterFreelance = async (formData: ProfileFormData) => {
-  const user = await getCurrentUser();
-  const response = await api.post("/freelances", {
-    firstName: formData.firstName,
-    lastName: formData.lastName,
-    jobTitle: formData.workField,
-    averageDailyRate: formData.averageDailyRate,
-    location: formData.location,
-    seniority: formData.experienceYear,
-    userId: user.id,
-    skillIds: formData.skills.map((skill) => skill.id),
-  });
+  try {
+    // Create a FormData object for the file upload
+    const fileFormData = new FormData();
 
-  return response.data;
+    // Append the file if it exists
+    if (formData.avatar) {
+      fileFormData.append("file", formData.avatar);
+    }
+
+    // Upload the file first
+    let avatarUrl = null;
+    if (formData.avatar) {
+      const uploadResponse = await api.post("/upload", fileFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      avatarUrl = uploadResponse.data.url; // Assuming the server returns the URL of the uploaded file
+    }
+
+    // Get the current user
+    const user = await getCurrentUser();
+
+    // Now send the rest of the profile data
+    const response = await api.post("/freelances", {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      jobTitle: formData.workField,
+      averageDailyRate: formData.averageDailyRate,
+      location: formData.location,
+      seniority: formData.experienceYear,
+      userId: user.id,
+      skillIds: formData.skills.map((skill) => skill.id),
+      avatarUrl: avatarUrl, // Add the avatar URL if a file was uploaded
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error during freelance registration:", error);
+    throw error;
+  }
 };
