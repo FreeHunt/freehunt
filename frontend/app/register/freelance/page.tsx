@@ -160,7 +160,6 @@ function Page() {
   const goToNextSection = () => {
     const currentSchema = schema[currentSection];
     const result = currentSchema.safeParse(formData);
-    console.log(currentSection);
     if (currentSection === 0) {
       setErrorFirstNameSection(result.error || null);
       setErrorLastNameSection(result.error || null);
