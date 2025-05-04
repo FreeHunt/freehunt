@@ -63,7 +63,7 @@ function JobPostingCard(jobPosting: JobPosting) {
 
           {/* General information */}
           <div className="flex flex-col min-w-0">
-            <CardTitle className="text-lg text-freehunt-black-two pb-1 truncate">
+            <CardTitle className="text-lg text-freehunt-black-two pb-1 break-words line-clamp-2 hyphens-auto">
               {title}
             </CardTitle>
             <CardDescription className="flex flex-col gap-1.5">
