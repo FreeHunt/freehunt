@@ -1,25 +1,22 @@
 "use client";
-import { useRouter, useSearchParams } from "next/navigation";
+
+import { useRouter } from "next/navigation";
 import Form from "next/form";
 import { FieldError, register } from "@/actions/register";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { AuthFlowResponseError } from "@/actions/register";
-function Page() {
+import { useSearchParams } from "next/navigation";
+
+// Create a client component that safely uses useSearchParams
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [userType, setUserType] = useState<"freelance" | "company" | null>(
     null,
   );
-
-  useEffect(() => {
-    const type = searchParams.get("type") as "freelance" | "company";
-    if (type) {
-      setUserType(type);
-    }
-  }, [searchParams]);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,7 +28,17 @@ function Page() {
   const [errorsPasswordRepeat, setErrorsPasswordRepeat] = useState<string[]>(
     [],
   );
+
+  // Extract type from search params directly in the component
+  useEffect(() => {
+    const type = searchParams.get("type") as "freelance" | "company";
+    if (type) {
+      setUserType(type);
+    }
+  }, [searchParams]);
+
   const handleSubmit = async () => {
+    setErrors([]);
     setErrorsUsername([]);
     setErrorsEmail([]);
     setErrorsPassword([]);
@@ -41,35 +48,37 @@ function Page() {
       email,
       password,
       password_repeat,
-      "COMPANY",
+      userType === "company" ? "COMPANY" : "FREELANCE",
     );
     if (response.success === true) {
       router.push(`/register/${userType}`);
     } else {
       const errors = response.response as AuthFlowResponseError;
       Object.entries(errors.response_errors).forEach(([field, fieldErrors]) => {
-        fieldErrors.forEach((err: FieldError) => {
-          switch (field) {
-            case "username":
-              setErrorsUsername((prevErrors) => [...prevErrors, err.string]);
-              break;
-            case "email":
-              setErrorsEmail((prevErrors) => [...prevErrors, err.string]);
-              break;
-            case "password":
-              setErrorsPassword((prevErrors) => [...prevErrors, err.string]);
-              break;
-            case "password_repeat":
-              setErrorsPasswordRepeat((prevErrors) => [
-                ...prevErrors,
-                err.string,
-              ]);
-              break;
-            default:
-              setErrors((prevErrors) => [...prevErrors, err.string]);
-              break;
-          }
-        });
+        if (Array.isArray(fieldErrors)) {
+          fieldErrors.forEach((err: FieldError) => {
+            switch (field) {
+              case "username":
+                setErrorsUsername((prevErrors) => [...prevErrors, err.string]);
+                break;
+              case "email":
+                setErrorsEmail((prevErrors) => [...prevErrors, err.string]);
+                break;
+              case "password":
+                setErrorsPassword((prevErrors) => [...prevErrors, err.string]);
+                break;
+              case "password_repeat":
+                setErrorsPasswordRepeat((prevErrors) => [
+                  ...prevErrors,
+                  err.string,
+                ]);
+                break;
+              default:
+                setErrors((prevErrors) => [...prevErrors, err.string]);
+                break;
+            }
+          });
+        }
       });
     }
   };
@@ -134,6 +143,7 @@ function Page() {
               <Input
                 className="flex h-10 p-2 items-center gap-2.5 self-stretch w-full rounded-xl border-black border"
                 placeholder="Mot de passe"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -148,6 +158,7 @@ function Page() {
               <Input
                 className="flex h-10 p-2 items-center gap-2.5 self-stretch w-full rounded-xl border-black border"
                 placeholder="Confirmation du mot de passe"
+                type="password"
                 value={password_repeat}
                 onChange={(e) => setPasswordRepeat(e.target.value)}
               />
@@ -172,6 +183,17 @@ function Page() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main page component with suspense boundary
+function Page() {
+  return (
+    <Suspense
+      fallback={<div className="flex justify-center p-10">Chargement...</div>}
+    >
+      <RegisterForm />
+    </Suspense>
   );
 }
 

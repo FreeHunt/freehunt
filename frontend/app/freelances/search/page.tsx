@@ -7,7 +7,7 @@ import { formatNumberToEuros } from "@/lib/utils";
 import { SearchInput } from "@/components/common/search-input";
 import { Badge } from "@/components/ui/badge";
 import { searchFreelances } from "@/actions/freelances";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { FreelanceSearchResult, Skill } from "@/lib/interfaces";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleBadge } from "@/components/common/toggle-badge";
@@ -50,7 +50,7 @@ const SENIORITY_OPTIONS: SeniorityOption[] = [
   { value: "expert", label: "10 ans et +", min: 10 },
 ];
 
-function Page() {
+function SearchPageContent() {
   const searchParams = useSearchParams();
 
   const [minimumAverageDailyRate, setMinimumAverageDailyRate] = useState(
@@ -511,6 +511,14 @@ function Page() {
         </main>
       </div>
     </>
+  );
+}
+
+function Page() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-10">Chargement...</div>}>
+      <SearchPageContent />
+    </Suspense>
   );
 }
 
