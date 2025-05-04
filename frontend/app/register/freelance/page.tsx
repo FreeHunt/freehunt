@@ -222,9 +222,10 @@ function Page() {
   }, [formData]);
 
   return (
-    <div className="flex flex-col items-center gap-4 md:gap-8 lg:gap-20 my-6 md:my-10 lg:my-28">
-      <div className="flex flex-col justify-center items-center gap-2 self-stretch px-4">
-        <div className="flex p-3 md:p-5 justify-center items-center gap-2 h-16">
+    <div className="flex flex-col items-center gap-4 md:gap-8 lg:gap-16 my-4 md:my-8 lg:my-20 px-4 md:px-8 lg:px-12">
+      {/* Title Section */}
+      <div className="flex flex-col justify-center items-center gap-2 self-stretch w-full">
+        <div className="flex p-2 md:p-3 lg:p-5 justify-center items-center gap-2 h-12 md:h-16">
           <AnimatePresence mode="wait">
             <SectionTitle
               title={sectionTitles[currentSection]}
@@ -234,13 +235,21 @@ function Page() {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center items-center gap-4 md:gap-8 lg:gap-20 p-4 max-md:w-full">
-        <div className="flex justify-end self-start gap-5">
-          {/* Preview card */}
+      {/* Main Content Container */}
+      <div className="flex flex-col md:flex-row justify-center items-start gap-6 md:gap-8 lg:gap-12 w-full max-w-6xl">
+        {/* Preview Card - Hidden on mobile, shown at top on tablet, left side on desktop */}
+        <div className="hidden md:block md:w-1/3 lg:w-1/4 sticky top-24">
           <PreviewCard formData={formData} blurStates={blurStates} />
+        </div>
 
-          {/* Form sections with animations */}
-          <div className="flex flex-col items-center gap-10 self-stretch w-full md:w-[600px] lg:w-[700px] relative min-h-[500px]">
+        {/* Mobile-only Preview Card - Shown at top on mobile */}
+        <div className="md:hidden w-full mb-4">
+          <PreviewCard formData={formData} blurStates={blurStates} />
+        </div>
+
+        {/* Form sections with animations */}
+        <div className="flex flex-col items-center gap-6 md:gap-8 w-full md:w-2/3 lg:w-3/4">
+          <div className="w-full min-h-[400px] md:min-h-[450px] relative">
             <AnimatePresence custom={direction} mode="wait">
               <FormSection
                 isActive={currentSection === 0}
@@ -301,15 +310,16 @@ function Page() {
                 />
               </FormSection>
             </AnimatePresence>
+          </div>
 
-            {/* Section indicator */}
+          {/* Section indicator and Navigation */}
+          <div className="w-full flex flex-col items-center gap-4 md:gap-6 mt-2 md:mt-4">
             <SectionIndicator
               currentSection={currentSection}
               totalSections={totalSections}
               onSectionChange={navigateToSection}
             />
 
-            {/* Navigation buttons */}
             <NavigationButtons
               onPrevious={goToPreviousSection}
               onNext={goToNextSection}

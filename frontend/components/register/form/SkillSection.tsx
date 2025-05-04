@@ -30,6 +30,7 @@ export function SkillsSection({
   const [skillType, setSkillType] = useState<"TECHNICAL" | "SOFT">("TECHNICAL");
   const [error, setError] = useState<string | null>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch skills from the API
   useEffect(() => {
@@ -159,7 +160,9 @@ export function SkillsSection({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         suggestionsRef.current &&
-        !suggestionsRef.current.contains(event.target as Node)
+        !suggestionsRef.current.contains(event.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(event.target as Node)
       ) {
         setShowSuggestions(false);
       }
@@ -178,21 +181,23 @@ export function SkillsSection({
   const softSkillsCount = skills.filter((s) => s.type === "SOFT").length;
 
   return (
-    <div className="flex flex-col items-center gap-2 w-full">
-      <div className="flex flex-col justify-center items-center gap-5 self-stretch">
+    <div className="flex flex-col items-center gap-2 w-full px-2 sm:px-0">
+      <div className="flex flex-col justify-center items-center gap-4 sm:gap-5 self-stretch">
         <p
-          className={`${montserrat.className} text-black text-center text-lg font-medium`}
+          className={`${montserrat.className} text-black text-center text-base sm:text-lg font-medium`}
         >
           Vos compétences (maximum 5)
           <br />
-          (les recruteurs vous trouveront via ces informations)
+          <span className="text-sm sm:text-base">
+            (les recruteurs vous trouveront via ces informations)
+          </span>
         </p>
 
-        {/* Skill Type Selector */}
-        <div className="flex items-center gap-4 w-full pb-2">
+        {/* Skill Type Selector - Stacks on mobile */}
+        <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full pb-2">
           <button
             onClick={() => setSkillType("TECHNICAL")}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+            className={`w-full py-2 px-2 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
               skillType === "TECHNICAL"
                 ? "bg-freehunt-main text-white"
                 : "bg-gray-100 text-freehunt-black-two"
@@ -202,7 +207,7 @@ export function SkillsSection({
           </button>
           <button
             onClick={() => setSkillType("SOFT")}
-            className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+            className={`w-full py-2 px-2 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
               skillType === "SOFT"
                 ? "bg-freehunt-main text-white"
                 : "bg-gray-100 text-freehunt-black-two"
@@ -212,9 +217,10 @@ export function SkillsSection({
           </button>
         </div>
 
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full relative">
           <div className="flex items-center gap-2 w-full">
             <Input
+              ref={inputRef}
               type="text"
               className="flex-1 h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
               value={currentSkill}
@@ -239,25 +245,27 @@ export function SkillsSection({
                 (skillType === "TECHNICAL" && technicalSkillsCount >= 3) ||
                 (skillType === "SOFT" && softSkillsCount >= 3)
               }
-              className="h-10 px-4 rounded-lg bg-freehunt-main text-white"
+              className="h-10 px-3 sm:px-4 rounded-lg bg-freehunt-main text-white min-w-8"
             >
               +
             </Button>
           </div>
 
           {/* Error message */}
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-xs sm:text-sm mt-1">{error}</p>
+          )}
 
-          {/* Suggestions dropdown */}
+          {/* Suggestions dropdown - Full width on mobile with better positioning */}
           {showSuggestions && suggestions.length > 0 && (
             <div
               ref={suggestionsRef}
-              className="absolute mt-12 w-[calc(100%-5rem)] bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto z-10"
+              className="absolute mt-12 w-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-y-auto z-10"
             >
               {suggestions.map((skill) => (
                 <div
                   key={skill.id}
-                  className="p-2 hover:bg-gray-100 cursor-pointer"
+                  className="p-2 hover:bg-gray-100 cursor-pointer text-sm sm:text-base"
                   onClick={() => handleSelectSuggestion(skill)}
                 >
                   <span className="text-freehunt-black-two">{skill.name}</span>
@@ -268,22 +276,22 @@ export function SkillsSection({
         </div>
 
         {/* Display selected skills by category */}
-        <div className="flex flex-col w-full gap-4">
+        <div className="flex flex-col w-full gap-3 sm:gap-4 mt-1 sm:mt-2">
           {/* Technical Skills */}
           {skills.filter((s) => s.type === "TECHNICAL").length > 0 && (
-            <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-medium text-freehunt-black-two">
+            <div className="flex flex-col gap-1 sm:gap-2">
+              <h4 className="text-xs sm:text-sm font-medium text-freehunt-black-two">
                 Compétences techniques :
               </h4>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
                 {skills
                   .filter((skill) => skill.type === "TECHNICAL")
                   .map((skill, index) => (
                     <div
                       key={`tech-${index}`}
-                      className="flex items-center gap-1 bg-gray-100 rounded-lg px-3 py-1"
+                      className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm"
                     >
-                      <span className="text-freehunt-black-two text-sm">
+                      <span className="text-freehunt-black-two">
                         {skill.name}
                       </span>
                       <button
@@ -292,7 +300,7 @@ export function SkillsSection({
                             skills.findIndex((s) => s.name === skill.name),
                           )
                         }
-                        className="text-red-500 text-sm font-bold"
+                        className="text-red-500 font-bold ml-1"
                       >
                         ×
                       </button>
@@ -304,19 +312,19 @@ export function SkillsSection({
 
           {/* Soft Skills */}
           {skills.filter((s) => s.type === "SOFT").length > 0 && (
-            <div className="flex flex-col gap-2">
-              <h4 className="text-sm font-medium text-freehunt-black-two">
+            <div className="flex flex-col gap-1 sm:gap-2">
+              <h4 className="text-xs sm:text-sm font-medium text-freehunt-black-two">
                 Soft skills :
               </h4>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1 sm:gap-2">
                 {skills
                   .filter((skill) => skill.type === "SOFT")
                   .map((skill, index) => (
                     <div
                       key={`soft-${index}`}
-                      className="flex items-center gap-1 bg-gray-100 rounded-lg px-3 py-1"
+                      className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm"
                     >
-                      <span className="text-freehunt-black-two text-sm">
+                      <span className="text-freehunt-black-two">
                         {skill.name}
                       </span>
                       <button
@@ -325,7 +333,7 @@ export function SkillsSection({
                             skills.findIndex((s) => s.name === skill.name),
                           )
                         }
-                        className="text-red-500 text-sm font-bold"
+                        className="text-red-500 font-bold ml-1"
                       >
                         ×
                       </button>
@@ -337,9 +345,9 @@ export function SkillsSection({
         </div>
 
         {errorSkillsSection && (
-          <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+          <div className="flex flex-col justify-center items-center gap-2 sm:gap-5 self-stretch w-full">
             <p
-              className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
+              className={`${montserrat.className} text-red-500 text-center text-sm sm:text-lg font-medium`}
             >
               {
                 errorSkillsSection.errors.find(
@@ -350,7 +358,9 @@ export function SkillsSection({
           </div>
         )}
       </div>
-      <TipBox content="Sélectionnez un équilibre entre compétences techniques et soft skills pour vous démarquer auprès des recruteurs !" />
+      <div className="w-full px-1 sm:px-0 mt-1 sm:mt-2">
+        <TipBox content="Sélectionnez un équilibre entre compétences techniques et soft skills pour vous démarquer auprès des recruteurs !" />
+      </div>
     </div>
   );
 }

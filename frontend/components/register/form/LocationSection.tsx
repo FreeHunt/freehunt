@@ -32,24 +32,32 @@ export function LocationRateSection({
   errorExperienceYearSection,
 }: LocationRateSectionProps) {
   return (
-    <div className="flex flex-col items-center gap-10 w-full">
-      <div className="flex flex-col justify-center items-center gap-5 self-stretch">
+    <div className="flex flex-col items-center gap-6 md:gap-10 w-full">
+      {/* Section Localisation */}
+      <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
         <p
-          className={`${montserrat.className} text-black text-center text-lg font-medium`}
+          className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium px-2`}
         >
-          Quelle est votre localisation ? <br />
-          (les recruteurs vous trouveront via ces informations)
+          Quelle est votre localisation ?{" "}
+          <span className="hidden md:inline">
+            <br />
+            (les recruteurs vous trouveront via ces informations)
+          </span>
+          <span className="inline md:hidden text-xs text-gray-600 block mt-1">
+            (les recruteurs vous trouveront via ces informations)
+          </span>
         </p>
         <Input
           type="text"
           className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
           value={location}
           onChange={onLocationChange}
+          placeholder="Ex: Paris, Lyon, Bordeaux..."
         />
         {errorLocationSection && (
-          <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+          <div className="w-full">
             <p
-              className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
+              className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
             >
               {
                 errorLocationSection.errors.find(
@@ -60,10 +68,13 @@ export function LocationRateSection({
           </div>
         )}
       </div>
-      <div className="flex flex-row justify-center items-center gap-5 self-stretch">
-        <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+
+      {/* Section Taux journalier et années d'expérience */}
+      <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-5 self-stretch w-full">
+        {/* Taux journalier */}
+        <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
           <p
-            className={`${montserrat.className} text-black text-center text-lg font-medium`}
+            className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium`}
           >
             Quel est votre taux journalier ?
           </p>
@@ -72,11 +83,13 @@ export function LocationRateSection({
             className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
             value={averageDailyRate || ""}
             onChange={onRateChange}
+            placeholder="€ / jour"
+            min="0"
           />
           {errorAverageDailyRateSection && (
-            <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+            <div className="w-full">
               <p
-                className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
+                className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
               >
                 {
                   errorAverageDailyRateSection.errors.find(
@@ -87,22 +100,26 @@ export function LocationRateSection({
             </div>
           )}
         </div>
-        <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+
+        {/* Années d'expérience */}
+        <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
           <p
-            className={`${montserrat.className} text-black text-center text-lg font-medium`}
+            className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium`}
           >
-            Quel est votre année d&apos;expérience ?
+            Années d&apos;expérience
           </p>
           <Input
             type="number"
             className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
             value={experienceYear || ""}
             onChange={onExperienceYearChange}
+            placeholder="Nombre d'années"
+            min="0"
           />
           {errorExperienceYearSection && (
-            <div className="flex flex-col justify-center items-center gap-5 self-stretch w-full">
+            <div className="w-full">
               <p
-                className={`${montserrat.className} text-red-500 text-center text-lg font-medium`}
+                className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
               >
                 {
                   errorExperienceYearSection.errors.find(
