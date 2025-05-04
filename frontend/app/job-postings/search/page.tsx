@@ -140,7 +140,6 @@ function Page() {
         page,
         pageSize: DEFAULT_PAGE_SIZE,
       });
-      console.log(results);
 
       // Update URL search params
       const params = new URLSearchParams();

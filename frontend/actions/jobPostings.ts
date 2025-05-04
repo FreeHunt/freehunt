@@ -8,8 +8,8 @@ interface SearchJobPostingsParams {
   title?: string;
   skillNames?: string[];
   location?: JobPostingLocation | "any"; // Allow 'any' for no filter
-  minimumAverageDailyRate?: number; // Renamed to match frontend state
-  maximumAverageDailyRate?: number; // Renamed to match frontend state
+  minimumAverageDailyRate?: number; // Frontend name
+  maximumAverageDailyRate?: number; // Frontend name
   minSeniority?: number;
   maxSeniority?: number;
   page?: number;
@@ -22,6 +22,18 @@ export async function searchJobPostings(
   try {
     // Prepare the payload, removing 'any' location if present
     const payload: Record<string, unknown> = { ...params };
+    
+    // Transform frontend parameter names to match backend expectations
+    if (payload.minimumAverageDailyRate !== undefined) {
+      payload.minDailyRate = payload.minimumAverageDailyRate;
+      delete payload.minimumAverageDailyRate;
+    }
+    
+    if (payload.maximumAverageDailyRate !== undefined) {
+      payload.maxDailyRate = payload.maximumAverageDailyRate;
+      delete payload.maximumAverageDailyRate;
+    }
+    
     if (payload.location === "any") {
       delete payload.location;
     }
