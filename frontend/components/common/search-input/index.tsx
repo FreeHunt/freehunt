@@ -1,6 +1,6 @@
 "use client";
 
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useState, useEffect } from "react";
 import { Input as ShadcnInput } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,14 +10,22 @@ function SearchInput({
   className,
   buttonText = "Rechercher",
   buttonClassName,
+  defaultValue = "",
+  value: externalValue,
+  onChange,
   ...props
 }: ComponentProps<typeof ShadcnInput> & {
   buttonText?: string; // Optional prop for button text
   buttonClassName?: string; // Optional prop for button class
 }) {
-  const { onChange } = props;
+  const [value, setValue] = useState(defaultValue);
 
-  const [value, setValue] = useState("");
+  // Sync with external value if provided
+  useEffect(() => {
+    if (externalValue !== undefined) {
+      setValue(externalValue);
+    }
+  }, [externalValue]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);

@@ -398,7 +398,8 @@ function Page() {
             <SearchInput
               placeholder="Intitulé du poste, technologies..."
               className="w-full text-sm lg:text-base px-6 lg:px-12 mt-2 lg:mt-0"
-              defaultValue={searchQuery}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               name="search"
             />
           </form>
