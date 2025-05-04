@@ -46,7 +46,7 @@ function JobPostingCard(jobPosting: JobPosting) {
   };
 
   return (
-    <Card className="w-full max-w-[340px] rounded-[30px] pb-0 shadow-none flex flex-col">
+    <Card className="w-full max-w-[340px] rounded-[30px] pb-0 shadow-none flex flex-col relative">
       {/* Promotion Badge */}
       {isPromoted && (
         <Badge className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 font-semibold z-10">
