@@ -51,21 +51,21 @@ function JobPostingCard(jobPosting: JobPosting) {
         </Badge>
       )}
       <CardHeader className="flex-shrink-0">
-        <div className="flex">
+        <div className="flex flex-wrap">
           <Avatar className="w-14 h-14 mr-5 flex-shrink-0">
             {/* TODO: Add company logo if available */}
             <AvatarFallback>{getCompanyInitials()}</AvatarFallback>
           </Avatar>
 
           <div className="flex flex-col min-w-0">
-            <CardTitle className="text-lg text-freehunt-black-two pb-1 break-words line-clamp-2 hyphens-auto">
+            <CardTitle className="text-lg text-freehunt-black-two pb-1 break-words line-clamp-2 hyphens-auto max-w-[200px]">
               {title}
             </CardTitle>
-            <CardDescription className="flex flex-col gap-1.5">
+            <CardDescription className="flex flex-col gap-1.5 max-w-[200px]">
               {company && (
                 <div className="flex items-center gap-1 min-w-0">
                   <Building size={14} className="text-gray-500 flex-shrink-0" />
-                  <p className="text-gray-600 font-medium truncate">
+                  <p className="text-gray-600 font-medium truncate max-w-[170px]">
                     {company.name}
                   </p>
                 </div>
@@ -75,7 +75,7 @@ function JobPostingCard(jobPosting: JobPosting) {
                   size={14}
                   className="text-freehunt-main flex-shrink-0"
                 />
-                <p className="text-freehunt-main truncate">
+                <p className="text-freehunt-main truncate max-w-[170px]">
                   {getLocationText(location)}
                 </p>
               </div>

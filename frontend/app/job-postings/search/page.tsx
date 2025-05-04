@@ -7,7 +7,7 @@ import { formatNumberToEuros } from "@/lib/utils";
 import { SearchInput } from "@/components/common/search-input";
 import { Badge } from "@/components/ui/badge";
 import { searchJobPostings } from "@/actions/jobPostings";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import {
   JobPostingSearchResult,
   Skill,
@@ -66,7 +66,8 @@ const LOCATION_OPTIONS: LocationOption[] = [
   { value: JobPostingLocation.HYBRID, label: "Hybride" },
 ];
 
-function Page() {
+// Create a client component that safely uses useSearchParams
+function SearchPageContent() {
   const searchParams = useSearchParams();
 
   const [minimumAverageDailyRate, setMinimumAverageDailyRate] = useState(
@@ -99,11 +100,11 @@ function Page() {
       let localSkills = await getSkills();
       localSkills = localSkills.slice(0, 10);
 
-      const skillParameters = searchParams.getAll("skills");
+      const skillParams = searchParams.getAll("skills");
 
-      if (localSkills.length > 0 && skillParameters.length > 0) {
+      if (localSkills.length > 0 && skillParams.length > 0) {
         const preSelectedSkills = localSkills.filter((skill) =>
-          skillParameters.includes(skill.name),
+          skillParams.includes(skill.name),
         );
         setSelectedSkills(preSelectedSkills);
       }
@@ -113,6 +114,39 @@ function Page() {
     };
 
     fetchSkills();
+    // Only run this once on component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const title = searchParams.get("title");
+    const page = searchParams.get("page");
+    const seniority = searchParams.get("seniority");
+    const location = searchParams.get("location");
+
+    if (title) {
+      setSearchQuery(title);
+    }
+
+    if (page) {
+      const pageNumber = parseInt(page, 10);
+      if (!isNaN(pageNumber)) {
+        setCurrentPage(pageNumber);
+      }
+    }
+
+    if (seniority) {
+      setSelectedSeniority(seniority);
+    }
+
+    if (
+      location &&
+      Object.values(JobPostingLocation).includes(location as JobPostingLocation)
+    ) {
+      setSelectedLocation(location as JobPostingLocation);
+    }
+    // Only run this once on component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchJobPostings = useCallback(
@@ -164,15 +198,21 @@ function Page() {
   );
 
   const debouncedFetchJobPostings = useCallback(
-    debounce((query: string, page: number) => {
-      fetchJobPostings(query, page);
-    }, DEBOUNCE_DELAY),
+    (query: string, page: number) => {
+      const debouncedFn = debounce((q: string, p: number) => {
+        fetchJobPostings(q, p);
+      }, DEBOUNCE_DELAY);
+
+      debouncedFn(query, page);
+      return () => debouncedFn.clear();
+    },
     [fetchJobPostings],
   );
 
   useEffect(() => {
-    debouncedFetchJobPostings(searchQuery, currentPage);
-    return () => debouncedFetchJobPostings.clear();
+    const cleanup = debouncedFetchJobPostings(searchQuery, currentPage);
+
+    return cleanup;
   }, [
     debouncedFetchJobPostings,
     searchQuery,
@@ -183,35 +223,6 @@ function Page() {
     minimumAverageDailyRate,
     maximumAverageDailyRate,
   ]);
-
-  useEffect(() => {
-    const title = searchParams.get("title");
-    const page = searchParams.get("page");
-    const seniority = searchParams.get("seniority");
-    const location = searchParams.get("location");
-
-    if (title) {
-      setSearchQuery(title);
-    }
-
-    if (page) {
-      const pageNumber = parseInt(page, 10);
-      if (!isNaN(pageNumber)) {
-        setCurrentPage(pageNumber);
-      }
-    }
-
-    if (seniority) {
-      setSelectedSeniority(seniority);
-    }
-
-    if (
-      location &&
-      Object.values(JobPostingLocation).includes(location as JobPostingLocation)
-    ) {
-      setSelectedLocation(location as JobPostingLocation);
-    }
-  }, [searchParams]);
 
   const handleSearch = async (formData: FormData) => {
     const query = formData.get("search") as string;
@@ -442,127 +453,134 @@ function Page() {
                 .map((jobPosting) => (
                   <JobPostingCard key={jobPosting.id} {...jobPosting} />
                 ))}
-            {!jobPostingsLoading &&
-              jobPostingResults.data.length === 0 && (
-                <p className="text-freehunt-black-two col-span-full text-center py-8">
-                  Aucune offre d&apos;emploi trouvée.
-                </p>
-              )}
+            {!jobPostingsLoading && jobPostingResults.data.length === 0 && (
+              <p className="text-freehunt-black-two col-span-full text-center py-8">
+                Aucune offre d&apos;emploi trouvée.
+              </p>
+            )}
           </div>
 
-          {totalPages > 1 &&
-            !jobPostingsLoading && (
-              <div className="flex justify-center mt-6">
-                <Pagination>
-                  <PaginationContent>
-                    {currentPage > 1 && (
-                      <PaginationItem>
-                        <PaginationPrevious
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(currentPage - 1);
-                          }}
-                        />
-                      </PaginationItem>
-                    )}
+          {totalPages > 1 && !jobPostingsLoading && (
+            <div className="flex justify-center mt-6">
+              <Pagination>
+                <PaginationContent>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationPrevious
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage - 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
 
-                    {currentPage > 2 && (
-                      <PaginationItem>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(1);
-                          }}
-                        >
-                          1
-                        </PaginationLink>
-                      </PaginationItem>
-                    )}
-
-                    {currentPage > 3 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    )}
-
-                    {currentPage > 1 && (
-                      <PaginationItem>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(currentPage - 1);
-                          }}
-                        >
-                          {currentPage - 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    )}
-
+                  {currentPage > 2 && (
                     <PaginationItem>
                       <PaginationLink
                         href="#"
-                        isActive
-                        onClick={(e) => e.preventDefault()}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(1);
+                        }}
                       >
-                        {currentPage}
+                        1
                       </PaginationLink>
                     </PaginationItem>
+                  )}
 
-                    {currentPage < totalPages && (
-                      <PaginationItem>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(currentPage + 1);
-                          }}
-                        >
-                          {currentPage + 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    )}
+                  {currentPage > 3 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
 
-                    {currentPage < totalPages - 2 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    )}
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage - 1);
+                        }}
+                      >
+                        {currentPage - 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
 
-                    {currentPage < totalPages - 1 && (
-                      <PaginationItem>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(totalPages);
-                          }}
-                        >
-                          {totalPages}
-                        </PaginationLink>
-                      </PaginationItem>
-                    )}
+                  <PaginationItem>
+                    <PaginationLink
+                      href="#"
+                      isActive
+                      onClick={(e) => e.preventDefault()}
+                    >
+                      {currentPage}
+                    </PaginationLink>
+                  </PaginationItem>
 
-                    {currentPage < totalPages && (
-                      <PaginationItem>
-                        <PaginationNext
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(currentPage + 1);
-                          }}
-                        />
-                      </PaginationItem>
-                    )}
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage + 1);
+                        }}
+                      >
+                        {currentPage + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {currentPage < totalPages - 2 && (
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  )}
+
+                  {currentPage < totalPages - 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(totalPages);
+                        }}
+                      >
+                        {totalPages}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationNext
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handlePageChange(currentPage + 1);
+                        }}
+                      />
+                    </PaginationItem>
+                  )}
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </main>
       </div>
     </>
+  );
+}
+
+// Main page component with suspense boundary
+function Page() {
+  return (
+    <Suspense fallback={<div className="flex justify-center p-10">Chargement...</div>}>
+      <SearchPageContent />
+    </Suspense>
   );
 }
 
