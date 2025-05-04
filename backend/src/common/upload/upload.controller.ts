@@ -1,7 +1,7 @@
 import {
+  Body,
   Controller,
   Post,
-  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -17,7 +17,7 @@ export class UploadController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Query('bucketName') bucketName: string,
+    @Body('bucketName') bucketName: string,
   ) {
     return this.uploadService.uploadFile(file, bucketName);
   }

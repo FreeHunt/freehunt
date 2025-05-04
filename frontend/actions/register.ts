@@ -132,6 +132,7 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
   try {
     // Create a FormData object for the file upload
     const fileFormData = new FormData();
+    const bucketName = "avatar";
 
     // Append the file if it exists
     if (formData.avatar) {
@@ -140,6 +141,7 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
 
     // Upload the file first
     let avatarUrl = null;
+    fileFormData.append("bucketName", bucketName);
     if (formData.avatar) {
       const uploadResponse = await api.post("/upload", fileFormData, {
         headers: {
