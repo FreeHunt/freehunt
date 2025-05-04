@@ -23,7 +23,7 @@ export function CompanyAddressSection({
           required
         />
         <p className="text-sm text-gray-500">
-          Indiquez l'adresse complète du siège social de votre entreprise.
+          Indiquez l&apos;adresse complète du siège social de votre entreprise.
         </p>
       </div>
     </div>

@@ -18,7 +18,7 @@ export function CompanyIdentitySection({
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="space-y-2">
-        <Label htmlFor="companyName">Nom de l'entreprise</Label>
+        <Label htmlFor="companyName">Nom de l&apos;entreprise</Label>
         <Input
           id="companyName"
           placeholder="Ex: Acme Inc"
@@ -27,7 +27,7 @@ export function CompanyIdentitySection({
           required
         />
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="companySiren">Numéro SIREN (9 chiffres)</Label>
         <Input
@@ -40,7 +40,8 @@ export function CompanyIdentitySection({
           required
         />
         <p className="text-sm text-gray-500">
-          Le numéro SIREN est un identifiant unique à 9 chiffres attribué à chaque entreprise française.
+          Le numéro SIREN est un identifiant unique à 9 chiffres attribué à
+          chaque entreprise française.
         </p>
       </div>
     </div>

@@ -14,7 +14,9 @@ export function CompanyDescriptionSection({
   return (
     <div className="flex flex-col gap-6 w-full">
       <div className="space-y-2">
-        <Label htmlFor="companyDescription">Description de l'entreprise</Label>
+        <Label htmlFor="companyDescription">
+          Description de l&apos;entreprise
+        </Label>
         <Textarea
           id="companyDescription"
           placeholder="Décrivez l'activité de votre entreprise, vos services, votre histoire..."
@@ -24,7 +26,8 @@ export function CompanyDescriptionSection({
           required
         />
         <p className="text-sm text-gray-500">
-          Cette description sera visible sur votre profil et aidera les freelances à comprendre votre activité.
+          Cette description sera visible sur votre profil et aidera les
+          freelances à comprendre votre activité.
         </p>
       </div>
     </div>
