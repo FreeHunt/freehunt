@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { JobPostingResponseDto } from '../../job-postings/dto/job-posting-response.dto';
-import { FreelanceResponseDto } from '../../freelances/dto/freelance-response.dto';
+import { JobPostingResponseDto } from '@/src/job-postings/dto/job-posting-response.dto';
+import { FreelanceResponseDto } from '@/src/freelances/dto/freelance-response.dto';
 
 export class ProjectResponseDto {
   @ApiProperty({
