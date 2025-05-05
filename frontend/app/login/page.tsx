@@ -11,7 +11,7 @@ export default function Login() {
   const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     // api de connexion...
-    console.log('Login avec:', email, password);
+    // console.log('Login avec:', email, password);
   };
 
   return (
@@ -108,7 +108,7 @@ export default function Login() {
           <p className="text-gray-600">
             Pas encore de compte ?{' '}
             <a href="/register" className="font-medium text-pink-600 hover:text-pink-800">
-              S'inscrire
+              S&apos;inscrire
             </a>
           </p>
         </div>
