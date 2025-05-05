@@ -19,6 +19,9 @@ RUN npx prisma generate --schema=./prisma/schema.prisma
 # Build the NestJS application
 RUN npm run build
 
+# Make the start script executable
+RUN chmod +x start.sh
+
 # Set the environment variable to force Prisma to use the musl binary
 ENV PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x
 
