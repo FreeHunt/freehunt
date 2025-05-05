@@ -100,7 +100,7 @@ export default function Login() {
         <div className="text-center mt-6">
           <p className="text-gray-600">
             Pas encore de compte ?{' '}
-            <a href="#" className="font-medium text-pink-600 hover:text-pink-800">
+            <a href="/register" className="font-medium text-pink-600 hover:text-pink-800">
               S'inscrire
             </a>
           </p>
