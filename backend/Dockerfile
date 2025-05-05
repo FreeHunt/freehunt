@@ -13,8 +13,14 @@ RUN npm install
 # Copy the rest of the application files
 COPY . .
 
+# Generate the binary for linux-musl during the build
+RUN npx prisma generate --schema=./prisma/schema.prisma
+
 # Build the NestJS application
 RUN npm run build
+
+# Set the environment variable to force Prisma to use the musl binary
+ENV PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x
 
 # Expose the application port
 EXPOSE 3000
