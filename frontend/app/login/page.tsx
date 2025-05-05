@@ -19,7 +19,7 @@ export default function Login() {
       <div className="w-full max-w-md px-6 py-8">
         <div className="flex justify-center mb-8">
           <div className="text-3xl font-bold text-gray-800">
-          On vous <span className="text-pink-500"> attendait...</span>
+          On vous <span className="text-pink-500"> attendait... 🙂</span>
           </div>
         </div>
         
