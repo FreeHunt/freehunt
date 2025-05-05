@@ -25,5 +25,5 @@ ENV PRISMA_CLI_BINARY_TARGETS=linux-musl-openssl-3.0.x
 # Expose the application port
 EXPOSE 3000
 
-# Execute le script de démarrage
-CMD ["node", "dist/src/main.js"]
+# Run migrations and start the application
+CMD ["./start.sh"]
