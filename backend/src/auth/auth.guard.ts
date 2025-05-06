@@ -29,7 +29,7 @@ export class AuthentikAuthGuard implements CanActivate {
       // Appel à l'API Authentik pour vérifier l'utilisateur
       const response = await firstValueFrom(
         this.httpService
-          .get('http://localhost:9000/api/v3/core/users/me/', {
+          .get(process.env.AUTHENTIK_URL + '/api/v3/core/users/me/', {
             headers: {
               Cookie: `authentik_session=${authentikSessionCookie}`,
             },

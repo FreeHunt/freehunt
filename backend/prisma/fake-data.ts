@@ -186,7 +186,7 @@ export function fakeDocument() {
   return {
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
-    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE] as const),
+    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE, DocumentType.AVATAR] as const),
   };
 }
 export function fakeDocumentComplete() {
@@ -194,10 +194,11 @@ export function fakeDocumentComplete() {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
-    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE] as const),
+    type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE, DocumentType.AVATAR] as const),
     freelanceId: faker.string.uuid(),
     invoiceId: faker.string.uuid(),
     quoteId: faker.string.uuid(),
+    userId: faker.string.uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),
   };

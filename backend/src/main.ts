@@ -17,7 +17,13 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
 
   // Enable CORS
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || '',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Range', 'X-Total-Count'],
+  });
 
   // Enable cookie parser
   app.use(cookieParser());

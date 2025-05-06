@@ -1,4 +1,6 @@
 import { api } from "@/lib/api";
+import { getCurrentUser } from "./auth";
+import { Skill } from "@/lib/interfaces";
 
 export interface RegisterResponse {
   success: boolean;
@@ -85,8 +87,9 @@ export interface ProfileFormData {
   workField: string;
   location: string;
   averageDailyRate: number;
-  avatar: string;
-  skills: string[];
+  avatar: File | null;
+  skills: Skill[];
+  experienceYear: number;
 }
 
 export interface BlurStates {
@@ -97,6 +100,7 @@ export interface BlurStates {
   isAverageDailyRateBlurred: boolean;
   isAvatarBlurred: boolean;
   isSkillsBlurred: boolean;
+  isExperienceYearBlurred: boolean;
 }
 
 export interface SectionTitle {
@@ -124,3 +128,48 @@ export interface CompanyPreviewCardProps {
   formData: CompanyFormData;
   companyBlurStates: CompanyBlurStates;
 }
+export const RegisterFreelance = async (formData: ProfileFormData) => {
+  try {
+    // Create a FormData object for the file upload
+    const fileFormData = new FormData();
+    const bucketName = "avatar";
+
+    // Append the file if it exists
+    if (formData.avatar) {
+      fileFormData.append("file", formData.avatar);
+    }
+
+    // Upload the file first
+    let avatarUrl = null;
+    fileFormData.append("bucketName", bucketName);
+    if (formData.avatar) {
+      const uploadResponse = await api.post("/upload", fileFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      avatarUrl = uploadResponse.data.url; // Assuming the server returns the URL of the uploaded file
+    }
+
+    // Get the current user
+    const user = await getCurrentUser();
+
+    // Now send the rest of the profile data
+    const response = await api.post("/freelances", {
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      jobTitle: formData.workField,
+      averageDailyRate: formData.averageDailyRate,
+      location: formData.location,
+      seniority: formData.experienceYear,
+      userId: user.id,
+      skillIds: formData.skills.map((skill) => skill.id),
+      avatarUrl: avatarUrl, // Add the avatar URL if a file was uploaded
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error during freelance registration:", error);
+    throw error;
+  }
+};
