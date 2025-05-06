@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import NavigationMenu from "@/components/navigation-menu";
+import MatomoScript from "@/components/MatomoScript";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.className} antialiased min-h-screen`}>
+        <MatomoScript />
         <NavigationMenu />
         <main>{children}</main>
       </body>
