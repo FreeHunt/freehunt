@@ -132,7 +132,7 @@ services:
       - .env
 
   matomo:
-    image: matomo:latest
+    image: matomo:4.13.0
     container_name: matomo
     restart: unless-stopped
     ports:
