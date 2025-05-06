@@ -187,6 +187,7 @@ export function fakeDocument() {
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
     type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE, DocumentType.AVATAR] as const),
+    messageId: undefined,
   };
 }
 export function fakeDocumentComplete() {
@@ -195,10 +196,11 @@ export function fakeDocumentComplete() {
     name: faker.person.fullName(),
     url: faker.lorem.words(5),
     type: faker.helpers.arrayElement([DocumentType.INVOICE, DocumentType.QUOTE, DocumentType.AVATAR] as const),
-    freelanceId: faker.string.uuid(),
-    invoiceId: faker.string.uuid(),
-    quoteId: faker.string.uuid(),
-    userId: faker.string.uuid(),
+    freelanceId: undefined,
+    invoiceId: undefined,
+    quoteId: undefined,
+    messageId: undefined,
+    userId: undefined,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
