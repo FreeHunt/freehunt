@@ -142,17 +142,25 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
     // Upload the file first
     let avatarUrl = null;
     fileFormData.append("bucketName", bucketName);
+    // Get the current user
+    const user = await getCurrentUser();
     if (formData.avatar) {
       const uploadResponse = await api.post("/upload", fileFormData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+      console.log(uploadResponse.data);
       avatarUrl = uploadResponse.data.url; // Assuming the server returns the URL of the uploaded file
-    }
 
-    // Get the current user
-    const user = await getCurrentUser();
+      // Create a document for the avatar
+      await api.post("/documents", {
+        name: formData.avatar.name,
+        url: avatarUrl,
+        type: "AVATAR",
+        userId: user.id,
+      });
+    }
 
     // Now send the rest of the profile data
     const response = await api.post("/freelances", {
@@ -164,7 +172,6 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
       seniority: formData.experienceYear,
       userId: user.id,
       skillIds: formData.skills.map((skill) => skill.id),
-      avatarUrl: avatarUrl, // Add the avatar URL if a file was uploaded
     });
 
     return response.data;

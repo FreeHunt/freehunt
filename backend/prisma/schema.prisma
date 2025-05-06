@@ -182,14 +182,15 @@ model Document {
   url         String
   type        DocumentType
   freelance   Freelance?   @relation(fields: [freelanceId], references: [id])
-  freelanceId String       @db.Uuid
+  freelanceId String?      @db.Uuid
   invoice     Invoice?     @relation(fields: [invoiceId], references: [id])
-  invoiceId   String       @unique @db.Uuid
+  invoiceId   String?      @unique @db.Uuid
   quote       Quote?       @relation(fields: [quoteId], references: [id])
-  quoteId     String       @unique @db.Uuid
+  quoteId     String?      @unique @db.Uuid
   message     Message?
-  userId      String       @unique @db.Uuid
-  user        User         @relation(fields: [userId], references: [id])
+  messageId   String?      @unique @db.Uuid
+  userId      String?      @unique @db.Uuid
+  user        User?        @relation(fields: [userId], references: [id])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now()) @updatedAt
 }

@@ -13,6 +13,7 @@ import { ConversationsModule } from './conversations/conversations.module';
 import { MessagesModule } from './messages/message.module';
 import { UploadModule } from './common/upload/upload.module';
 import { ConfigModule } from '@nestjs/config';
+import { DocumentsModule } from './documents/documents.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -29,6 +30,7 @@ import { ConfigModule } from '@nestjs/config';
     ChatModule,
     MessagesModule,
     UploadModule,
+    DocumentsModule,
   ],
   controllers: [],
   providers: [],
