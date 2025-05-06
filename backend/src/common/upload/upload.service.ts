@@ -20,7 +20,7 @@ export class UploadService {
   async uploadFile(
     file: Express.Multer.File,
     bucketName: string,
-  ): Promise<string> {
+  ): Promise<{ url: string; key: string }> {
     const uniqueKey = `${Date.now()}-${file.originalname}`;
     const command = new PutObjectCommand({
       Bucket: bucketName,
@@ -28,6 +28,9 @@ export class UploadService {
       Body: file.buffer,
     });
     await this.minioClient.send(command);
-    return uniqueKey;
+    return {
+      url: `${process.env.MINIO_URL}/${bucketName}/${uniqueKey}`,
+      key: uniqueKey,
+    };
   }
 }
