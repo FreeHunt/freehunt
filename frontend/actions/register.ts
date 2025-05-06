@@ -150,7 +150,6 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
           "Content-Type": "multipart/form-data",
         },
       });
-      console.log(uploadResponse.data);
       avatarUrl = uploadResponse.data.url; // Assuming the server returns the URL of the uploaded file
 
       // Create a document for the avatar
