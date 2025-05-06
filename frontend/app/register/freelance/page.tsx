@@ -19,7 +19,7 @@ import { SkillsSection } from "@/components/register/form/SkillSection";
 import { AvatarSection } from "@/components/register/form/AvatarSection";
 import { z } from "zod";
 import { Skill } from "@/lib/interfaces";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 const schemaFirstSection = z.object({
   firstName: z.string().min(1, "Le prénom est obligatoire"),
@@ -58,6 +58,7 @@ const schema = [
 ];
 
 function Page() {
+  const router = useRouter();
   // État initial du formulaire
   const [formData, setFormData] = useState<ProfileFormData>({
     firstName: "",
