@@ -4,28 +4,28 @@ import { LocationIcon } from "@/components/common/icons/LocationIcon";
 import { CompanyPreviewCardProps } from "@/actions/register";
 import { BuildingIcon } from "lucide-react";
 
-export function CompanyPreviewCard({ formData, companyBlurStates }: CompanyPreviewCardProps) {
+export function CompanyPreviewCard({
+  formData,
+  companyBlurStates,
+}: CompanyPreviewCardProps) {
   const trimmedName = formData.name.trim();
   const trimmedSiren = formData.siren.trim();
   const trimmedAddress = formData.address.trim();
   const trimmedDescription = formData.description.trim();
-  
-  const displayName = () =>
-    trimmedName === "" ? "Acme Inc" : trimmedName;
 
-  const displaySiren = () =>
-    trimmedSiren === "" ? "123456789" : trimmedSiren;
+  const displayName = () => (trimmedName === "" ? "Acme Inc" : trimmedName);
+
+  const displaySiren = () => (trimmedSiren === "" ? "123456789" : trimmedSiren);
 
   const displayAddress = () =>
     trimmedAddress === "" ? "Paris, France" : trimmedAddress;
 
   const displayDescription = () =>
-    trimmedDescription === "" 
+    trimmedDescription === ""
       ? "Description de l'entreprise"
       : trimmedDescription;
-      
-  const displayLogo = () =>
-    formData.logo === "" ? "/images/company-logo.png" : formData.logo;
+
+  const fileUrl = formData.logo ? URL.createObjectURL(formData.logo) : "";
 
   return (
     <div className="flex w-80 h-full flex-col align-start border-black border rounded-2xl md:rounded-3xl lg:rounded-4xl bg-zinc-50">
@@ -38,7 +38,7 @@ export function CompanyPreviewCard({ formData, companyBlurStates }: CompanyPrevi
           >
             {formData.logo ? (
               <Image
-                src={displayLogo()}
+                src={fileUrl}
                 alt="Logo de l'entreprise"
                 width={56}
                 height={56}
@@ -81,9 +81,9 @@ export function CompanyPreviewCard({ formData, companyBlurStates }: CompanyPrevi
             </div>
           </div>
         </div>
-        
+
         {/* Description de l'entreprise */}
-        <div 
+        <div
           className={`w-full text-sm text-freehunt-black-two ${
             companyBlurStates.isDescriptionBlurred ? "blur-sm" : ""
           }`}
