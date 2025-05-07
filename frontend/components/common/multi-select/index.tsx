@@ -14,75 +14,97 @@ import { Command as CommandPrimitive } from "cmdk";
 
 type Skill = Record<"value" | "label", string>;
 
-const SKILLS = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-  {
-    value: "wordpress",
-    label: "WordPress",
-  },
-  {
-    value: "express.js",
-    label: "Express.js",
-  },
-  {
-    value: "nest.js",
-    label: "Nest.js",
-  },
-] satisfies Skill[];
+// const SKILLS = [
+//   {
+//     value: "next.js",
+//     label: "Next.js",
+//   },
+//   {
+//     value: "sveltekit",
+//     label: "SvelteKit",
+//   },
+//   {
+//     value: "nuxt.js",
+//     label: "Nuxt.js",
+//   },
+//   {
+//     value: "remix",
+//     label: "Remix",
+//   },
+//   {
+//     value: "astro",
+//     label: "Astro",
+//   },
+//   {
+//     value: "wordpress",
+//     label: "WordPress",
+//   },
+//   {
+//     value: "express.js",
+//     label: "Express.js",
+//   },
+//   {
+//     value: "nest.js",
+//     label: "Nest.js",
+//   },
+// ] satisfies Skill[];
 
-export function MultiSelect() {
+interface MultiSelectProps {
+  options?: Skill[];
+  selected?: Skill[];
+  onChange?: (selected: Skill[]) => void;
+  className?: string;
+  placeholder?: string;
+}
+
+export function MultiSelect({
+  options,
+  selected = [],
+  onChange,
+  className,
+  placeholder = "Selectionner un élément",
+}: MultiSelectProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [open, setOpen] = React.useState(false);
-  const [selectedItems, setSelectedItems] = React.useState<Skill[]>([]);
   const [inputValue, setInputValue] = React.useState("");
 
-  const handleUnselectItem = React.useCallback((skill: Skill) => {
-    setSelectedItems((prev) => prev.filter((s) => s.value !== skill.value));
-  }, []);
+  // const selectedItems = options?.filter((opt) => selected.includes(opt.value));
+
+  const handleUnselectItem = React.useCallback(
+    (skill: Skill) => {
+      const newSelected = selected.filter((val) => val.value !== skill.value);
+      onChange?.(newSelected);
+    },
+    [selected, onChange],
+  );
+
+  const handleSelectItem = React.useCallback(
+    (skill: Skill) => {
+      const newSelected = [...selected, skill];
+      onChange?.(newSelected);
+      setInputValue("");
+    },
+    [selected, onChange],
+  );
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
       const input = inputRef.current;
       if (input) {
-        if (e.key === "Delete" || e.key === "Backspace") {
-          if (input.value === "") {
-            setSelectedItems((prev) => {
-              const newSelected = [...prev];
-              newSelected.pop();
-              return newSelected;
-            });
-          }
+        if (
+          (e.key === "Delete" || e.key === "Backspace") &&
+          input.value === ""
+        ) {
+          onChange?.(selected.slice(0, -1));
         }
-        // This is not a default behaviour of the <input /> field
-        if (e.key === "Escape") {
-          input.blur();
-        }
+        if (e.key === "Escape") input.blur();
       }
     },
-    [],
+    [selected, onChange],
   );
 
-  const selectablesItems = SKILLS.filter(
-    (skill) => !selectedItems.includes(skill),
+  const selectablesItems = options?.filter(
+    (skill) => !selected?.includes(skill),
   );
 
   console.log("selectablesItems", selectablesItems);
@@ -92,11 +114,11 @@ export function MultiSelect() {
   return (
     <Command
       onKeyDown={handleKeyDown}
-      className="overflow-visible bg-transparent"
+      className={`overflow-visible bg-transparent ${className}`}
     >
       <div className="rounded-md border px-3 py-2 text-sm ring-offset-background focus-within:ring-[3px] focus-within:ring-ring/50">
         <div className="flex flex-wrap gap-1">
-          {selectedItems.map((skill) => {
+          {selected?.map((skill) => {
             return (
               <Badge key={skill.value} variant="secondary">
                 {skill.label}
@@ -128,7 +150,7 @@ export function MultiSelect() {
               setInputValue("");
             }}
             onFocus={() => setOpen(true)}
-            placeholder="Select skills..."
+            placeholder={placeholder}
             className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
           />
         </div>
@@ -138,7 +160,7 @@ export function MultiSelect() {
           {open ? (
             <div className="absolute top-0 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
               <CommandGroup className="h-full overflow-auto">
-                {selectablesItems.map((skill) => {
+                {selectablesItems?.map((skill) => {
                   return (
                     <CommandItem
                       key={skill.value}
@@ -146,10 +168,7 @@ export function MultiSelect() {
                         e.preventDefault();
                         e.stopPropagation();
                       }}
-                      onSelect={() => {
-                        setInputValue("");
-                        setSelectedItems((prev) => [...prev, skill]);
-                      }}
+                      onSelect={() => handleSelectItem(skill)}
                       className={"cursor-pointer"}
                     >
                       {skill.label}
@@ -165,14 +184,10 @@ export function MultiSelect() {
                       e.stopPropagation();
                     }}
                     onSelect={() => {
-                      setInputValue("");
-                      setSelectedItems((prev) => [
-                        ...prev,
-                        {
-                          value: inputValue,
-                          label: inputValue,
-                        },
-                      ]);
+                      handleSelectItem({
+                        value: inputValue,
+                        label: inputValue,
+                      });
                     }}
                     className={"cursor-pointer"}
                   >
