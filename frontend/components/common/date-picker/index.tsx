@@ -13,12 +13,18 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export function DatePicker() {
-  const [date, setDate] = React.useState<Date>();
+interface DatePickerProps {
+  date: Date | undefined;
+  setDate: (date: Date | undefined) => void;
+  className?: string;
+}
+
+export function DatePicker({ date, setDate, className }: DatePickerProps) {
+  // const [date, setDate] = React.useState<Date>();
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
+      <PopoverTrigger asChild className={className}>
         <Button
           variant={"outline"}
           className={cn(
@@ -30,7 +36,7 @@ export function DatePicker() {
           {date ? format(date, "dd-MM-yyyy") : <span>Choissiez une date</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0">
         <Calendar
           mode="single"
           selected={date}
