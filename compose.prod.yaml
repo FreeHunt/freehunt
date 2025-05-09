@@ -64,10 +64,6 @@ services:
     image: ghcr.io/freehunt/freehunt/frontend:latest
     ports:
       - "5173:5173"
-    environment:
-      API_URL: ${API_URL}
-      NEXT_PUBLIC_MATOMO_URL: ${NEXT_PUBLIC_MATOMO_URL}
-      NEXT_PUBLIC_MATOMO_SITE_ID: ${NEXT_PUBLIC_MATOMO_SITE_ID}
     deploy:
       replicas: 3
 
