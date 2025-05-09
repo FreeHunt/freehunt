@@ -141,12 +141,16 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+  
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
+          platforms: linux/amd64, linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
