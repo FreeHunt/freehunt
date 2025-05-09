@@ -98,7 +98,6 @@ jobs:
       contents: read
       packages: write
       security-events: write
-      id-token: write
 
     defaults:
       run:
@@ -179,21 +178,11 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          provenance: true
-          sbom: true
           build-args: |
             NODE_ENV=production
             API_URL=${{ vars.API_URL }}
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID }}
-
-      # Generate artifact attestation for supply chain security
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-name: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend
-          subject-digest: ${{ steps.build-and-push.outputs.digest }}
-          push-to-registry: true
 
       # Report build status
       - name: Report build status
