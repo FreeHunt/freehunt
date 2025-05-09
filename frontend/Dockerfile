@@ -4,12 +4,6 @@
 
 FROM node:22-alpine AS base
 
-# Define build arguments that will be available to all stages
-ARG NODE_ENV=production
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_MATOMO_URL
-ARG NEXT_PUBLIC_MATOMO_SITE_ID
-
 ###
 # Install dependencies
 ###
@@ -26,7 +20,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci
 
 ###
-# Rebuild the source code
+# Build the application
 ###
 
 FROM base AS builder
@@ -36,40 +30,25 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Receive build arguments in this stage
-ARG NODE_ENV
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_MATOMO_URL
 ARG NEXT_PUBLIC_MATOMO_SITE_ID
 
-# Set environment variables for the build process
-ENV NODE_ENV=${NODE_ENV}
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_MATOMO_URL=${NEXT_PUBLIC_MATOMO_URL}
 ENV NEXT_PUBLIC_MATOMO_SITE_ID=${NEXT_PUBLIC_MATOMO_SITE_ID}
-ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
 ###
-# Production image, copy all the files and run next
+# Run the application
 ###
 
 FROM base AS runner
 WORKDIR /app
 
-# Set runtime environment variables
-ARG NODE_ENV
-ENV NODE_ENV=${NODE_ENV}
+ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# Set all runtime public variables
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_MATOMO_URL
-ARG NEXT_PUBLIC_MATOMO_SITE_ID
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
-ENV NEXT_PUBLIC_MATOMO_URL=${NEXT_PUBLIC_MATOMO_URL}
-ENV NEXT_PUBLIC_MATOMO_SITE_ID=${NEXT_PUBLIC_MATOMO_SITE_ID}
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
