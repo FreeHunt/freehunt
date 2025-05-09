@@ -16,8 +16,8 @@ export class DocumentsController {
   }
 
   @Get('/user/:id')
-  findByUserId(@Param('id') id: string) {
-    return this.documentsService.findByUserId(id);
+  findAvatarByUserId(@Param('id') id: string) {
+    return this.documentsService.findAvatarByUserId(id);
   }
 
   @Delete(':id')

@@ -1,3 +1,7 @@
+// todo : fixer le bouton document qui ne fonctionne pas
+// todo : fixer la conversation qui n'est pas en direct
+// todo : fixer le aujourd'hui qui n'est pas fonctionnel ou incohérent
+
 import { useState, useEffect, useRef } from "react";
 import { ArrowUpRight, X, Send, Paperclip } from "lucide-react";
 import Image from "next/image";
@@ -5,13 +9,18 @@ import {
   Conversation as ConversationInterface,
   Message,
   User,
+  Document,
 } from "@/lib/interfaces";
 import { sendMessage } from "@/actions/conversations";
 import { getCurrentUser } from "@/actions/auth";
 export default function ConversationComponent({
   conversation,
+  senderPicture,
+  receiverPicture,
 }: {
   conversation: ConversationInterface;
+  senderPicture: Document | null;
+  receiverPicture: Document | null;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [message, setMessage] = useState("");
@@ -77,7 +86,7 @@ export default function ConversationComponent({
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   <Image
-                    src="/api/placeholder/40/40"
+                    src={senderPicture?.url || "/images/default-avatar.png"}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                     width={40}
@@ -128,7 +137,10 @@ export default function ConversationComponent({
                         </div>
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src="/api/placeholder/40/40"
+                            src={
+                              receiverPicture?.url ||
+                              "/images/default-avatar.png"
+                            }
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -141,7 +153,9 @@ export default function ConversationComponent({
                       <div className="flex items-end space-x-2">
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src="/api/placeholder/40/40"
+                            src={
+                              senderPicture?.url || "/images/default-avatar.png"
+                            }
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -201,7 +215,7 @@ export default function ConversationComponent({
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   <Image
-                    src="/api/placeholder/40/40"
+                    src={senderPicture?.url || "/images/default-avatar.png"}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                     width={40}
@@ -254,7 +268,10 @@ export default function ConversationComponent({
                         </div>
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src="/api/placeholder/40/40"
+                            src={
+                              receiverPicture?.url ||
+                              "/images/default-avatar.png"
+                            }
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -267,7 +284,9 @@ export default function ConversationComponent({
                       <div className="flex items-end space-x-2">
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src="/api/placeholder/40/40"
+                            src={
+                              senderPicture?.url || "https://placehold.co/40x40"
+                            }
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -305,7 +324,7 @@ export default function ConversationComponent({
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
+                onKeyUp={handleKeyPress}
                 placeholder="Message..."
                 className="flex-grow px-3 py-2 outline-none"
               />

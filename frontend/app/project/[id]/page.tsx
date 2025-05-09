@@ -11,8 +11,11 @@ import {
 import CheckpointStats from "@/components/common/card/checkPointsStats";
 import { Project } from "@/lib/interfaces";
 import { getProject } from "@/actions/projects";
-import { getConversationByProject } from "@/actions/conversations";
-
+import {
+  getConversationByProject,
+  getUserPicture,
+} from "@/actions/conversations";
+import { Document } from "@/lib/interfaces";
 export default function ProjectDetailPage({
   params,
 }: {
@@ -24,6 +27,8 @@ export default function ProjectDetailPage({
   const [project, setProject] = useState<Project | null>(null);
   const [conversation, setConversation] =
     useState<ConversationInterface | null>(null);
+  const [senderPicture, setSenderPicture] = useState<Document | null>(null);
+  const [receiverPicture, setReceiverPicture] = useState<Document | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       const project = await getProject(projectId);
@@ -35,6 +40,11 @@ export default function ProjectDetailPage({
         const conversation = await getConversationByProject(projectId);
         console.log("Conversation récupérée:", conversation);
         setConversation(conversation);
+        const senderPicture = await getUserPicture(conversation.senderId);
+        const receiverPicture = await getUserPicture(conversation.receiverId);
+
+        setSenderPicture(senderPicture);
+        setReceiverPicture(receiverPicture);
       }
     };
 
@@ -100,7 +110,11 @@ export default function ProjectDetailPage({
               <h1 className="text-2xl font-bold">Conversations</h1>
               <div className="w-full bg-gray-100 p-4 rounded">
                 {conversation ? (
-                  <Conversation conversation={conversation} />
+                  <Conversation
+                    conversation={conversation}
+                    senderPicture={senderPicture || null}
+                    receiverPicture={receiverPicture || null}
+                  />
                 ) : (
                   <div>Chargement de la conversation...</div>
                 )}

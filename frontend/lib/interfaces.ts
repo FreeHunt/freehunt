@@ -115,3 +115,14 @@ export interface JobPosting {
 export interface Quote {
   id: string;
 }
+
+export interface Document {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  userId: string;
+  messageId: string;
+  quoteId: string;
+  invoiceId: string;
+}

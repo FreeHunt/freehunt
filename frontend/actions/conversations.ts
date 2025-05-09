@@ -19,5 +19,12 @@ export const sendMessage = async (message: Message) => {
     conversationId: message.conversationId,
     documentId: message.documentId,
   });
+
+  // Le backend émettra automatiquement l'événement 'newMessage' via le ChatService
+  return response.data;
+};
+
+export const getUserPicture = async (userId: string) => {
+  const response = await api.get(`/documents/user/${userId}`);
   return response.data;
 };
