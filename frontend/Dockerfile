@@ -56,6 +56,9 @@ USER nextjs
 
 EXPOSE 5173
 
+# Bind the application to all available network interfaces to ensure it is accessible
+# from outside the container in production environments.
+ENV HOSTNAME="0.0.0.0"
 ENV PORT=5173
 
 CMD ["node", "server.js"]
