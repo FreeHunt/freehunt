@@ -29,7 +29,6 @@ jobs:
               - 'frontend/**'
               - 'compose.yaml'
               - 'compose.prod.yaml'
-              - '.github/workflows/node.js.yml'
 
   backend:
     needs: changes
