@@ -58,14 +58,18 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-# Receive runtime environment variables
+# Set runtime environment variables
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV}
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Runtime public variables (these are already built into the app during build time)
+# Set all runtime public variables
 ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_MATOMO_URL
+ARG NEXT_PUBLIC_MATOMO_SITE_ID
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_MATOMO_URL=${NEXT_PUBLIC_MATOMO_URL}
+ENV NEXT_PUBLIC_MATOMO_SITE_ID=${NEXT_PUBLIC_MATOMO_SITE_ID}
 
 # Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
