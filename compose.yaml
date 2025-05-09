@@ -73,10 +73,8 @@ services:
       - "${COMPOSE_PORT_HTTP:-9000}:9000"
       - "${COMPOSE_PORT_HTTPS:-9443}:9443"
     depends_on:
-      authentik-postgresql:
-        condition: service_healthy
-      authentik-redis:
-        condition: service_healthy
+      - authentik-postgresql
+      - authentik-redis
 
   authentik-worker:
     image: ${AUTHENTIK_IMAGE:-ghcr.io/goauthentik/server}:${AUTHENTIK_TAG:-2025.2.4}
@@ -98,10 +96,8 @@ services:
     env_file:
       - .env
     depends_on:
-      authentik-postgresql:
-        condition: service_healthy
-      authentik-redis:
-        condition: service_healthy
+      - authentik-postgresql
+      - authentik-redis
 
   minio:
     image: minio/minio
