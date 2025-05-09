@@ -86,6 +86,14 @@ export class ConversationsController {
     return conversations;
   }
 
+  @Get('project/:id')
+  async getConversationsByProject(@Param('id') id: string) {
+    const conversation =
+      await this.conversationsService.getConversationByProject(id);
+    this.chatService.server.emit('getConversationByProject', conversation);
+    return conversation;
+  }
+
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete a conversation',

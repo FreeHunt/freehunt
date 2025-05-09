@@ -9,12 +9,13 @@ export class ProjectsService {
 
   // Create a new project
   async create(createProjectDto: CreateProjectDto) {
-    return this.prismaService.project.create({ 
+    return this.prismaService.project.create({
       data: createProjectDto,
       include: {
         freelance: true,
         jobPosting: true,
-      }});
+      },
+    });
   }
 
   // Find all projects
@@ -23,7 +24,7 @@ export class ProjectsService {
       include: {
         freelance: true,
         jobPosting: true,
-      }
+      },
     });
 
     return projects;
@@ -36,7 +37,7 @@ export class ProjectsService {
       include: {
         freelance: true,
         jobPosting: true,
-      }
+      },
     });
 
     if (!project) {
@@ -54,7 +55,7 @@ export class ProjectsService {
       include: {
         freelance: true,
         jobPosting: true,
-      }
+      },
     });
   }
 
@@ -65,7 +66,7 @@ export class ProjectsService {
       include: {
         freelance: true,
         jobPosting: true,
-      }
+      },
     });
   }
 }

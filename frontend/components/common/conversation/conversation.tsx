@@ -1,67 +1,29 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowUpRight, X, Send, Paperclip } from "lucide-react";
 import Image from "next/image";
-
-export default function ConversationComponent() {
+import {
+  Conversation as ConversationInterface,
+  Message,
+  User,
+} from "@/lib/interfaces";
+import { sendMessage } from "@/actions/conversations";
+import { getCurrentUser } from "@/actions/auth";
+export default function ConversationComponent({
+  conversation,
+}: {
+  conversation: ConversationInterface;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [message, setMessage] = useState("");
-  const [hasNewMessages, setHasNewMessages] = useState(true);
-  const [isPageVisible, setIsPageVisible] = useState(true);
   const messagesEndRef = useRef(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  useEffect(() => {
+    if (conversation.messages) {
+      setMessages(conversation.messages);
+    }
+  }, [conversation]);
 
-  // Plus d'historique de messages pour démontrer le défilement
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "Fayssal Mechmeche",
-      content: "Bonjour, comment ça va aujourd'hui ?",
-      time: "09:15",
-      avatar: "/api/placeholder/40/40",
-      isNew: false,
-    },
-    {
-      id: 2,
-      sender: "You",
-      content: "Salut ! Ça va bien, merci. Et toi ?",
-      time: "09:18",
-      avatar: "/api/placeholder/40/40",
-      isNew: false,
-    },
-    {
-      id: 3,
-      sender: "Fayssal Mechmeche",
-      content: "Je vais bien aussi. Tu as vu le nouveau projet ?",
-      time: "09:20",
-      avatar: "/api/placeholder/40/40",
-      isNew: false,
-    },
-    {
-      id: 4,
-      sender: "You",
-      content: "Pas encore, je vais le regarder",
-      time: "09:23",
-      avatar: "/api/placeholder/40/40",
-      isNew: false,
-    },
-    {
-      id: 5,
-      sender: "Fayssal Mechmeche",
-      content: "On est mort dans le film",
-      time: "11:30",
-      avatar: "/api/placeholder/40/40",
-      isNew: true,
-    },
-    {
-      id: 6,
-      sender: "You",
-      content: "Allez BodyCount",
-      time: "11:45",
-      avatar: "/api/placeholder/40/40",
-      isNew: false,
-    },
-  ]);
-
-  // Scroll to bottom when messages change or when expanded
   useEffect(() => {
     if (messagesEndRef.current) {
       (messagesEndRef.current as HTMLElement).scrollIntoView({
@@ -70,73 +32,31 @@ export default function ConversationComponent() {
     }
   }, [messages, expanded]);
 
-  // Simule la visibilité de la page
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      setIsPageVisible(!document.hidden);
-      if (!document.hidden) {
-        markAllMessagesAsRead();
-      }
+    const fetchUser = async () => {
+      const user = await getCurrentUser();
+      setUser(user);
     };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    fetchUser();
   }, []);
-
-  // Simule la réception d'un nouveau message après 10 secondes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const newMessage = {
-        id: Date.now(),
-        sender: "Fayssal Mechmeche",
-        content: "Tu as vu le dernier épisode ?",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        avatar: "/api/placeholder/40/40",
-        isNew: true,
-      };
-
-      setMessages((prev) => [...prev, newMessage]);
-      if (!isPageVisible || !expanded) {
-        setHasNewMessages(true);
-      }
-    }, 10000);
-
-    return () => clearTimeout(timer);
-  }, [messages, isPageVisible, expanded]);
 
   const toggleExpand = () => {
     setExpanded(!expanded);
-    if (!expanded) {
-      markAllMessagesAsRead();
-    }
-  };
-
-  const markAllMessagesAsRead = () => {
-    setHasNewMessages(false);
-    setMessages((prev) => prev.map((msg) => ({ ...msg, isNew: false })));
   };
 
   const handleSendMessage = () => {
     if (message.trim()) {
-      setMessages([
-        ...messages,
-        {
-          id: Date.now(),
-          sender: "You",
-          content: message,
-          time: new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-          avatar: "/api/placeholder/40/40",
-          isNew: false,
-        },
-      ]);
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        content: message,
+        senderId: user?.id || "",
+        receiverId: conversation.receiverId,
+        conversationId: conversation.id,
+        //documentId:
+      };
+      setMessages([...messages, newMessage]);
       setMessage("");
+      sendMessage(newMessage);
     }
   };
 
@@ -146,9 +66,6 @@ export default function ConversationComponent() {
       handleSendMessage();
     }
   };
-
-  // Trouver l'index du premier message nouveau
-  const firstNewMessageIndex = messages.findIndex((msg) => msg.isNew);
 
   return (
     <div className="relative">
@@ -189,38 +106,29 @@ export default function ConversationComponent() {
                 <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
               </div>
 
-              {messages.map((msg, index) => (
+              {messages.map((msg) => (
                 <div key={msg.id}>
-                  {/* New message divider - only show before the first new message */}
-                  {msg.isNew &&
-                    index === firstNewMessageIndex &&
-                    hasNewMessages && (
-                      <div className="flex items-center justify-center my-4">
-                        <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
-                        <span className="px-4 py-1 bg-purple-200 text-purple-700 text-sm rounded-full mx-2">
-                          Nouveau
-                        </span>
-                        <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
-                      </div>
-                    )}
-
-                  {/* Message bubble */}
                   <div
                     className={`flex ${
-                      msg.sender === "You" ? "justify-start" : "justify-end"
+                      msg.senderId === conversation.senderId
+                        ? "justify-end"
+                        : "justify-start"
                     }`}
                   >
-                    {msg.sender !== "You" && (
+                    {msg.senderId !== conversation.senderId && (
                       <div className="flex items-end space-x-2">
                         <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
                           <p className="text-sm">{msg.content}</p>
                           <p className="text-xs text-gray-500 mt-1 text-right">
-                            {msg.time}
+                            {new Date().toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </p>
                         </div>
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={msg.avatar}
+                            src="/api/placeholder/40/40"
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -229,11 +137,11 @@ export default function ConversationComponent() {
                         </div>
                       </div>
                     )}
-                    {msg.sender === "You" && (
+                    {msg.senderId === conversation.senderId && (
                       <div className="flex items-end space-x-2">
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={msg.avatar}
+                            src="/api/placeholder/40/40"
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -243,7 +151,10 @@ export default function ConversationComponent() {
                         <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
                           <p className="text-sm">{msg.content}</p>
                           <p className="text-xs text-gray-500 mt-1">
-                            {msg.time}
+                            {new Date().toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </p>
                         </div>
                       </div>
@@ -299,11 +210,6 @@ export default function ConversationComponent() {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-medium">Conversation</span>
-                  {hasNewMessages && (
-                    <span className="text-xs text-purple-600">
-                      Nouveaux messages
-                    </span>
-                  )}
                 </div>
               </div>
               <button
@@ -326,38 +232,29 @@ export default function ConversationComponent() {
                 <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
               </div>
 
-              {messages.map((msg, index) => (
+              {messages.map((msg) => (
                 <div key={msg.id}>
-                  {/* New message divider - only show before the first new message */}
-                  {msg.isNew &&
-                    index === firstNewMessageIndex &&
-                    hasNewMessages && (
-                      <div className="flex items-center justify-center my-4">
-                        <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
-                        <span className="px-4 py-1 bg-purple-200 text-purple-700 text-sm rounded-full mx-2">
-                          Nouveau
-                        </span>
-                        <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
-                      </div>
-                    )}
-
-                  {/* Message bubble */}
                   <div
                     className={`flex ${
-                      msg.sender === "You" ? "justify-start" : "justify-end"
+                      msg.senderId === conversation.senderId
+                        ? "justify-end"
+                        : "justify-start"
                     }`}
                   >
-                    {msg.sender !== "You" && (
+                    {msg.senderId !== conversation.senderId && (
                       <div className="flex items-end space-x-2">
                         <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
                           <p className="text-sm">{msg.content}</p>
                           <p className="text-xs text-gray-500 mt-1 text-right">
-                            {msg.time}
+                            {new Date().toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </p>
                         </div>
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={msg.avatar}
+                            src="/api/placeholder/40/40"
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -366,11 +263,11 @@ export default function ConversationComponent() {
                         </div>
                       </div>
                     )}
-                    {msg.sender === "You" && (
+                    {msg.senderId === conversation.senderId && (
                       <div className="flex items-end space-x-2">
                         <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                           <Image
-                            src={msg.avatar}
+                            src="/api/placeholder/40/40"
                             alt="Avatar"
                             className="w-full h-full object-cover"
                             width={40}
@@ -380,7 +277,10 @@ export default function ConversationComponent() {
                         <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
                           <p className="text-sm">{msg.content}</p>
                           <p className="text-xs text-gray-500 mt-1">
-                            {msg.time}
+                            {new Date().toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </p>
                         </div>
                       </div>

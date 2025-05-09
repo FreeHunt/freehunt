@@ -89,6 +89,24 @@ export interface Checkpoint {
   quoteId?: string;
 }
 
+export interface Conversation {
+  id: string;
+  receiverId: string;
+  senderId: string;
+  projectId: string;
+  messages: Message[];
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  senderId: string;
+  receiverId: string;
+  conversationId: string;
+  documentId?: string;
+  projectId?: string;
+}
+
 export interface JobPosting {
   id: string;
   name: string;

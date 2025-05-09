@@ -4,10 +4,14 @@ import { useEffect, useState } from "react";
 import ProjectTimeline from "@/components/common/calendar/ProjectTimeline";
 import Conversation from "@/components/common/conversation/conversation";
 import { getCheckpoints } from "@/actions/checkPoints";
-import { Checkpoint } from "@/lib/interfaces";
+import {
+  Checkpoint,
+  Conversation as ConversationInterface,
+} from "@/lib/interfaces";
 import CheckpointStats from "@/components/common/card/checkPointsStats";
 import { Project } from "@/lib/interfaces";
 import { getProject } from "@/actions/projects";
+import { getConversationByProject } from "@/actions/conversations";
 
 export default function ProjectDetailPage({
   params,
@@ -18,6 +22,8 @@ export default function ProjectDetailPage({
   // Sample data with proper structure for the timeline component
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [project, setProject] = useState<Project | null>(null);
+  const [conversation, setConversation] =
+    useState<ConversationInterface | null>(null);
   useEffect(() => {
     const fetchData = async () => {
       const project = await getProject(projectId);
@@ -26,6 +32,9 @@ export default function ProjectDetailPage({
       if (project) {
         const checkpoints = await getCheckpoints(project.jobPostingId);
         setCheckpoints(checkpoints);
+        const conversation = await getConversationByProject(projectId);
+        console.log("Conversation récupérée:", conversation);
+        setConversation(conversation);
       }
     };
 
@@ -90,7 +99,11 @@ export default function ProjectDetailPage({
             <div className="flex w-full flex-col items-start gap-3 p-5">
               <h1 className="text-2xl font-bold">Conversations</h1>
               <div className="w-full bg-gray-100 p-4 rounded">
-                <Conversation />
+                {conversation ? (
+                  <Conversation conversation={conversation} />
+                ) : (
+                  <div>Chargement de la conversation...</div>
+                )}
               </div>
             </div>
           </div>
