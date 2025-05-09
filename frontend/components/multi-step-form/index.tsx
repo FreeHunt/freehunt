@@ -8,14 +8,20 @@ import { MultiSelect } from "../common/multi-select";
 import { DatePicker } from "../common/date-picker";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
-import { format } from "date-fns";
 import { JobPostingLocation } from "@/lib/interfaces";
 
 type Step = {
   id: string;
   label: string;
+};
+
+type Checkpoint = {
+  id: string;
+  name: string;
+  description: string;
+  deadline: string;
 };
 
 type Skill = Record<"value" | "label", string>;
@@ -120,9 +126,28 @@ const profileSchema = z.object({
   experience: z.string(),
 });
 
+const checkpointSchema = z.object({
+  name: z.string().min(1, "Le nom de l'étape est requis"),
+  description: z.string().min(1, "La description de l'étape est requise"),
+  deadline: z
+    .string()
+    .min(1, "La date limite est requise")
+    .refine(
+      (date) => {
+        return (
+          new Date(date).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
+        );
+      },
+      {
+        message: "La date limite ne peut pas être dans le passé",
+      },
+    ),
+});
+
 const projectSchema = z.object({
-  startDate: z.string().min(1, "La date de début est requise"),
-  projectSteps: z.string().min(1, "Les étapes du projet sont requises"),
+  checkpoints: z
+    .array(checkpointSchema)
+    .min(1, "Au moins un checkpoint du projet est requis"),
 });
 
 // Schéma complet du formulaire
@@ -135,12 +160,13 @@ const formSchema = z.object({
   dateOfEnd: profileSchema.shape.dateOfEnd,
   typePresence: profileSchema.shape.typePresence,
   experience: profileSchema.shape.experience,
-  startDate: projectSchema.shape.startDate,
-  projectSteps: projectSchema.shape.projectSteps,
+  checkpoints: z.array(checkpointSchema),
 });
 
 // Type inféré à partir du schéma Zod
-type FormData = z.infer<typeof formSchema>;
+type FormData = Omit<z.infer<typeof formSchema>, "checkpoints"> & {
+  checkpoints: Checkpoint[];
+};
 
 export default function MultiStepForm() {
   const steps: Step[] = [
@@ -150,7 +176,7 @@ export default function MultiStepForm() {
     { id: "summary", label: "Récapitulatif" },
   ];
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(2);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -160,8 +186,7 @@ export default function MultiStepForm() {
     dateOfEnd: "",
     typePresence: "",
     experience: "Intermédiaire",
-    startDate: "",
-    projectSteps: "",
+    checkpoints: [],
   });
   const [selectedDateStart, setSelectedDateStart] = useState<Date | undefined>(
     new Date(),
@@ -169,10 +194,14 @@ export default function MultiStepForm() {
   const [selectedDateEnd, setSelectedDateEnd] = useState<Date | undefined>(
     undefined,
   );
+
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [touchedFields, setTouchedFields] = useState<Set<keyof FormData>>(
-    new Set(),
-  );
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
+  // État pour gérer les dates des deadlines des checkpoints
+  const [checkpointDeadlines, setCheckpointDeadlines] = useState<
+    Record<string, Date | undefined>
+  >({});
 
   // Mettre à jour formData.dateOfStart lorsque selectedDate change
   useEffect(() => {
@@ -192,73 +221,102 @@ export default function MultiStepForm() {
     }
   }, [selectedDateStart]);
 
+  // Mettre à jour les deadlines des checkpoints
+  useEffect(() => {
+    const updatedCheckpoints = formData.checkpoints.map((checkpoint) => {
+      if (checkpointDeadlines[checkpoint.id]) {
+        return {
+          ...checkpoint,
+          // deadline: format(
+          //   checkpointDeadlines[checkpoint.id] as Date,
+          //   "yyyy-MM-dd",
+          // ),
+          deadline: (checkpointDeadlines[checkpoint.id] as Date).toISOString(),
+        };
+      }
+      return checkpoint;
+    });
+
+    if (
+      JSON.stringify(updatedCheckpoints) !==
+      JSON.stringify(formData.checkpoints)
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        checkpoints: updatedCheckpoints,
+      }));
+    }
+  }, [checkpointDeadlines]);
+
+  const addCheckpoint = () => {
+    const newCheckpointId = `checkpoint-${Date.now()}`;
+    const newCheckpoint: Checkpoint = {
+      id: newCheckpointId,
+      name: "",
+      description: "",
+      deadline: "",
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      checkpoints: [...prev.checkpoints, newCheckpoint],
+    }));
+  };
+
+  const removeCheckpoint = (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      checkpoints: prev.checkpoints.filter(
+        (checkpoint) => checkpoint.id !== id,
+      ),
+    }));
+
+    // Supprimer également la deadline associée
+    const newDeadlines = { ...checkpointDeadlines };
+    delete newDeadlines[id];
+    setCheckpointDeadlines(newDeadlines);
+  };
+
+  const updateCheckpoint = (
+    id: string,
+    field: keyof Omit<Checkpoint, "id">,
+    value: string,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      checkpoints: prev.checkpoints.map((checkpoint) =>
+        checkpoint.id === id ? { ...checkpoint, [field]: value } : checkpoint,
+      ),
+    }));
+
+    // Marquer le champ comme touché
+    setTouchedFields((prev) => {
+      const newTouched = new Set(prev);
+      newTouched.add(`checkpoints.${id}.${field}`);
+      return newTouched;
+    });
+  };
+
+  // Fonction pour définir la deadline d'un checkpoint
+  const setCheckpointDeadline = (id: string, date: Date | undefined) => {
+    setCheckpointDeadlines((prev) => ({
+      ...prev,
+      [id]: date,
+    }));
+
+    if (date) {
+      // Marquer le champ comme touché
+      setTouchedFields((prev) => {
+        const newTouched = new Set(prev);
+        newTouched.add(`checkpoints.${id}.deadline`);
+        return newTouched;
+      });
+    }
+  };
+
   // useEffect(() => {
   //   console.log(errors);
   // }, [errors]);
-
-  const validateJobStep = () => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.jobTitle.trim()) {
-      newErrors.jobTitle = "Le titre du poste est requis";
-    } else if (formData.jobTitle.length < 3) {
-      newErrors.jobTitle = "Le titre doit contenir au moins 3 caractères";
-    }
-
-    if (!formData.jobDescription.trim()) {
-      newErrors.jobDescription = "La description du poste est requise";
-    } else if (formData.jobDescription.length < 20) {
-      newErrors.jobDescription =
-        "La description doit contenir au moins 20 caractères";
-    }
-
-    return newErrors;
-  };
-
-  const validateProfileStep = () => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.skills.trim()) {
-      newErrors.skills = "Les compétences requises sont nécessaires";
-    }
-
-    if (!formData.tjm.trim()) {
-      newErrors.tjm = "Le tarif journalier est requis";
-    } else if (isNaN(Number(formData.tjm))) {
-      newErrors.tjm = "Le tarif doit être un nombre valide";
-    }
-
-    if (!formData.dateOfStart.trim()) {
-      newErrors.dateOfStart = "La date de début est requise";
-    } else if (new Date(formData.dateOfStart) < new Date()) {
-      newErrors.dateOfStart = "La date de début ne peut pas être dans le passé";
-    }
-
-    if (formData.dateOfEnd && formData.dateOfEnd < formData.dateOfStart) {
-      newErrors.dateOfEnd =
-        "La date de fin ne peut pas être antérieure à la date de début";
-    }
-
-    if (!formData.experience.trim()) {
-      newErrors.experience = "Le niveau d'expérience est requis";
-    }
-
-    return newErrors;
-  };
-
-  const validateProjectStep = () => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.startDate) {
-      newErrors.startDate = "La date de début est requise";
-    }
-
-    if (!formData.projectSteps.trim()) {
-      newErrors.projectSteps = "Les étapes du projet sont requises";
-    }
-
-    return newErrors;
-  };
 
   // Validation avec Zod selon l'étape actuelle
   const validateCurrentStep = () => {
@@ -283,12 +341,31 @@ export default function MultiStepForm() {
           });
           return {};
         case 2:
-          // Valider uniquement les champs de l'étape "project"
-          projectSchema.parse({
-            startDate: formData.startDate,
-            projectSteps: formData.projectSteps,
+          // Vérifier si au moins un checkpoint est défini
+          // if (formData.checkpoints.length === 0) {
+          //   return {
+          //     checkpoints: "Au moins un checkpoint du projet est requis",
+          //   };
+          // }
+
+          // Valider chaque checkpoint du projet
+          const checkpointErrors: Record<string, string> = {};
+          formData.checkpoints.forEach((checkpoint) => {
+            try {
+              checkpointSchema.parse(checkpoint);
+            } catch (error) {
+              if (error instanceof z.ZodError) {
+                error.errors.forEach((err) => {
+                  if (err.path.length > 0) {
+                    const field = err.path[0] as string;
+                    checkpointErrors[`checkpoints.${checkpoint.id}.${field}`] =
+                      err.message;
+                  }
+                });
+              }
+            }
           });
-          return {};
+          return checkpointErrors;
         default:
           return {};
       }
@@ -328,7 +405,7 @@ export default function MultiStepForm() {
   };
 
   // Handle field blur
-  const handleBlur = (fieldName: keyof FormData) => {
+  const handleBlur = (fieldName: string) => {
     setTouchedFields((prev) => {
       const newTouched = new Set(prev);
       newTouched.add(fieldName);
@@ -367,8 +444,17 @@ export default function MultiStepForm() {
       fieldsToTouch.add("typePresence");
       fieldsToTouch.add("experience");
     } else if (currentStep === 2) {
-      fieldsToTouch.add("startDate");
-      fieldsToTouch.add("projectSteps");
+      // Marquer tous les champs des checkpoints comme touchés
+      formData.checkpoints.forEach((checkpoint) => {
+        fieldsToTouch.add(`checkpoints.${checkpoint.id}.name`);
+        fieldsToTouch.add(`checkpoints.${checkpoint.id}.description`);
+        fieldsToTouch.add(`checkpoints.${checkpoint.id}.deadline`);
+      });
+
+      // Si aucun checkpoint n'est défini, marquer le champ checkpoints comme touché
+      if (formData.checkpoints.length === 0) {
+        fieldsToTouch.add("checkpoints");
+      }
     }
 
     setTouchedFields(fieldsToTouch);
@@ -406,16 +492,23 @@ export default function MultiStepForm() {
   };
 
   // Formater la date pour l'affichage
-  const formatDisplayDate = (dateString: string) => {
-    if (!dateString) return "";
-    try {
-      const date = new Date(dateString);
-      return format(date, "d MMMM yyyy", {
-        locale: require("date-fns/locale/fr"),
-      });
-    } catch (error) {
-      return dateString;
-    }
+  // const formatDisplayDate = (dateString: string) => {
+  //   if (!dateString) return "";
+  //   try {
+  //     const date = new Date(dateString);
+  //     return format(date, "d MMMM yyyy", {
+  //       locale: require("date-fns/locale/fr"),
+  //     });
+  //   } catch (error) {
+  //     return dateString;
+  //   }
+  // };
+
+  // Vérifier si un checkpoint a des erreurs
+  const hasCheckpointErrors = (checkpointId: string) => {
+    return Object.keys(errors).some((key) =>
+      key.startsWith(`checkpoints.${checkpointId}`),
+    );
   };
 
   return (
@@ -693,28 +786,165 @@ export default function MultiStepForm() {
 
         {/* Step Three */}
         {currentStep === 2 && (
-          <div>
-            <h2 className="text-xl font-bold mb-4">
-              Les étapes clés du projet
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Date de début
-                </label>
-                <input type="date" className="w-full p-2 border rounded-md" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Étapes principales
-                </label>
-                <textarea
-                  className="w-full p-2 border rounded-md"
-                  rows={4}
-                  placeholder="Listez les étapes clés du projet..."
-                ></textarea>
-              </div>
+          <div className="flex flex-col gap-8">
+            <div className="flex justify-between items-center mb-2">
+              {/* <label className="block text-sm font-medium">
+                Checkpoints du projet <span className="text-red-500">*</span>
+              </label> */}
+              <Button
+                onClick={addCheckpoint}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 cursor-pointer border-full"
+              >
+                <Plus className="h-4 w-4 text-freehunt-main" />
+                Ajouter une étape
+              </Button>
             </div>
+
+            {formData.checkpoints.length === 0 ? (
+              <div className="text-center py-8 border border-dashed rounded-md bg-gray-50">
+                <p className="text-gray-500">
+                  Aucun checkpoint défini. Cliquez sur &quot;Ajouter une
+                  étape&quot; pour commencer.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {/* Liste des checkpoints */}
+                {formData.checkpoints.map((checkpoint, index) => (
+                  <div
+                    key={checkpoint.id}
+                    className={`border rounded-md p-4 flex flex-col gap-3 ${
+                      hasCheckpointErrors(checkpoint.id)
+                        ? "border-red-200 bg-red-50"
+                        : ""
+                    }`}
+                  >
+                    {/* Checkpoint Header + Delete */}
+                    <div className="flex justify-between items-start">
+                      <h2 className="text-xl font-bold text-freehunt-grey-dark underline">
+                        Checkpoint {index + 1} :
+                      </h2>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeCheckpoint(checkpoint.id)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50 -mt-1 -mr-2 cursor-pointer"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* Input Nom du Checkpoint */}
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-bold text-freehunt-main">
+                          Nom de l&apos;étape
+                        </h2>
+                        <p className="text-gray-400">
+                          Veuillez saissir le nom de l&apos;étape.
+                        </p>
+                      </div>
+                      <Input
+                        type="text"
+                        value={checkpoint.name}
+                        onChange={(e) =>
+                          updateCheckpoint(
+                            checkpoint.id,
+                            "name",
+                            e.target.value,
+                          )
+                        }
+                        onBlur={() =>
+                          handleBlur(`checkpoints.${checkpoint.id}.name`)
+                        }
+                        className={`w-full p-2 border rounded-md ${
+                          errors[`checkpoints.${checkpoint.id}.name`]
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        placeholder="Exemple : Étape 1 - Analyse des besoins"
+                      />
+                      {errors[`checkpoints.${checkpoint.id}.name`] && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center">
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          {errors[`checkpoints.${checkpoint.id}.name`]}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Input Description Checkpoint */}
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-bold text-freehunt-main">
+                          Description
+                        </h2>
+                        <p className="text-gray-400">
+                          Détaillez davantage ici ce que vous voulez réaliser
+                          lors de cette étape.
+                        </p>
+                      </div>
+                      <Textarea
+                        name="checkpointDescription"
+                        value={checkpoint.description}
+                        onChange={(e) =>
+                          updateCheckpoint(
+                            checkpoint.id,
+                            "description",
+                            e.target.value,
+                          )
+                        }
+                        onBlur={() =>
+                          handleBlur(`checkpoints.${checkpoint.id}.description`)
+                        }
+                        className={`w-full p-2 border rounded-md ${
+                          errors[`checkpoints.${checkpoint.id}.description`]
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        placeholder="Exemple : Nous souhaitons réaliser une analyse approfondie des besoins du client afin de définir les fonctionnalités clés de la plateforme. Cela inclut des entretiens avec les parties prenantes et l'examen de la documentation existante."
+                      ></Textarea>
+                      {errors[`checkpoints.${checkpoint.id}.description`] && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center">
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          {errors[`checkpoints.${checkpoint.id}.description`]}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Input Deadline Checkpoint */}
+                    <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-1">
+                        <h2 className="text-xl font-bold text-freehunt-main">
+                          Deadline
+                        </h2>
+                        <p className="text-gray-400">
+                          Sélectionnez une date limite pour cette étape.
+                        </p>
+                      </div>
+                      <DatePicker
+                        date={checkpointDeadlines[checkpoint.id]}
+                        setDate={(date) =>
+                          setCheckpointDeadline(checkpoint.id, date)
+                        }
+                        className={
+                          errors[`checkpoints.${checkpoint.id}.deadline`]
+                            ? "border-red-500"
+                            : ""
+                        }
+                      />
+                      {errors[`checkpoints.${checkpoint.id}.deadline`] && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center">
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          {errors[`checkpoints.${checkpoint.id}.deadline`]}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
