@@ -68,6 +68,8 @@ services:
       API_URL: ${API_URL}
       NEXT_PUBLIC_MATOMO_URL: ${NEXT_PUBLIC_MATOMO_URL}
       NEXT_PUBLIC_MATOMO_SITE_ID: ${NEXT_PUBLIC_MATOMO_SITE_ID}
+    deploy:
+      replicas: 3
 
   # Backend
   backend:
@@ -79,6 +81,8 @@ services:
       MINIO_URL: ${MINIO_URL}
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    deploy:
+      replicas: 3
 
   # Production-only services
   uptime-kuma:
