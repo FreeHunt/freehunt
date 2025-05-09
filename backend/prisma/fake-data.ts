@@ -1,4 +1,4 @@
-import { Role, SkillType, JobPostingLocation, DocumentType } from '@prisma/client';
+import { Role, SkillType, JobPostingLocation, CheckpointStatus, DocumentType } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import Decimal from 'decimal.js';
 
@@ -144,6 +144,7 @@ export function fakeCheckpointComplete() {
     name: faker.person.fullName(),
     description: faker.lorem.words(5),
     date: faker.date.anytime(),
+    status: CheckpointStatus.TODO,
     jobPostingId: faker.string.uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),

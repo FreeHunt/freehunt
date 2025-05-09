@@ -137,11 +137,18 @@ model Checkpoint {
   name         String
   description  String
   date         DateTime
+  status       CheckpointStatus @default(TODO)
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
   jobPostingId String     @db.Uuid
   quote        Quote?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now()) @updatedAt
+}
+
+enum CheckpointStatus {
+  TODO
+  IN_PROGRESS
+  DONE
 }
 
 // Devis

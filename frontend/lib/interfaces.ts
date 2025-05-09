@@ -65,3 +65,35 @@ export interface JobPostingSearchResult {
   data: JobPosting[];
   total: number;
 }
+
+export interface Project {
+  id: string;
+  name: string;
+  description: string;
+  endDate: string;
+  freelancerId: string;
+  companyId: string;
+  conversationId: string;
+  jobPostingId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Checkpoint {
+  id: string;
+  name: string;
+  description?: string;
+  date: string | Date;
+  status: "TODO" | "IN_PROGRESS" | "DONE" | "DELAYED" | "CANCELED";
+  jobPostingId: string;
+  quoteId?: string;
+}
+
+export interface JobPosting {
+  id: string;
+  name: string;
+}
+
+export interface Quote {
+  id: string;
+}

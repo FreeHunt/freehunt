@@ -14,6 +14,7 @@ import { MessagesModule } from './messages/message.module';
 import { UploadModule } from './common/upload/upload.module';
 import { ConfigModule } from '@nestjs/config';
 import { DocumentsModule } from './documents/documents.module';
+import { CheckpointsModule } from './checkpoints/checkpoints.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -31,6 +32,7 @@ import { DocumentsModule } from './documents/documents.module';
     MessagesModule,
     UploadModule,
     DocumentsModule,
+    CheckpointsModule,
   ],
   controllers: [],
   providers: [],

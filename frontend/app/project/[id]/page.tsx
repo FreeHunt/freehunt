@@ -1,0 +1,101 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import ProjectTimeline from "@/components/common/calendar/ProjectTimeline";
+import Conversation from "@/components/common/conversation/conversation";
+import { getCheckpoints } from "@/actions/checkPoints";
+import { Checkpoint } from "@/lib/interfaces";
+import CheckpointStats from "@/components/common/card/checkPointsStats";
+import { Project } from "@/lib/interfaces";
+import { getProject } from "@/actions/projects";
+
+export default function ProjectDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const projectId = params.id;
+  // Sample data with proper structure for the timeline component
+  const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
+  const [project, setProject] = useState<Project | null>(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      const project = await getProject(projectId);
+      setProject(project);
+
+      if (project) {
+        const checkpoints = await getCheckpoints(project.jobPostingId);
+        setCheckpoints(checkpoints);
+      }
+    };
+
+    fetchData();
+  }, [projectId]);
+
+  // Handle checkpoint click
+  const handleCheckpointClick = (checkpoint: Checkpoint) => {
+    console.log("Checkpoint clicked:", checkpoint);
+    // Add your logic here
+  };
+
+  return (
+    <div className="flex w-full h-full p-4">
+      <div className="flex w-full h-full flex-col items-start gap-3">
+        <div className="flex h-20 p-5 items-start gap-2.5 self-stretch border-b border-gray-200">
+          <h1 className="text-3xl font-bold">
+            Projet {project ? project.name : ""}
+          </h1>
+        </div>
+        <div className="flex w-full h-full items-start gap-3">
+          <div className="flex w-2/3 flex-col items-start gap-3">
+            <div className="flex w-full flex-col items-start gap-3 p-5">
+              <h1 className="text-2xl font-bold">Calendrier</h1>
+              <ProjectTimeline
+                checkpoints={checkpoints}
+                jobPostings={[]}
+                startDate={new Date().toISOString().split("T")[0]}
+                daysToShow={14}
+                onCheckpointClick={handleCheckpointClick}
+              />
+            </div>
+            <div className="flex w-full flex-col items-start gap-3 p-5">
+              <h1 className="text-2xl font-bold">Statistiques</h1>
+              {/* Add your statistics components here */}
+              <div className="w-full bg-gray-100 p-4 rounded">
+                <CheckpointStats checkpoints={checkpoints} />
+              </div>
+            </div>
+            <div className="flex w-full flex-col items-start gap-3 p-5">
+              <h1 className="text-2xl font-bold">Checkpoints</h1>
+              {/* Simple checkpoint list */}
+              <div className="w-full">
+                {checkpoints.map((checkpoint) => (
+                  <div
+                    key={checkpoint.id}
+                    className="mb-2 p-3 border rounded bg-white"
+                  >
+                    <div className="font-medium">{checkpoint.name}</div>
+                    <div className="text-sm text-gray-600">
+                      {checkpoint.description}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {new Date(checkpoint.date).toLocaleDateString("fr-FR")}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex w-1/3 flex-col items-start gap-3 h-full">
+            <div className="flex w-full flex-col items-start gap-3 p-5">
+              <h1 className="text-2xl font-bold">Conversations</h1>
+              <div className="w-full bg-gray-100 p-4 rounded">
+                <Conversation />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
