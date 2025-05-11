@@ -950,15 +950,165 @@ export default function MultiStepForm() {
 
         {/* Step Four */}
         {currentStep === 3 && (
-          <div>
-            <h2 className="text-xl font-bold mb-4">Récapitulatif</h2>
-            <p className="text-gray-600 mb-4">
+          <div className="flex flex-col gap-6">
+            <h2 className="text-2xl font-bold text-freehunt-main">
+              Récapitulatif de la mission
+            </h2>
+            <p className="text-gray-600 mb-2">
               Veuillez vérifier toutes les informations avant de soumettre votre
-              formulaire.
+              offre de mission.
             </p>
-            <div className="p-4 bg-gray-50 rounded-md">
-              <p className="font-medium">
-                Toutes les informations sont correctes ?
+
+            {/* Informations du job */}
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-freehunt-main mb-4">
+                Informations du poste
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <p className="text-gray-500 text-sm">Titre du poste</p>
+                  <p className="font-medium">
+                    {formData.jobTitle || "Non spécifié"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Description</p>
+                  <p className="whitespace-pre-wrap">
+                    {formData.jobDescription || "Non spécifié"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Profil recherché */}
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-freehunt-main mb-4">
+                Profil recherché
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-500 text-sm">Compétences requises</p>
+                  <div className="flex flex-wrap gap-2 mt-1">
+                    {formData.skills && formData.skills.length > 0 ? (
+                      formData.skills.map((skill) => (
+                        <span
+                          key={skill.value}
+                          className="bg-freehunt-main/10 text-freehunt-main px-2 py-1 rounded-full text-sm"
+                        >
+                          {skill.label}
+                        </span>
+                      ))
+                    ) : (
+                      <p>Aucune compétence spécifiée</p>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Tarif journalier</p>
+                  <p className="font-medium">
+                    {formData.tjm ? `${formData.tjm} €/jour` : "Non spécifié"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">
+                    Niveau d&apos;expérience
+                  </p>
+                  <p className="font-medium">
+                    {formData.experience || "Non spécifié"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Type de présence</p>
+                  <p className="font-medium">
+                    {formData.typePresence === JobPostingLocation.ONSITE &&
+                      "Sur site"}
+                    {formData.typePresence === JobPostingLocation.REMOTE &&
+                      "Télétravail"}
+                    {formData.typePresence === JobPostingLocation.HYBRID &&
+                      "Hybride"}
+                    {!formData.typePresence && "Non spécifié"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Date de début</p>
+                  <p className="font-medium">
+                    {formData.dateOfStart
+                      ? new Date(formData.dateOfStart).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          },
+                        )
+                      : "Non spécifiée"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-sm">
+                    Date de fin (optionnelle)
+                  </p>
+                  <p className="font-medium">
+                    {formData.dateOfEnd
+                      ? new Date(formData.dateOfEnd).toLocaleDateString(
+                          "fr-FR",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          },
+                        )
+                      : "Non spécifiée"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Étapes clés */}
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-freehunt-main mb-4">
+                Étapes clés du projet
+              </h3>
+              {formData.checkpoints && formData.checkpoints.length > 0 ? (
+                <div className="flex flex-col gap-4">
+                  {formData.checkpoints.map((checkpoint, index) => (
+                    <div
+                      key={checkpoint.id}
+                      className="border-l-4 border-freehunt-main pl-4 py-2"
+                    >
+                      <p className="font-medium text-lg">
+                        {checkpoint.name || `Étape ${index + 1}`}
+                      </p>
+                      <p className="text-gray-600 mt-1 whitespace-pre-wrap">
+                        {checkpoint.description || "Aucune description"}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Deadline:{" "}
+                        {checkpoint.deadline
+                          ? new Date(checkpoint.deadline).toLocaleDateString(
+                              "fr-FR",
+                              {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              },
+                            )
+                          : "Non spécifiée"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">Aucune étape clé définie</p>
+              )}
+            </div>
+
+            <div className="p-4 bg-yellow-50 rounded-md border border-yellow-200">
+              <p className="font-medium text-yellow-800 flex items-center">
+                <AlertCircle className="h-5 w-5 mr-2" />
+                Veuillez vérifier toutes les informations avant de soumettre.
+                Une fois soumise, votre offre de mission sera visible par les
+                freelances.
               </p>
             </div>
           </div>
