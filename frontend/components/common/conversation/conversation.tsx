@@ -159,7 +159,8 @@ export default function ConversationComponent({
 
   // Helper to determine if a message is from the current user
   const isCurrentUserMessage = (msg: Message) => {
-    return msg.senderId === user?.id;
+    console.log(msg.senderId, user?.id);
+    return msg.senderId === user?.id; // Doit correspondre à currentUserId
   };
 
   // Get the appropriate avatar based on who sent the message
@@ -318,17 +319,12 @@ export default function ConversationComponent({
               <div className="flex items-center gap-2 md:gap-3">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden">
                   <Image
-                    src={getOtherUserAvatar()}
+                    src={otherUserPicture?.url || "/images/default-avatar.png"}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                     width={40}
                     height={40}
                   />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-medium text-sm md:text-base">
-                    Conversation
-                  </span>
                 </div>
               </div>
               <button

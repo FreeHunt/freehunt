@@ -82,8 +82,14 @@ export default function ProjectDetailPage({
         const senderPicture = await getUserPicture(conversation.senderId);
         const receiverPicture = await getUserPicture(conversation.receiverId);
 
-        setCurrentUserPicture(senderPicture);
-        setOtherUserPicture(receiverPicture);
+        // Déterminer quel avatar appartient à l'utilisateur actuel
+        if (currentUserId === conversation.senderId) {
+          setCurrentUserPicture(senderPicture);
+          setOtherUserPicture(receiverPicture);
+        } else {
+          setCurrentUserPicture(receiverPicture);
+          setOtherUserPicture(senderPicture);
+        }
 
         // Join the conversation room
         if (conversation?.id && currentUserId) {
@@ -224,8 +230,8 @@ export default function ProjectDetailPage({
                     {conversation ? (
                       <Conversation
                         conversation={conversation}
-                        currentUserPicture={currentUserPicture || null}
-                        otherUserPicture={otherUserPicture || null}
+                        currentUserPicture={currentUserPicture}
+                        otherUserPicture={otherUserPicture}
                       />
                     ) : (
                       <div className="p-4 text-center">
