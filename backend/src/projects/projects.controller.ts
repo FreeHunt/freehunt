@@ -133,9 +133,7 @@ export class ProjectController {
     status: 400,
     description: 'Bad Request',
   })
-  remove(
-    @Param('id') id: string,
-  ): Promise<ProjectResponseDto> {
+  remove(@Param('id') id: string): Promise<ProjectResponseDto> {
     return this.projectsService.remove(id);
   }
 }

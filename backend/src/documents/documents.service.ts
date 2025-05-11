@@ -31,8 +31,10 @@ export class DocumentsService {
     return this.prisma.document.findUnique({ where: { id } });
   }
 
-  async findByUserId(userId: string): Promise<Document[]> {
-    return this.prisma.document.findMany({ where: { userId } });
+  async findAvatarByUserId(userId: string): Promise<Document | null> {
+    return this.prisma.document.findFirst({
+      where: { userId, type: 'AVATAR' },
+    });
   }
 
   async delete(id: string): Promise<Document> {

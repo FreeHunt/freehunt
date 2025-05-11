@@ -16,6 +16,7 @@ import { SearchJobPostingDto } from './dto/search-job-posting.dto';
 import { JobPostingResponseDto } from './dto/job-posting-response.dto';
 import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { JobPosting } from '@prisma/client';
 
 @ApiTags('job-postings')
 @Controller('job-postings')
@@ -153,5 +154,12 @@ export class JobPostingsController {
     @Body() searchJobPostingDto: SearchJobPostingDto,
   ): Promise<JobPostingSearchResult> {
     return this.jobPostingsService.search(searchJobPostingDto);
+  }
+
+  @Get('user/:userId')
+  getJobPostingsByUserId(
+    @Param('userId') userId: string,
+  ): Promise<JobPosting[]> {
+    return this.jobPostingsService.getJobPostingsByUserId(userId);
   }
 }

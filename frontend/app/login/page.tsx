@@ -1,18 +1,24 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Eye, EyeOff, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { useState } from "react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { login } from "@/actions/login";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // api de connexion...
     // console.log('Login avec:', email, password);
+    const user = await login(email, password);
+    console.log(user);
+    router.push("/");
   };
 
   return (
@@ -23,17 +29,24 @@ export default function Login() {
             On vous <span className="text-pink-500"> attendait... 🙂</span>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-pink-500 to-red-500 py-4 px-6">
             <h2 className="text-2xl font-bold text-white">Connexion</h2>
-            <p className="text-pink-100 text-sm mt-1">Accédez à votre espace personnel</p>
+            <p className="text-pink-100 text-sm mt-1">
+              Accédez à votre espace personnel
+            </p>
           </div>
-          
+
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Adresse email</label>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Adresse email
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -45,11 +58,21 @@ export default function Login() {
                   required
                 />
               </div>
-              
+
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">Mot de passe</label>
-                  <Link href="/forgot-password" className="text-sm text-pink-600 hover:text-pink-800 font-medium">Mot de passe oublié ?</Link>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Mot de passe
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-pink-600 hover:text-pink-800 font-medium"
+                  >
+                    Mot de passe oublié ?
+                  </Link>
                 </div>
                 <div className="relative">
                   <input
@@ -66,13 +89,17 @@ export default function Login() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                    aria-label={
+                      showPassword
+                        ? "Masquer le mot de passe"
+                        : "Afficher le mot de passe"
+                    }
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
               </div>
-              
+
               <div className="flex items-center">
                 <input
                   id="remember"
@@ -80,11 +107,14 @@ export default function Login() {
                   type="checkbox"
                   className="h-4 w-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
                 />
-                <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
+                <label
+                  htmlFor="remember"
+                  className="ml-2 block text-sm text-gray-700"
+                >
                   Se souvenir de moi
                 </label>
               </div>
-              
+
               <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
@@ -92,7 +122,7 @@ export default function Login() {
               >
                 Se connecter <ArrowRight size={18} />
               </button>
-              
+
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-300"></div>
@@ -104,11 +134,14 @@ export default function Login() {
             </form>
           </div>
         </div>
-        
+
         <div className="text-center mt-6">
           <p className="text-gray-600">
-            Pas encore de compte ?{' '}
-            <Link href="/register" className="font-medium text-pink-600 hover:text-pink-800">
+            Pas encore de compte ?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-pink-600 hover:text-pink-800"
+            >
               S&apos;inscrire
             </Link>
           </p>

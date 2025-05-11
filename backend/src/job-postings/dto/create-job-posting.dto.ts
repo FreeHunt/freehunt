@@ -77,4 +77,17 @@ export class CreateJobPostingDto {
     required: false,
   })
   skillIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  @ApiProperty({
+    description: 'Array of checkpoint IDs to associate with the job posting',
+    example: [
+      '550e8400-e29b-41d4-a716-446655440000',
+      '550e8400-e29b-41d4-a716-446655440001',
+    ],
+    required: false,
+  })
+  checkpointIds?: string[];
 }
