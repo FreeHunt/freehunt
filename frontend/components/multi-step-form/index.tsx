@@ -164,8 +164,9 @@ const formSchema = z.object({
 });
 
 // Type inféré à partir du schéma Zod
-type FormData = Omit<z.infer<typeof formSchema>, "checkpoints"> & {
+type FormData = Omit<z.infer<typeof formSchema>, "checkpoints" | "skills"> & {
   checkpoints: Checkpoint[];
+  skills: Skill[];
 };
 
 export default function MultiStepForm() {
@@ -180,7 +181,7 @@ export default function MultiStepForm() {
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
-    skills: [{ value: "", label: "" }],
+    skills: [],
     tjm: "",
     dateOfStart: "",
     dateOfEnd: "",
@@ -556,7 +557,7 @@ export default function MultiStepForm() {
                 value={formData.jobTitle}
                 onChange={handleChange}
                 onBlur={() => handleBlur("jobTitle")}
-                className={`text-freehunt-main rounded-full ${
+                className={`rounded-full ${
                   errors.jobTitle ? "border-red-500" : ""
                 }`}
                 placeholder="Exemple : Développeur Front-End React"
