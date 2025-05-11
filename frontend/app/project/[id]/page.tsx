@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import ProjectTimeline from "@/components/common/calendar/ProjectTimeline";
 import Conversation from "@/components/common/conversation/conversation";
-import { getCheckpoints } from "@/actions/checkPoints";
+import { getCheckpoints, updateCheckpoint } from "@/actions/checkPoints";
 import {
   Checkpoint,
   Conversation as ConversationInterface,
@@ -42,8 +42,12 @@ export default function ProjectDetailPage({
   const [project, setProject] = useState<Project | null>(null);
   const [conversation, setConversation] =
     useState<ConversationInterface | null>(null);
-  const [senderPicture, setSenderPicture] = useState<Document | null>(null);
-  const [receiverPicture, setReceiverPicture] = useState<Document | null>(null);
+  const [currentUserPicture, setCurrentUserPicture] = useState<Document | null>(
+    null,
+  );
+  const [otherUserPicture, setOtherUserPicture] = useState<Document | null>(
+    null,
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,8 +63,8 @@ export default function ProjectDetailPage({
         const senderPicture = await getUserPicture(conversation.senderId);
         const receiverPicture = await getUserPicture(conversation.receiverId);
 
-        setSenderPicture(senderPicture);
-        setReceiverPicture(receiverPicture);
+        setCurrentUserPicture(senderPicture);
+        setOtherUserPicture(receiverPicture);
 
         // Join the conversation room
         if (conversation?.id && currentUserId) {
@@ -74,13 +78,13 @@ export default function ProjectDetailPage({
   }, [projectId, currentUserId]);
 
   // Handle checkpoint click
-  const handleCheckpointClick = (checkpoint: Checkpoint) => {
-    console.log("Checkpoint clicked:", checkpoint);
-    // Add your logic here
+  const handleCheckpointClick = async (checkpoint: Checkpoint) => {
+    checkpoint.status = "DONE";
+    await updateCheckpoint(checkpoint);
   };
 
   return (
-    <SocketProvider userId={currentUserId}>
+    <SocketProvider userId={currentUserId || ""}>
       <div className="flex w-full h-full p-4">
         <div className="flex w-full h-full flex-col items-start gap-3">
           <div className="flex h-20 p-5 items-start gap-2.5 self-stretch border-b border-gray-200">
@@ -97,7 +101,6 @@ export default function ProjectDetailPage({
                   jobPostings={[]}
                   startDate={new Date().toISOString().split("T")[0]}
                   daysToShow={14}
-                  onCheckpointClick={handleCheckpointClick}
                 />
               </div>
               <div className="flex w-full flex-col items-start gap-3 p-5">
@@ -114,15 +117,37 @@ export default function ProjectDetailPage({
                   {checkpoints.map((checkpoint) => (
                     <div
                       key={checkpoint.id}
-                      className="mb-2 p-3 border rounded bg-white"
+                      className="mb-2 p-3 border rounded bg-white flex justify-between items-start"
                     >
-                      <div className="font-medium">{checkpoint.name}</div>
-                      <div className="text-sm text-gray-600">
-                        {checkpoint.description}
+                      <div>
+                        <div className="font-medium">{checkpoint.name}</div>
+                        <div className="text-sm text-gray-600">
+                          {checkpoint.description}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          {new Date(checkpoint.date).toLocaleDateString(
+                            "fr-FR",
+                          )}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {new Date(checkpoint.date).toLocaleDateString("fr-FR")}
-                      </div>
+                      <button
+                        onClick={() => handleCheckpointClick(checkpoint)}
+                        className="px-4 py-2 bg-freehunt-main text-white rounded-md hover:bg-freehunt-main/90 transition-colors duration-200 flex items-center gap-2 text-sm font-medium shadow-sm cursor-pointer"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        Valider
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -135,8 +160,8 @@ export default function ProjectDetailPage({
                   {conversation ? (
                     <Conversation
                       conversation={conversation}
-                      senderPicture={senderPicture || null}
-                      receiverPicture={receiverPicture || null}
+                      currentUserPicture={currentUserPicture || null}
+                      otherUserPicture={otherUserPicture || null}
                     />
                   ) : (
                     <div>Chargement de la conversation...</div>

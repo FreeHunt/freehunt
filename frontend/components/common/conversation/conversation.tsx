@@ -13,12 +13,12 @@ import { Conversation, Message, User, Document } from "@/lib/interfaces";
 
 export default function ConversationComponent({
   conversation,
-  senderPicture,
-  receiverPicture,
+  currentUserPicture,
+  otherUserPicture,
 }: {
   conversation: Conversation;
-  senderPicture: Document;
-  receiverPicture: Document;
+  currentUserPicture: Document | null;
+  otherUserPicture: Document | null;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -142,9 +142,14 @@ export default function ConversationComponent({
 
   // Helper to determine if a message is from the current user
   const isCurrentUserMessage = (msg: Message) => {
-    // Vérifier si l'utilisateur actuel est soit l'expéditeur soit le destinataire
     return msg.senderId === user?.id;
   };
+
+  // Get the appropriate avatar based on who sent the message
+  const getCurrentUserAvatar = () =>
+    currentUserPicture?.url || "/images/default-avatar.png";
+  const getOtherUserAvatar = () =>
+    otherUserPicture?.url || "/images/default-avatar.png";
 
   if (loading) {
     return (
@@ -164,7 +169,7 @@ export default function ConversationComponent({
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   <Image
-                    src={senderPicture?.url || "/images/default-avatar.png"}
+                    src={getOtherUserAvatar()}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                     width={40}
@@ -209,44 +214,38 @@ export default function ConversationComponent({
                     >
                       {!isCurrentUserMessage(msg) ? (
                         <div className="flex items-end space-x-2">
+                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={getOtherUserAvatar()}
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
+                            />
+                          </div>
                           <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
                             <p className="text-sm">{msg.content}</p>
                             <p className="text-xs text-gray-500 mt-1 text-right">
                               {formatMessageTime(msg.createdAt)}
                             </p>
                           </div>
-                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                            <Image
-                              src={
-                                receiverPicture?.url ||
-                                "/images/default-avatar.png"
-                              }
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                              width={40}
-                              height={40}
-                            />
-                          </div>
                         </div>
                       ) : (
                         <div className="flex items-end space-x-2">
+                          <div className="bg-blue-500 text-white rounded-2xl py-2 px-4 max-w-xs">
+                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-xs text-blue-100 mt-1">
+                              {formatMessageTime(msg.createdAt)}
+                            </p>
+                          </div>
                           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                             <Image
-                              src={
-                                senderPicture?.url ||
-                                "/images/default-avatar.png"
-                              }
+                              src={getCurrentUserAvatar()}
                               alt="Avatar"
                               className="w-full h-full object-cover"
                               width={40}
                               height={40}
                             />
-                          </div>
-                          <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
-                            <p className="text-sm">{msg.content}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {formatMessageTime(msg.createdAt)}
-                            </p>
                           </div>
                         </div>
                       )}
@@ -293,7 +292,7 @@ export default function ConversationComponent({
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden">
                   <Image
-                    src={senderPicture?.url || "/images/default-avatar.png"}
+                    src={getOtherUserAvatar()}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                     width={40}
@@ -340,44 +339,38 @@ export default function ConversationComponent({
                     >
                       {!isCurrentUserMessage(msg) ? (
                         <div className="flex items-end space-x-2">
+                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={getOtherUserAvatar()}
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
+                            />
+                          </div>
                           <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
                             <p className="text-sm">{msg.content}</p>
                             <p className="text-xs text-gray-500 mt-1 text-right">
                               {formatMessageTime(msg.createdAt)}
                             </p>
                           </div>
-                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                            <Image
-                              src={
-                                receiverPicture?.url ||
-                                "/images/default-avatar.png"
-                              }
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                              width={40}
-                              height={40}
-                            />
-                          </div>
                         </div>
                       ) : (
                         <div className="flex items-end space-x-2">
+                          <div className="bg-blue-500 text-white rounded-2xl py-2 px-4 max-w-xs">
+                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-xs text-blue-100 mt-1">
+                              {formatMessageTime(msg.createdAt)}
+                            </p>
+                          </div>
                           <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
                             <Image
-                              src={
-                                senderPicture?.url ||
-                                "/images/default-avatar.png"
-                              }
+                              src={getCurrentUserAvatar()}
                               alt="Avatar"
                               className="w-full h-full object-cover"
                               width={40}
                               height={40}
                             />
-                          </div>
-                          <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
-                            <p className="text-sm">{msg.content}</p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {formatMessageTime(msg.createdAt)}
-                            </p>
                           </div>
                         </div>
                       )}

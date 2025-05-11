@@ -21,7 +21,6 @@ interface ProjectTimelineProps {
   checkpoints?: Checkpoint[];
   daysToShow?: number;
   startDate?: string;
-  onCheckpointClick?: (checkpoint: Checkpoint) => void;
   jobPostings?: JobPosting[];
   quotes?: Quote[];
 }
@@ -30,7 +29,6 @@ export default function ProjectTimeline({
   checkpoints = [],
   daysToShow = 7,
   startDate,
-  onCheckpointClick = () => {},
   jobPostings = [],
   quotes = [],
 }: ProjectTimelineProps) {
@@ -392,7 +390,6 @@ export default function ProjectTimeline({
                     top: "50%",
                     transform: "translate(-50%, -50%)",
                   }}
-                  onClick={() => onCheckpointClick(checkpoint)}
                   title={`${checkpoint.name} (${formatDate(
                     new Date(checkpoint.date).toISOString().split("T")[0],
                   )})`}
