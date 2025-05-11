@@ -11,14 +11,18 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [error, setError] = useState("");
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // api de connexion...
     // console.log('Login avec:', email, password);
-    const user = await login(email, password);
-    console.log(user);
-    router.push("/");
+    const response = await login(email, password);
+    // Debugging: Log only non-sensitive information if necessary
+    if (response.success) {
+      router.push("/");
+    } else {
+      setError("Email ou mot de passe incorrect");
+    }
   };
 
   return (
@@ -40,6 +44,7 @@ export default function Login() {
 
           <div className="p-6">
             <form onSubmit={handleSubmit} className="space-y-5">
+              {error && <div className="text-red-500">{error}</div>}
               <div>
                 <label
                   htmlFor="email"
@@ -67,12 +72,6 @@ export default function Login() {
                   >
                     Mot de passe
                   </label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-pink-600 hover:text-pink-800 font-medium"
-                  >
-                    Mot de passe oublié ?
-                  </Link>
                 </div>
                 <div className="relative">
                   <input
@@ -98,21 +97,6 @@ export default function Login() {
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
                 </div>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  id="remember"
-                  name="remember"
-                  type="checkbox"
-                  className="h-4 w-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
-                />
-                <label
-                  htmlFor="remember"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  Se souvenir de moi
-                </label>
               </div>
 
               <button
