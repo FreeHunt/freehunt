@@ -92,6 +92,7 @@ const profileSchema = z.object({
     .min(1, "La date de début est requise")
     .refine(
       (date) => {
+        console.log("dateStart", date);
         return (
           new Date(date).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
         );
@@ -100,21 +101,7 @@ const profileSchema = z.object({
         message: "La date de début ne peut pas être dans le passé",
       },
     ),
-  dateOfEnd: z
-    .string()
-    .optional()
-    .refine(
-      (date) => {
-        if (!date) return true; // Si pas de date de fin, pas de validation
-        const startDate = new Date(date);
-        const endDate = new Date(date);
-        return endDate >= startDate;
-      },
-      {
-        message:
-          "La date de fin ne peut pas être antérieure à la date de début",
-      },
-    ),
+  dateOfEnd: z.string().optional(),
   typePresence: z
     .string()
     .refine((val) => validPresenceForZod.includes(val), {
@@ -177,7 +164,7 @@ export default function MultiStepForm() {
     { id: "summary", label: "Récapitulatif" },
   ];
 
-  const [currentStep, setCurrentStep] = useState(2);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -222,16 +209,74 @@ export default function MultiStepForm() {
     }
   }, [selectedDateStart]);
 
+  // Mettre à jour formData.dateOfEnd lorsque selectedDateEnd change
+  useEffect(() => {
+    if (selectedDateEnd) {
+      setFormData((prev) => ({
+        ...prev,
+        dateOfEnd: selectedDateEnd.toISOString(),
+      }));
+
+      // Marquer le champ comme touché
+      setTouchedFields((prev) => {
+        const newTouched = new Set(prev);
+        newTouched.add("dateOfEnd");
+        return newTouched;
+      });
+    }
+  }, [selectedDateEnd]);
+
+  // Mettre à jour formData.dateOfEnd lorsque selectedDate (et qu'elle est postérieure à la date de fin) change
+  useEffect(() => {
+    if (selectedDateStart && selectedDateEnd) {
+      if (selectedDateStart > selectedDateEnd) {
+        // Réinitialiser la date de fin ou l'aligner sur la date de début
+        setSelectedDateEnd(selectedDateStart);
+
+        setFormData((prev) => ({
+          ...prev,
+          dateOfEnd: selectedDateStart.toISOString(),
+        }));
+
+        // Marquer le champ comme touché
+        setTouchedFields((prev) => {
+          const newTouched = new Set(prev);
+          newTouched.add("dateOfEnd");
+          return newTouched;
+        });
+      }
+    }
+  }, [selectedDateStart]);
+
+  // Remplacer votre fonction handleEndDateChange
+  const handleEndDateChange = (date: Date | undefined) => {
+    // Toujours mettre à jour la date de fin sélectionnée
+    setSelectedDateEnd(date);
+
+    // Vérifier si la date est antérieure à la date de début
+    if (date && selectedDateStart && date < selectedDateStart) {
+      // Afficher un message d'erreur mais ne pas corriger la date
+      setErrors((prev) => ({
+        ...prev,
+        dateOfEnd:
+          "La date de fin ne peut pas être antérieure à la date de début",
+      }));
+    } else {
+      // Si la date est valide, supprimer l'erreur
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.dateOfEnd;
+        return newErrors;
+      });
+    }
+  };
+
   // Mettre à jour les deadlines des checkpoints
   useEffect(() => {
     const updatedCheckpoints = formData.checkpoints.map((checkpoint) => {
       if (checkpointDeadlines[checkpoint.id]) {
         return {
           ...checkpoint,
-          // deadline: format(
-          //   checkpointDeadlines[checkpoint.id] as Date,
-          //   "yyyy-MM-dd",
-          // ),
           deadline: (checkpointDeadlines[checkpoint.id] as Date).toISOString(),
         };
       }
@@ -315,9 +360,9 @@ export default function MultiStepForm() {
     }
   };
 
-  // useEffect(() => {
-  //   console.log(errors);
-  // }, [errors]);
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   // Validation avec Zod selon l'étape actuelle
   const validateCurrentStep = () => {
@@ -426,7 +471,22 @@ export default function MultiStepForm() {
       }
     });
 
-    setErrors(filteredErrors);
+    // Préserver les erreurs personnalisées qui ne viennent pas de Zod
+    setErrors((prevErrors) => {
+      // Liste des erreurs personnalisées à conserver
+      const customErrorKeys = ["dateOfEnd"]; // Ajoutez d'autres clés ici si nécessaire
+
+      const newErrors = { ...filteredErrors };
+
+      // Conserver toutes les erreurs personnalisées
+      customErrorKeys.forEach((key) => {
+        if (prevErrors[key]) {
+          newErrors[key] = prevErrors[key];
+        }
+      });
+
+      return newErrors;
+    });
   }, [formData, touchedFields, currentStep]);
 
   const goToNextStep = () => {
@@ -491,19 +551,6 @@ export default function MultiStepForm() {
       }
     }
   };
-
-  // Formater la date pour l'affichage
-  // const formatDisplayDate = (dateString: string) => {
-  //   if (!dateString) return "";
-  //   try {
-  //     const date = new Date(dateString);
-  //     return format(date, "d MMMM yyyy", {
-  //       locale: require("date-fns/locale/fr"),
-  //     });
-  //   } catch (error) {
-  //     return dateString;
-  //   }
-  // };
 
   // Vérifier si un checkpoint a des erreurs
   const hasCheckpointErrors = (checkpointId: string) => {
@@ -705,7 +752,7 @@ export default function MultiStepForm() {
                 </div>
                 <DatePicker
                   date={selectedDateEnd}
-                  setDate={setSelectedDateEnd}
+                  setDate={handleEndDateChange}
                   className={`text-freehunt-black-two rounded-full ${
                     errors.dateOfEnd ? "border-red-500" : ""
                   }`}
