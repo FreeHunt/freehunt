@@ -106,6 +106,12 @@ export default function ProjectDetailPage({
   const handleCheckpointClick = async (checkpoint: Checkpoint) => {
     checkpoint.status = "DONE";
     await updateCheckpoint(checkpoint);
+
+    // Mettre à jour la liste des checkpoints
+    const updatedCheckpoints = checkpoints.map((cp) =>
+      cp.id === checkpoint.id ? checkpoint : cp,
+    );
+    setCheckpoints(updatedCheckpoints);
   };
 
   // Mobile tabs toggle
@@ -186,26 +192,52 @@ export default function ProjectDetailPage({
                             {new Date(checkpoint.date).toLocaleDateString(
                               "fr-FR",
                             )}
+                            {checkpoint.status === "DONE" && (
+                              <span className="text-sm text-green-500">
+                                - Validé
+                              </span>
+                            )}
+                            {checkpoint.status === "TODO" && (
+                              <span className="text-sm text-red-500">
+                                - Non validé
+                              </span>
+                            )}
+
+                            {checkpoint.status === "IN_PROGRESS" && (
+                              <span className="text-sm text-yellow-500">
+                                - En cours
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleCheckpointClick(checkpoint)}
-                          className="px-3 py-1.5 md:px-4 md:py-2 bg-freehunt-main text-white rounded-md hover:bg-freehunt-main/90 transition-colors duration-200 flex items-center gap-1 md:gap-2 text-sm font-medium shadow-sm cursor-pointer w-full md:w-auto justify-center"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                        {/* if checkpoint is not done, show the button */}
+                        {checkpoint.status != "DONE" && (
+                          <button
+                            onClick={() => handleCheckpointClick(checkpoint)}
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-freehunt-main text-white rounded-md hover:bg-freehunt-main/90 transition-colors duration-200 flex items-center gap-1 md:gap-2 text-sm font-medium shadow-sm cursor-pointer w-full md:w-auto justify-center"
                           >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          Valider
-                        </button>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            Valider
+                          </button>
+                        )}
+
+                        {/* if checkpoint is done, show the button */}
+                        {checkpoint.status === "DONE" && (
+                          <p className="text-sm text-green-500">
+                            Checkpoint validé
+                          </p>
+                        )}
                       </div>
                     ))}
 
