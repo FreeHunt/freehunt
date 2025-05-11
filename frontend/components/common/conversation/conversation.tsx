@@ -1,80 +1,153 @@
-// todo : fixer le bouton document qui ne fonctionne pas
-// todo : fixer la conversation qui n'est pas en direct
-// todo : fixer le aujourd'hui qui n'est pas fonctionnel ou incohérent
+"use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ArrowUpRight, X, Send, Paperclip } from "lucide-react";
 import Image from "next/image";
 import {
-  Conversation as ConversationInterface,
-  Message,
-  User,
-  Document,
-} from "@/lib/interfaces";
-import { sendMessage } from "@/actions/conversations";
+  getMessagesByConversation,
+  sendMessage,
+} from "@/actions/conversations";
 import { getCurrentUser } from "@/actions/auth";
+import { io } from "socket.io-client";
+
 export default function ConversationComponent({
   conversation,
   senderPicture,
   receiverPicture,
-}: {
-  conversation: ConversationInterface;
-  senderPicture: Document | null;
-  receiverPicture: Document | null;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const messagesEndRef = useRef(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [user, setUser] = useState<User | null>(null);
-  useEffect(() => {
-    if (conversation.messages) {
-      setMessages(conversation.messages);
-    }
-  }, [conversation]);
+  const socketRef = useRef(null);
 
+  // Connect to socket when component mounts
+  useEffect(() => {
+    // Connect to the WebSocket server
+    socketRef.current = io(
+      process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001",
+    );
+
+    // Join conversation room
+    if (conversation?.id) {
+      socketRef.current.emit("joinRoom", { roomId: conversation.id });
+    }
+
+    // Listen for new messages
+    socketRef.current.on("newMessage", (message) => {
+      if (message.conversationId === conversation?.id) {
+        setMessages((prevMessages) => {
+          // Vérifier si le message existe déjà
+          const messageExists = prevMessages.some(
+            (msg) => msg.id === message.id,
+          );
+          if (messageExists) {
+            return prevMessages;
+          }
+          return [...prevMessages, message];
+        });
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (conversation?.id) {
+        socketRef.current.emit("leaveRoom", { roomId: conversation.id });
+      }
+      socketRef.current.disconnect();
+    };
+  }, [conversation?.id]);
+
+  // Fetch initial messages and current user
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (conversation?.id) {
+        setLoading(true);
+        try {
+          const data = await getMessagesByConversation(conversation.id);
+          setMessages(data);
+        } catch (error) {
+          console.error("Failed to fetch messages:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    const fetchUser = async () => {
+      try {
+        const userData = await getCurrentUser();
+        setUser(userData);
+      } catch (error) {
+        console.error("Failed to fetch current user:", error);
+      }
+    };
+
+    fetchMessages();
+    fetchUser();
+  }, [conversation?.id]);
+
+  // Scroll to bottom when messages change or when view is expanded
   useEffect(() => {
     if (messagesEndRef.current) {
-      (messagesEndRef.current as HTMLElement).scrollIntoView({
-        behavior: "smooth",
-      });
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, expanded]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = await getCurrentUser();
-      setUser(user);
-    };
-    fetchUser();
-  }, []);
 
   const toggleExpand = () => {
     setExpanded(!expanded);
   };
 
-  const handleSendMessage = () => {
-    if (message.trim()) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
+  const handleSendMessage = async () => {
+    if (!message.trim() || !conversation) return;
+
+    try {
+      const messageToSend = {
         content: message,
-        senderId: user?.id || "",
+        senderId: user?.id || conversation.senderId,
         receiverId: conversation.receiverId,
         conversationId: conversation.id,
-        //documentId:
       };
-      setMessages([...messages, newMessage]);
+
+      await sendMessage(messageToSend);
+      // Socket will handle the state update, but let's clear the input
       setMessage("");
-      sendMessage(newMessage);
+    } catch (error) {
+      console.error("Failed to send message:", error);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleSendMessage();
     }
   };
+
+  // Format the timestamp for messages
+  const formatMessageTime = (dateString) => {
+    const date = dateString ? new Date(dateString) : new Date();
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  // Helper to determine if a message is from the current user
+  const isCurrentUserMessage = (msg) => {
+    // Vérifier si l'utilisateur actuel est soit l'expéditeur soit le destinataire
+    return msg.senderId === user?.id;
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center">
+        Chargement des messages...
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
@@ -115,67 +188,67 @@ export default function ConversationComponent({
                 <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
               </div>
 
-              {messages.map((msg) => (
-                <div key={msg.id}>
-                  <div
-                    className={`flex ${
-                      msg.senderId === conversation.senderId
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    {msg.senderId !== conversation.senderId && (
-                      <div className="flex items-end space-x-2">
-                        <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
-                          <p className="text-sm">{msg.content}</p>
-                          <p className="text-xs text-gray-500 mt-1 text-right">
-                            {new Date().toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                          <Image
-                            src={
-                              receiverPicture?.url ||
-                              "/images/default-avatar.png"
-                            }
-                            alt="Avatar"
-                            className="w-full h-full object-cover"
-                            width={40}
-                            height={40}
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {msg.senderId === conversation.senderId && (
-                      <div className="flex items-end space-x-2">
-                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                          <Image
-                            src={
-                              senderPicture?.url || "/images/default-avatar.png"
-                            }
-                            alt="Avatar"
-                            className="w-full h-full object-cover"
-                            width={40}
-                            height={40}
-                          />
-                        </div>
-                        <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
-                          <p className="text-sm">{msg.content}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date().toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              {messages.length === 0 ? (
+                <div className="flex items-center justify-center h-24 text-gray-500">
+                  Aucun message dans cette conversation
                 </div>
-              ))}
+              ) : (
+                messages.map((msg) => (
+                  <div key={msg.id}>
+                    <div
+                      className={`flex ${
+                        isCurrentUserMessage(msg)
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
+                    >
+                      {!isCurrentUserMessage(msg) ? (
+                        <div className="flex items-end space-x-2">
+                          <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
+                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-xs text-gray-500 mt-1 text-right">
+                              {formatMessageTime(msg.createdAt)}
+                            </p>
+                          </div>
+                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={
+                                receiverPicture?.url ||
+                                "/images/default-avatar.png"
+                              }
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-end space-x-2">
+                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={
+                                senderPicture?.url ||
+                                "/images/default-avatar.png"
+                              }
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
+                            />
+                          </div>
+                          <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
+                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatMessageTime(msg.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
 
               {/* Invisible element for scrolling to bottom */}
               <div ref={messagesEndRef} />
@@ -246,67 +319,67 @@ export default function ConversationComponent({
                 <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
               </div>
 
-              {messages.map((msg) => (
-                <div key={msg.id}>
-                  <div
-                    className={`flex ${
-                      msg.senderId === conversation.senderId
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    {msg.senderId !== conversation.senderId && (
-                      <div className="flex items-end space-x-2">
-                        <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
-                          <p className="text-sm">{msg.content}</p>
-                          <p className="text-xs text-gray-500 mt-1 text-right">
-                            {new Date().toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                          <Image
-                            src={
-                              receiverPicture?.url ||
-                              "/images/default-avatar.png"
-                            }
-                            alt="Avatar"
-                            className="w-full h-full object-cover"
-                            width={40}
-                            height={40}
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {msg.senderId === conversation.senderId && (
-                      <div className="flex items-end space-x-2">
-                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                          <Image
-                            src={
-                              senderPicture?.url || "https://placehold.co/40x40"
-                            }
-                            alt="Avatar"
-                            className="w-full h-full object-cover"
-                            width={40}
-                            height={40}
-                          />
-                        </div>
-                        <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
-                          <p className="text-sm">{msg.content}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date().toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              {messages.length === 0 ? (
+                <div className="flex items-center justify-center h-24 text-gray-500">
+                  Aucun message dans cette conversation
                 </div>
-              ))}
+              ) : (
+                messages.map((msg) => (
+                  <div key={msg.id}>
+                    <div
+                      className={`flex ${
+                        isCurrentUserMessage(msg)
+                          ? "justify-end"
+                          : "justify-start"
+                      }`}
+                    >
+                      {!isCurrentUserMessage(msg) ? (
+                        <div className="flex items-end space-x-2">
+                          <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
+                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-xs text-gray-500 mt-1 text-right">
+                              {formatMessageTime(msg.createdAt)}
+                            </p>
+                          </div>
+                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={
+                                receiverPicture?.url ||
+                                "/images/default-avatar.png"
+                              }
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-end space-x-2">
+                          <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                            <Image
+                              src={
+                                senderPicture?.url ||
+                                "/images/default-avatar.png"
+                              }
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                              width={40}
+                              height={40}
+                            />
+                          </div>
+                          <div className="bg-gray-200 rounded-2xl py-2 px-4 max-w-xs">
+                            <p className="text-sm">{msg.content}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {formatMessageTime(msg.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
 
               {/* Invisible element for scrolling to bottom */}
               <div ref={messagesEndRef} />
@@ -324,7 +397,7 @@ export default function ConversationComponent({
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                onKeyUp={handleKeyPress}
+                onKeyPress={handleKeyPress}
                 placeholder="Message..."
                 className="flex-grow px-3 py-2 outline-none"
               />
