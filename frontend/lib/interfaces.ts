@@ -105,6 +105,8 @@ export interface Message {
   conversationId: string;
   documentId?: string;
   projectId?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface JobPosting {

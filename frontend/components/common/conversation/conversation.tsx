@@ -8,20 +8,25 @@ import {
   sendMessage,
 } from "@/actions/conversations";
 import { getCurrentUser } from "@/actions/auth";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
+import { Conversation, Message, User, Document } from "@/lib/interfaces";
 
 export default function ConversationComponent({
   conversation,
   senderPicture,
   receiverPicture,
+}: {
+  conversation: Conversation;
+  senderPicture: Document;
+  receiverPicture: Document;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const messagesEndRef = useRef(null);
-  const socketRef = useRef(null);
+  const [user, setUser] = useState<User | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
   // Connect to socket when component mounts
   useEffect(() => {
@@ -38,7 +43,7 @@ export default function ConversationComponent({
     // Listen for new messages
     socketRef.current.on("newMessage", (message) => {
       if (message.conversationId === conversation?.id) {
-        setMessages((prevMessages) => {
+        setMessages((prevMessages: Message[]) => {
           // Vérifier si le message existe déjà
           const messageExists = prevMessages.some(
             (msg) => msg.id === message.id,
@@ -54,9 +59,9 @@ export default function ConversationComponent({
     // Cleanup on unmount
     return () => {
       if (conversation?.id) {
-        socketRef.current.emit("leaveRoom", { roomId: conversation.id });
+        socketRef.current?.emit("leaveRoom", { roomId: conversation.id });
       }
-      socketRef.current.disconnect();
+      socketRef.current?.disconnect();
     };
   }, [conversation?.id]);
 
@@ -111,7 +116,7 @@ export default function ConversationComponent({
         conversationId: conversation.id,
       };
 
-      await sendMessage(messageToSend);
+      await sendMessage(messageToSend as Message);
       // Socket will handle the state update, but let's clear the input
       setMessage("");
     } catch (error) {
@@ -119,7 +124,7 @@ export default function ConversationComponent({
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
       handleSendMessage();
@@ -127,7 +132,7 @@ export default function ConversationComponent({
   };
 
   // Format the timestamp for messages
-  const formatMessageTime = (dateString) => {
+  const formatMessageTime = (dateString: string) => {
     const date = dateString ? new Date(dateString) : new Date();
     return date.toLocaleTimeString([], {
       hour: "2-digit",
@@ -136,7 +141,7 @@ export default function ConversationComponent({
   };
 
   // Helper to determine if a message is from the current user
-  const isCurrentUserMessage = (msg) => {
+  const isCurrentUserMessage = (msg: Message) => {
     // Vérifier si l'utilisateur actuel est soit l'expéditeur soit le destinataire
     return msg.senderId === user?.id;
   };

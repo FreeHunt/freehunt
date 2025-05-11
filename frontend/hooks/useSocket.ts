@@ -1,11 +1,11 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 // Define interface for context
 interface SocketContextType {
-  socket: any;
+  socket: Socket | null;
   connected: boolean;
   joinRoom: (roomId: string) => void;
   leaveRoom: (roomId: string) => void;
@@ -20,7 +20,7 @@ export const SocketProvider: React.FC<{
   children: React.ReactNode;
   userId: string;
 }> = ({ children, userId }) => {
-  const [socket, setSocket] = useState<any>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
