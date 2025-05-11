@@ -17,7 +17,7 @@ export default function Login() {
     // api de connexion...
     // console.log('Login avec:', email, password);
     const response = await login(email, password);
-    console.log(response);
+    // Debugging: Log only non-sensitive information if necessary
     if (response.success) {
       router.push("/");
     } else {
