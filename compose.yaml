@@ -147,6 +147,15 @@ services:
     env_file:
       - .env
 
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    env_file:
+      - .env
+    command: |
+      listen --api-key $STRIPE_SECRET_KEY
+      --skip-verify
+      --forward-to http://backend:3000/api/stripe/webhook
+
 volumes:
   db:
   uptime-kuma-data:

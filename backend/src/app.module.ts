@@ -15,6 +15,7 @@ import { UploadModule } from './common/upload/upload.module';
 import { ConfigModule } from '@nestjs/config';
 import { DocumentsModule } from './documents/documents.module';
 import { CheckpointsModule } from './checkpoints/checkpoints.module';
+import { StripeModule } from './common/stripe/stripe.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -33,6 +34,7 @@ import { CheckpointsModule } from './checkpoints/checkpoints.module';
     UploadModule,
     DocumentsModule,
     CheckpointsModule,
+    StripeModule,
   ],
   controllers: [],
   providers: [],
