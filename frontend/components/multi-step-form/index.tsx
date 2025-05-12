@@ -578,8 +578,7 @@ export default function MultiStepForm() {
     }
   };
 
-  // Fonction pour soumettre le formulaire
-  const handleSubmit = () => {
+  const handleSubmitForm = () => {
     // Valider le formulaire complet avec Zod
     try {
       const validatedData = formSchema.parse(formData);
@@ -1217,7 +1216,7 @@ export default function MultiStepForm() {
         {currentStep < steps.length - 1 ? (
           <Button onClick={goToNextStep}>Suivant</Button>
         ) : (
-          <Button>Soumettre</Button>
+          <Button onClick={handleSubmitForm}>Soumettre</Button>
         )}
       </div>
     </div>
