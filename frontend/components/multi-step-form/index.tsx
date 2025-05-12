@@ -248,21 +248,40 @@ export default function MultiStepForm() {
     }
   }, [selectedDateStart]);
 
-  // Remplacer votre fonction handleEndDateChange
+  // Fonction centralisée pour valider les dates
+  const validateDates = (
+    startDate?: string | Date,
+    endDate?: string | Date,
+  ) => {
+    // Si la date de fin n'est pas définie, pas d'erreur
+    if (!endDate) return null;
+    if (!startDate) return null;
+
+    // Convertir les dates en objets Date si ce sont des chaînes
+    const start =
+      typeof startDate === "string" ? new Date(startDate) : startDate;
+    const end = typeof endDate === "string" ? new Date(endDate) : endDate;
+
+    // Vérifier que la date de fin n'est pas antérieure à la date de début
+    if (end < start) {
+      return "La date de fin ne peut pas être antérieure à la date de début";
+    }
+
+    return null; // Pas d'erreur
+  };
+
   const handleEndDateChange = (date: Date | undefined) => {
-    // Toujours mettre à jour la date de fin sélectionnée
     setSelectedDateEnd(date);
 
-    // Vérifier si la date est antérieure à la date de début
-    if (date && selectedDateStart && date < selectedDateStart) {
-      // Afficher un message d'erreur mais ne pas corriger la date
+    const dateError = validateDates(selectedDateStart, date);
+
+    if (dateError) {
       setErrors((prev) => ({
         ...prev,
-        dateOfEnd:
-          "La date de fin ne peut pas être antérieure à la date de début",
+        dateOfEnd: dateError,
       }));
     } else {
-      // Si la date est valide, supprimer l'erreur
+      // Supprimer l'erreur
       setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors.dateOfEnd;
@@ -385,7 +404,19 @@ export default function MultiStepForm() {
             typePresence: formData.typePresence,
             experience: formData.experience,
           });
-          return {};
+
+          // Validation des dates
+          const errors: Record<string, string> = {};
+          const dateError = validateDates(
+            formData.dateOfStart,
+            formData.dateOfEnd,
+          );
+
+          if (dateError) {
+            errors.dateOfEnd = dateError;
+          }
+
+          return errors;
         case 2:
           // Vérifier si au moins un checkpoint est défini
           // if (formData.checkpoints.length === 0) {
@@ -424,6 +455,16 @@ export default function MultiStepForm() {
             fieldErrors[err.path[0]] = err.message;
           }
         });
+
+        // Validation des dates
+        const dateError = validateDates(
+          formData.dateOfStart,
+          formData.dateOfEnd,
+        );
+        if (dateError) {
+          fieldErrors.dateOfEnd = dateError;
+        }
+
         return fieldErrors;
       }
       return {};
@@ -701,7 +742,7 @@ export default function MultiStepForm() {
                 value={formData.tjm}
                 onChange={handleChange}
                 onBlur={() => handleBlur("tjm")}
-                className={`text-freehunt-main rounded-full ${
+                className={`text-freehunt-black-two rounded-full ${
                   errors.tjm ? "border-red-500" : ""
                 }`}
                 placeholder="Exemple : 500 €/jour"

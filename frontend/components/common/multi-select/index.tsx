@@ -107,7 +107,7 @@ export function MultiSelect({
     (skill) => !selected?.includes(skill),
   );
 
-  console.log("selectablesItems", selectablesItems);
+  // console.log("selectablesItems", selectablesItems);
   // console.log("selectedItems", selectedItems);
   // console.log("inputValue", inputValue);
 
