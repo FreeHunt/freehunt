@@ -72,13 +72,6 @@ services:
     image: ghcr.io/freehunt/freehunt/backend:latest
     ports:
       - "3000:3000"
-    environment:
-      AUTHENTIK_URL: ${AUTHENTIK_URL}
-      DATABASE_URL: ${DATABASE_URL}
-      FRONTEND_URL: ${FRONTEND_URL}
-      MINIO_URL: ${MINIO_URL}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
     deploy:
       replicas: 3
 
