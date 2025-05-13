@@ -92,6 +92,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check TypeScript types
+        run: npm run tsc -- --noEmit
+
       - name: Run ESLint
         run: npm run lint
 
