@@ -169,20 +169,6 @@ jobs:
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID }}
 
-      # Report build status
-      - name: Report build status
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Frontend Docker image successfully built and pushed to GHCR"
-            echo "Image: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend"
-            echo "Tags: ${{ steps.meta.outputs.tags }}"
-            echo "Digest: ${{ steps.build-and-push.outputs.digest }}"
-          else
-            echo "❌ Frontend Docker image build failed"
-            exit 1
-          fi
-
   deploy-backend:
     name: Deploy backend
     needs: [backend]
@@ -267,17 +253,3 @@ jobs:
             MINIO_URL=${{ vars.MINIO_URL }}
             MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }}
             MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }}
-
-      # Report build status
-      - name: Report build status
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Backend Docker image successfully built and pushed to GHCR"
-            echo "Image: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/backend"
-            echo "Tags: ${{ steps.meta.outputs.tags }}"
-            echo "Digest: ${{ steps.build-and-push.outputs.digest }}"
-          else
-            echo "❌ Backend Docker image build failed"
-            exit 1
-          fi
