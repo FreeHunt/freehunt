@@ -121,7 +121,7 @@ export interface CompanyFormData {
   siren: string;
   description: string;
   address: string;
-  logo: string;
+  logo: File | null;
 }
 
 export interface CompanyPreviewCardProps {
@@ -142,6 +142,8 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
     // Upload the file first
     let avatarUrl = null;
     fileFormData.append("bucketName", bucketName);
+    // Get the current user
+    const user = await getCurrentUser();
     if (formData.avatar) {
       const uploadResponse = await api.post("/upload", fileFormData, {
         headers: {
@@ -149,10 +151,15 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
         },
       });
       avatarUrl = uploadResponse.data.url; // Assuming the server returns the URL of the uploaded file
-    }
 
-    // Get the current user
-    const user = await getCurrentUser();
+      // Create a document for the avatar
+      await api.post("/documents", {
+        name: formData.avatar.name,
+        url: avatarUrl,
+        type: "AVATAR",
+        userId: user.id,
+      });
+    }
 
     // Now send the rest of the profile data
     const response = await api.post("/freelances", {
@@ -164,12 +171,53 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
       seniority: formData.experienceYear,
       userId: user.id,
       skillIds: formData.skills.map((skill) => skill.id),
-      avatarUrl: avatarUrl, // Add the avatar URL if a file was uploaded
     });
 
     return response.data;
   } catch (error) {
     console.error("Error during freelance registration:", error);
+    throw error;
+  }
+};
+
+export const RegisterCompany = async (formData: CompanyFormData) => {
+  try {
+    const fileFormData = new FormData();
+    const bucketName = "avatar";
+
+    // Append the file if it exists
+    if (formData.logo) {
+      fileFormData.append("file", formData.logo);
+    }
+    let logoUrl: string | null = null;
+    fileFormData.append("bucketName", bucketName);
+    const user = await getCurrentUser();
+    if (formData.logo) {
+      const uploadResponse = await api.post("/upload", fileFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      logoUrl = uploadResponse.data.url; // Assuming the server returns the URL of the uploaded file
+
+      // Create a document for the avatar
+      await api.post("/documents", {
+        name: formData.logo.name,
+        url: logoUrl,
+        type: "AVATAR",
+        userId: user.id,
+      });
+    }
+    const response = await api.post("/companies", {
+      name: formData.name,
+      siren: formData.siren,
+      description: formData.description,
+      address: formData.address,
+      userId: user.id,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error during company registration:", error);
     throw error;
   }
 };

@@ -137,11 +137,18 @@ model Checkpoint {
   name         String
   description  String
   date         DateTime
+  status       CheckpointStatus @default(TODO)
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
   jobPostingId String     @db.Uuid
   quote        Quote?
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now()) @updatedAt
+}
+
+enum CheckpointStatus {
+  TODO
+  IN_PROGRESS
+  DONE
 }
 
 // Devis
@@ -182,14 +189,15 @@ model Document {
   url         String
   type        DocumentType
   freelance   Freelance?   @relation(fields: [freelanceId], references: [id])
-  freelanceId String       @db.Uuid
+  freelanceId String?      @db.Uuid
   invoice     Invoice?     @relation(fields: [invoiceId], references: [id])
-  invoiceId   String       @unique @db.Uuid
+  invoiceId   String?      @unique @db.Uuid
   quote       Quote?       @relation(fields: [quoteId], references: [id])
-  quoteId     String       @unique @db.Uuid
+  quoteId     String?      @unique @db.Uuid
   message     Message?
-  userId      String       @unique @db.Uuid
-  user        User         @relation(fields: [userId], references: [id])
+  messageId   String?      @unique @db.Uuid
+  userId      String?      @unique @db.Uuid
+  user        User?        @relation(fields: [userId], references: [id])
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now()) @updatedAt
 }

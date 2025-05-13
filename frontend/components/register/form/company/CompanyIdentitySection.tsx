@@ -1,12 +1,15 @@
 import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ZodError, ZodIssue } from "zod";
 
 interface CompanyIdentitySectionProps {
   name: string;
   siren: string;
   onNameChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onSirenChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  errorNameSection: ZodError | null;
+  errorSirenSection: ZodError | null;
 }
 
 export function CompanyIdentitySection({
@@ -14,6 +17,8 @@ export function CompanyIdentitySection({
   siren,
   onNameChange,
   onSirenChange,
+  errorNameSection,
+  errorSirenSection,
 }: CompanyIdentitySectionProps) {
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -26,6 +31,15 @@ export function CompanyIdentitySection({
           onChange={onNameChange}
           required
         />
+        {errorNameSection && (
+          <p className="text-sm text-red-500">
+            {
+              errorNameSection.errors.find(
+                (error: ZodIssue) => error.path[0] === "name",
+              )?.message
+            }
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -43,6 +57,15 @@ export function CompanyIdentitySection({
           Le numéro SIREN est un identifiant unique à 9 chiffres attribué à
           chaque entreprise française.
         </p>
+        {errorSirenSection && (
+          <p className="text-sm text-red-500">
+            {
+              errorSirenSection.errors.find(
+                (error: ZodIssue) => error.path[0] === "siren",
+              )?.message
+            }
+          </p>
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,11 @@
 "use server";
 
 import { api } from "@/lib/api";
-import { JobPostingSearchResult, JobPostingLocation } from "@/lib/interfaces";
+import {
+  JobPostingSearchResult,
+  JobPostingLocation,
+  JobPosting,
+} from "@/lib/interfaces";
 
 interface SearchJobPostingsParams {
   title?: string;
@@ -63,4 +67,11 @@ export async function searchJobPostings(
       total: 0,
     };
   }
+}
+
+export async function getJobPostingsByUserId(
+  userId: string,
+): Promise<JobPosting[]> {
+  const response = await api.get<JobPosting[]>(`/job-postings/user/${userId}`);
+  return response.data;
 }

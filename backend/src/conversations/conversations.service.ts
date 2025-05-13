@@ -9,7 +9,15 @@ export class ConversationsService {
 
   async createConversation(data: CreateConversationDto): Promise<Conversation> {
     return this.prisma.conversation.create({
-      data,
+      data: {
+        receiverId: data.receiverId,
+        senderId: data.senderId,
+        project: {
+          connect: {
+            id: data.projectId,
+          },
+        },
+      },
     });
   }
 
@@ -41,6 +49,13 @@ export class ConversationsService {
         messages: true,
         project: true,
       },
+    });
+  }
+
+  async getConversationByProject(id: string): Promise<Conversation | null> {
+    return this.prisma.conversation.findFirst({
+      where: { project: { id } },
+      include: { messages: true },
     });
   }
 

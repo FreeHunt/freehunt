@@ -1,13 +1,102 @@
 services:
+  # Overrides
+  db:
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  adminer:
+    deploy:
+      # 'Disable' adminer
+      replicas: 0
+
+  authentik-postgresql:
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  authentik-redis:
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  authentik-server:
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  authentik-worker:
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  minio:
+    deploy:
+      # 'Disable' minio
+      replicas: 0
+
+  matomo-db:
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  matomo:
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+
+  # Frontend
+  frontend:
+    image: ghcr.io/freehunt/freehunt/frontend:latest
+    ports:
+      - "5173:5173"
+    deploy:
+      replicas: 3
+
+  # Backend
+  backend:
+    image: ghcr.io/freehunt/freehunt/backend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      AUTHENTIK_URL: ${AUTHENTIK_URL}
+      DATABASE_URL: ${DATABASE_URL}
+      FRONTEND_URL: ${FRONTEND_URL}
+      MINIO_URL: ${MINIO_URL}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+    deploy:
+      replicas: 3
+
+  # Production-only services
   uptime-kuma:
     container_name: uptime-kuma
     image: louislam/uptime-kuma:1.23.16-alpine
-    restart: unless-stopped
     ports:
       - 3002:3001
     volumes:
       - uptime-kuma-data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
 
 volumes:
   uptime-kuma-data:

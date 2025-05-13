@@ -1,7 +1,10 @@
 "use client";
 
 import { AnimatePresence } from "framer-motion";
-import { SectionTitle as SectionTitleType } from "@/actions/register";
+import {
+  RegisterCompany,
+  SectionTitle as SectionTitleType,
+} from "@/actions/register";
 import { CompanyPreviewCard } from "@/components/common/card/CompanyPreviewCard";
 import { FormSection } from "@/components/register/form/FormSection";
 import { CompanyIdentitySection } from "@/components/register/form/company/CompanyIdentitySection";
@@ -13,19 +16,34 @@ import { FormContainer } from "@/components/register/FormContainer";
 import { FormNavigator } from "@/components/register/FormNavigator";
 import { useMultiStepForm } from "@/hooks/useMultiStepForm";
 import { useCompanyFormData } from "@/hooks/useCompanyFormData";
+import { useRouter } from "next/navigation";
 
 export default function CompanyRegisterPage() {
-  {/* Utilisation des hooks faits maison pour gérer les états du formulaire et la navigation */}
+  const router = useRouter();
+  {
+    /* Utilisation des hooks faits maison pour gérer les états du formulaire et la navigation */
+  }
   const totalSections = 4;
 
   const {
     formData,
     companyBlurStates,
+    errorNameSection,
+    errorSirenSection,
+    errorAddressSection,
+    errorDescriptionSection,
+    errorLogoSection,
     handleNameChange,
     handleSirenChange,
     handleAddressChange,
     handleDescriptionChange,
     handleLogoChange,
+    setErrorNameSection,
+    setErrorSirenSection,
+    setErrorAddressSection,
+    setErrorDescriptionSection,
+    setErrorLogoSection,
+    schema,
   } = useCompanyFormData();
 
   const {
@@ -33,9 +51,10 @@ export default function CompanyRegisterPage() {
     direction,
     isFirstSection,
     isLastSection,
-    goToNextSection,
     goToPreviousSection,
     navigateToSection,
+    setDirection,
+    setCurrentSection,
   } = useMultiStepForm(totalSections);
 
   const sectionTitles: SectionTitleType[] = [
@@ -45,13 +64,39 @@ export default function CompanyRegisterPage() {
     { highlight: "Ajoutez votre", regular: " logo d'entreprise" },
   ];
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     console.log("Formulaire entreprise soumis", formData);
+    await RegisterCompany(formData);
     alert("Inscription de l'entreprise soumise avec succès!");
+    router.push("/");
   };
 
-  const handleNext = () =>
-    goToNextSection(isLastSection ? handleFormSubmit : undefined);
+  const goToNextSection = () => {
+    const currentSchema = schema[currentSection];
+    const result = currentSchema.safeParse(formData);
+    if (currentSection === 0) {
+      setErrorNameSection(result.error || null);
+      setErrorSirenSection(result.error || null);
+    }
+    if (currentSection === 1) {
+      setErrorAddressSection(result.error || null);
+    }
+    if (currentSection === 2) {
+      setErrorDescriptionSection(result.error || null);
+    }
+    if (currentSection === 3) {
+      setErrorLogoSection(result.error || null);
+    }
+    if (!result.success) {
+      return;
+    }
+    if (currentSection < totalSections - 1) {
+      setDirection(1);
+      setCurrentSection(currentSection + 1);
+    } else {
+      handleFormSubmit();
+    }
+  };
 
   return (
     <RegisterPageLayout
@@ -60,7 +105,10 @@ export default function CompanyRegisterPage() {
     >
       <FormContainer
         previewCard={
-          <CompanyPreviewCard formData={formData} companyBlurStates={companyBlurStates} />
+          <CompanyPreviewCard
+            formData={formData}
+            companyBlurStates={companyBlurStates}
+          />
         }
         formContent={
           <>
@@ -75,6 +123,8 @@ export default function CompanyRegisterPage() {
                   siren={formData.siren}
                   onNameChange={handleNameChange}
                   onSirenChange={handleSirenChange}
+                  errorNameSection={errorNameSection}
+                  errorSirenSection={errorSirenSection}
                 />
               </FormSection>
 
@@ -86,6 +136,7 @@ export default function CompanyRegisterPage() {
                 <CompanyAddressSection
                   address={formData.address}
                   onAddressChange={handleAddressChange}
+                  errorAddressSection={errorAddressSection}
                 />
               </FormSection>
 
@@ -97,6 +148,7 @@ export default function CompanyRegisterPage() {
                 <CompanyDescriptionSection
                   description={formData.description}
                   onDescriptionChange={handleDescriptionChange}
+                  errorDescriptionSection={errorDescriptionSection}
                 />
               </FormSection>
 
@@ -105,7 +157,10 @@ export default function CompanyRegisterPage() {
                 direction={direction}
                 key="section4"
               >
-                <CompanyLogoSection onAvatarChange={handleLogoChange} />
+                <CompanyLogoSection
+                  onAvatarChange={handleLogoChange}
+                  errorLogoSection={errorLogoSection}
+                />
               </FormSection>
             </AnimatePresence>
 
@@ -114,7 +169,7 @@ export default function CompanyRegisterPage() {
               totalSections={totalSections}
               onSectionChange={navigateToSection}
               onPrevious={goToPreviousSection}
-              onNext={handleNext}
+              onNext={goToNextSection}
               isFirstSection={isFirstSection}
               isLastSection={isLastSection}
             />

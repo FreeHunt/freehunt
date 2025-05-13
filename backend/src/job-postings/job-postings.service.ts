@@ -179,4 +179,10 @@ export class JobPostingsService {
       total,
     };
   }
+
+  async getJobPostingsByUserId(userId: string): Promise<JobPosting[]> {
+    return this.prisma.jobPosting.findMany({
+      where: { company: { userId } },
+    });
+  }
 }
