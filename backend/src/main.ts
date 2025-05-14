@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { PrismaClientExceptionFilter } from './common/error/prisma.exception';
-
+import * as express from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -38,7 +38,7 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new PrismaClientExceptionFilter());
-
+  app.use('/stripe/webhook', express.raw({ type: 'application/json' }));
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

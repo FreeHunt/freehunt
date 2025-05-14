@@ -67,6 +67,7 @@ model Freelance {
   skills           Skill[]
   documents        Document[]
   projects         Project[]
+  stripeAccountId  String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @default(now()) @updatedAt
 }
@@ -157,6 +158,8 @@ model Quote {
   checkpoint   Checkpoint @relation(fields: [checkpointId], references: [id])
   checkpointId String     @unique @db.Uuid
   amount       Float?
+  stripeSessionId String @unique @db.Uuid
+  devisLink    String?
   document     Document?
   invoice      Invoice?
   createdAt    DateTime   @default(now())
@@ -169,6 +172,8 @@ model Invoice {
   quoteId       String    @unique @db.Uuid
   amount        Float?
   valueAddedTax Float?
+  stripeSessionId String @unique @db.Uuid
+  invoiceLink String
   document      Document?
   documentId    String    @db.Uuid
   project       Project?  @relation(fields: [projectId], references: [id])
