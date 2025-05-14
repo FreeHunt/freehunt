@@ -259,3 +259,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            AUTHENTIK_URL=${{ vars.AUTHENTIK_URL }}
+            FRONTEND_URL=${{ vars.FRONTEND_URL }}
+            MINIO_URL=${{ vars.MINIO_URL }}

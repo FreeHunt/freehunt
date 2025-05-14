@@ -73,9 +73,6 @@ services:
     ports:
       - "3000:3000"
     secrets:
-      - authentik_url
-      - frontend_url
-      - minio_url
       - minio_access_key
       - minio_secret_key
 
@@ -102,12 +99,6 @@ volumes:
   uptime-kuma-data:
 
 secrets:
-  authentik_url:
-    external: true
-  frontend_url:
-    external: true
-  minio_url:
-    external: true
   minio_access_key:
     external: true
   minio_secret_key:
