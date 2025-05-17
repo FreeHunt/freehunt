@@ -93,7 +93,7 @@ jobs:
         run: npm ci
 
       - name: Check TypeScript types
-        run: npm run tsc -- --noEmit
+        run: npx tsc --noEmit
 
       - name: Run ESLint
         run: npm run lint
