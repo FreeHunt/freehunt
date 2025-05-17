@@ -282,34 +282,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install SSH key for connecting to the server
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-          if_key_exists: replace
-
-      # Deploy application through SSH
+      # Deploy application through SSH using dedicated action
       - name: Deploy to production server
-        run: |
-          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          # Navigate to the project directory
-          cd ${{ secrets.PROJECT_PATH }}
-
-          # Pull the latest changes from the repository
-          git pull origin main
-
-          # Login to GitHub Container Registry if needed
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-          # Pull newest images
-          docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend:latest
-          docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/backend:latest
-
-          # Redeploy the stack with newest images
-          docker stack deploy -c compose.yaml -c compose.prod.yaml freehunt --with-registry-auth
-
-          # Logout from registry
-          docker logout ghcr.io
-          EOF
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          debug: true
+          script: ls -al
