@@ -40,7 +40,7 @@ jobs:
 
   backend:
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' || github.event.inputs.deploy_backend == 'true' }}
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     name: Run backend tests
 
@@ -70,7 +70,7 @@ jobs:
 
   frontend:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' || github.event.inputs.deploy_frontend == 'true' }}
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     name: Run frontend tests
 
@@ -98,9 +98,9 @@ jobs:
       - name: Run ESLint
         run: npm run lint
 
-  deploy-frontend:
-    name: Deploy frontend
-    needs: [frontend]
+  build-frontend:
+    name: Build and push frontend
+    needs: frontend
     # Run on main branch pushes or manual workflow dispatch
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_frontend == 'true')
     runs-on: ubuntu-latest
@@ -181,9 +181,9 @@ jobs:
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID }}
 
-  deploy-backend:
-    name: Deploy backend
-    needs: [backend]
+  build-backend:
+    name: Build and push backend
+    needs: backend
     # Run on main branch pushes or manual workflow dispatch
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_backend == 'true')
     runs-on: ubuntu-latest
