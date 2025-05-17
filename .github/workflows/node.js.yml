@@ -15,6 +15,10 @@ on:
         description: "Build and push backend"
         type: boolean
         default: false
+      deploy:
+        description: "Deploy to production"
+        type: boolean
+        default: false
 
 jobs:
   changes:
@@ -263,3 +267,49 @@ jobs:
             AUTHENTIK_URL=${{ vars.AUTHENTIK_URL }}
             FRONTEND_URL=${{ vars.FRONTEND_URL }}
             MINIO_URL=${{ vars.MINIO_URL }}
+
+  deploy:
+    name: Deploy to production
+    # needs: [build-frontend, build-backend]
+    # Run only when explicitly requested via workflow_dispatch or when push to main AND deploy input is true
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://freehunt.fr
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Install SSH key for connecting to the server
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          if_key_exists: replace
+
+      # Deploy application through SSH
+      - name: Deploy to production server
+        run: |
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # Navigate to the project directory
+          cd ${{ secrets.PROJECT_PATH }}
+
+          # Pull the latest changes from the repository
+          git pull origin main
+
+          # Login to GitHub Container Registry if needed
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+          # Pull newest images
+          docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend:latest
+          docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/backend:latest
+
+          # Redeploy the stack with newest images
+          docker stack deploy -c compose.yaml -c compose.prod.yaml freehunt --with-registry-auth
+
+          # Logout from registry
+          docker logout ghcr.io
+          EOF
