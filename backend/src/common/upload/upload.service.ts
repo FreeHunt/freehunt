@@ -1,18 +1,26 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
+import { EnvironmentService } from '../environment/environment.service';
 
 @Injectable()
 export class UploadService {
-  constructor(private readonly minioClient: S3Client) {
+  constructor(
+    private readonly minioClient: S3Client,
+    private readonly environmentService: EnvironmentService,
+  ) {
     this.minioClient = new S3Client({
       region: 'us-east-1',
-      endpoint: process.env.MINIO_URL || '',
+      endpoint: this.environmentService.get('MINIO_URL', ''),
       forcePathStyle: true,
       credentials: {
-        accessKeyId: process.env.MINIO_ACCESS_KEY || 'vT86tO0pmnyWimIrVtTN',
-        secretAccessKey:
-          process.env.MINIO_SECRET_KEY ||
+        accessKeyId: this.environmentService.get(
+          'MINIO_ACCESS_KEY',
+          'vT86tO0pmnyWimIrVtTN',
+        ),
+        secretAccessKey: this.environmentService.get(
+          'MINIO_SECRET_KEY',
           'YkNAG8oMYc4dcsGGi2uywOBSoj3yHCJUzGieBMx8',
+        ),
       },
     });
   }
@@ -29,7 +37,7 @@ export class UploadService {
     });
     await this.minioClient.send(command);
     return {
-      url: `${process.env.MINIO_URL}/${bucketName}/${uniqueKey}`,
+      url: `${this.environmentService.get('MINIO_URL')}/${bucketName}/${uniqueKey}`,
       key: uniqueKey,
     };
   }

@@ -8,12 +8,14 @@ import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom, mergeMap } from 'rxjs';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersService } from '../users/users.service';
+import { EnvironmentService } from '../common/environment/environment.service';
 
 @Injectable()
 export class AuthentikAuthGuard implements CanActivate {
   constructor(
     private readonly httpService: HttpService,
     private readonly usersService: UsersService,
+    private readonly environmentService: EnvironmentService,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context
@@ -29,11 +31,15 @@ export class AuthentikAuthGuard implements CanActivate {
       // Appel à l'API Authentik pour vérifier l'utilisateur
       const response = await firstValueFrom(
         this.httpService
-          .get(process.env.AUTHENTIK_URL + '/api/v3/core/users/me/', {
-            headers: {
-              Cookie: `authentik_session=${authentikSessionCookie}`,
+          .get(
+            this.environmentService.get('AUTHENTIK_URL') +
+              '/api/v3/core/users/me/',
+            {
+              headers: {
+                Cookie: `authentik_session=${authentikSessionCookie}`,
+              },
             },
-          })
+          )
           .pipe(
             mergeMap(async (res) => {
               const user = res.data as UserResponseDto;

@@ -72,6 +72,10 @@ services:
     image: ghcr.io/freehunt/freehunt/backend:latest
     ports:
       - "3000:3000"
+    secrets:
+      - minio_access_key
+      - minio_secret_key
+
     deploy:
       replicas: 3
 
@@ -93,3 +97,9 @@ services:
 
 volumes:
   uptime-kuma-data:
+
+secrets:
+  minio_access_key:
+    external: true
+  minio_secret_key:
+    external: true

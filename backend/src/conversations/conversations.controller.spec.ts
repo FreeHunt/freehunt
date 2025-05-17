@@ -5,6 +5,7 @@ import { PrismaService } from '../common/prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { HttpModule } from '@nestjs/axios';
 import { ChatService } from '../common/chat/chat.service';
+import { EnvironmentService } from '../common/environment/environment.service';
 
 describe('ConversationsController', () => {
   let controller: ConversationsController;
@@ -17,6 +18,7 @@ describe('ConversationsController', () => {
         PrismaService,
         UsersService,
         ChatService,
+        EnvironmentService,
       ],
       imports: [HttpModule],
     }).compile();
