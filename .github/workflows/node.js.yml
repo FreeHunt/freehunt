@@ -293,7 +293,7 @@ jobs:
       # Deploy application through SSH
       - name: Deploy to production server
         run: |
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
           # Navigate to the project directory
           cd ${{ secrets.PROJECT_PATH }}
 
