@@ -7,12 +7,12 @@ on:
     branches: ["main"]
   workflow_dispatch:
     inputs:
-      deploy_frontend:
-        description: "Deploy frontend"
+      build_push_frontend:
+        description: "Build and push frontend"
         type: boolean
         default: false
-      deploy_backend:
-        description: "Deploy backend"
+      build_push_backend:
+        description: "Build and push backend"
         type: boolean
         default: false
 
@@ -102,7 +102,7 @@ jobs:
     name: Build and push frontend
     needs: frontend
     # Run on main branch pushes or manual workflow dispatch
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_frontend == 'true')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_push_frontend == 'true')
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -185,7 +185,7 @@ jobs:
     name: Build and push backend
     needs: backend
     # Run on main branch pushes or manual workflow dispatch
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_backend == 'true')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_push_backend == 'true')
     runs-on: ubuntu-latest
     environment:
       name: production
