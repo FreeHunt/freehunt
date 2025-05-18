@@ -295,21 +295,22 @@ jobs:
             # Navigate to the project directory
             cd ${{ secrets.PROJECT_PATH }}
 
-            ls -al
-
             # Pull the latest changes from the repository
             # git pull origin main
             git pull
 
-            # Login to GitHub Container Registry using Personal Access Token
-            # echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Pull newest images
-            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend:latest
-            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/backend:latest
+            # Pull newest images 
+            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-frontend:latest
+            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-backend:latest
 
             # Redeploy the stack with newest images
             docker stack deploy -c compose.yaml -c compose.prod.yaml freehunt --with-registry-auth
+
+            # Verify the deployment
+            echo "État du déploiement:"
+            docker stack services freehunt
 
             # Logout from registry
             docker logout ghcr.io
