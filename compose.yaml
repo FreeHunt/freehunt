@@ -33,7 +33,7 @@ services:
     volumes:
       - authentik-postgresql:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${AUTHENTIK_PG_PASS:?database password required}
+      POSTGRES_PASSWORD: ${AUTHENTIK_PG_PASS:-authentik}
       POSTGRES_USER: ${AUTHENTIK_PG_USER:-authentik}
       POSTGRES_DB: ${AUTHENTIK_PG_DB:-authentik}
 
