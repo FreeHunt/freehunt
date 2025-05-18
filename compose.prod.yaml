@@ -75,7 +75,7 @@ services:
 
   # Frontend
   frontend:
-    image: ghcr.io/freehunt/freehunt/frontend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-frontend:latest
     ports:
       - "5173:5173"
     deploy:
@@ -83,7 +83,7 @@ services:
 
   # Backend
   backend:
-    image: ghcr.io/freehunt/freehunt/backend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-backend:latest
     ports:
       - "3000:3000"
     env_file:
