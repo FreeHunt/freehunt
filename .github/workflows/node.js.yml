@@ -282,32 +282,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Test SSH connection using manual file - with improved debugging and configuration
-      - name: Test SSH connection manually
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          ssh -vvv -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'echo "Connection test successful"'
-
-      # Deploy application through SSH using direct command to better match local setup
-      - name: Deploy to production server - direct SSH
-        run: |
-          cd ~/.ssh
-          ssh -o StrictHostKeyChecking=no -i deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOL'
-            echo "==== Starting Deployment ===="
-            echo "Current server: $(hostname)"
-            echo "Logged in as: $(whoami)"
-            
-            ls -la
-            
-            echo "==== Deployment Completed ===="
-          EOL
-
       # Keep alternative deployment method as backup
       - name: Deploy to production server
-        # if: ${{ false }} # Temporarily disabled to use direct method above
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -315,10 +291,25 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           debug: true
-          timeout: 120s # Augmenté à 120 secondes
-          use_insecure_cipher: true # Temporairement pour le débogage
           script: |
-            # Test simple command to verify connectivity
-            echo "Testing SSH connection"
-            hostname
-            whoami
+            # Navigate to the project directory
+            cd ${{ secrets.PROJECT_PATH }}
+
+            ls -al
+
+            # Pull the latest changes from the repository
+            # git pull origin main
+            git pull
+
+            # Login to GitHub Container Registry using Personal Access Token
+            echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+
+            # Pull newest images
+            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend:latest
+            docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/backend:latest
+
+            # Redeploy the stack with newest images
+            docker stack deploy -c compose.yaml -c compose.prod.yaml freehunt --with-registry-auth
+
+            # Logout from registry
+            docker logout ghcr.io
