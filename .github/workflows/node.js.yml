@@ -279,10 +279,6 @@ jobs:
       url: https://freehunt.fr
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # Keep alternative deployment method as backup
       - name: Deploy to production server
         uses: appleboy/ssh-action@v1.0.0
         with:
