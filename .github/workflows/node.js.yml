@@ -302,7 +302,7 @@ jobs:
             git pull
 
             # Login to GitHub Container Registry using Personal Access Token
-            echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+            # echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
 
             # Pull newest images
             docker pull ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend:latest
