@@ -282,6 +282,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Test SSH connection using manual file
+      - name: Test SSH connection manually
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          ssh -v -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'echo "Connection test successful"'
+
       # Deploy application through SSH using dedicated action
       - name: Deploy to production server
         uses: appleboy/ssh-action@v1.0.0
@@ -291,4 +300,9 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           debug: true
-          script: ls -al
+          timeout: 60s # Augmenté à 60 secondes
+          script: |
+            # Test simple command to verify connectivity
+            echo "Testing SSH connection"
+            hostname
+            whoami
