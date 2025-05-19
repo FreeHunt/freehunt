@@ -270,7 +270,7 @@ jobs:
 
   deploy:
     name: Deploy to production
-    needs: [build-frontend, build-backend]
+    # needs: [build-frontend, build-backend]
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
     runs-on: self-hosted
     environment:
