@@ -1,6 +1,8 @@
 services:
   # Overrides
   db:
+    env_file:
+      - ./env/backend.env
     deploy:
       replicas: 1
       placement:
@@ -13,6 +15,8 @@ services:
       replicas: 0
 
   authentik-postgresql:
+    env_file:
+      - ./env/authentik.env
     deploy:
       replicas: 1
       placement:
@@ -27,6 +31,8 @@ services:
           - node.role == manager
 
   authentik-server:
+    env_file:
+      - ./env/authentik.env
     deploy:
       replicas: 1
       placement:
@@ -34,6 +40,8 @@ services:
           - node.role == manager
 
   authentik-worker:
+    env_file:
+      - ./env/authentik.env
     deploy:
       replicas: 1
       placement:
@@ -41,11 +49,15 @@ services:
           - node.role == manager
 
   minio:
+    env_file:
+      - ./env/minio.env
     deploy:
       # 'Disable' minio
       replicas: 0
 
   matomo-db:
+    env_file:
+      - ./env/matomo.env
     deploy:
       replicas: 1
       placement:
@@ -53,6 +65,8 @@ services:
           - node.role == manager
 
   matomo:
+    env_file:
+      - ./env/matomo.env
     deploy:
       replicas: 1
       placement:
@@ -61,7 +75,7 @@ services:
 
   # Frontend
   frontend:
-    image: ghcr.io/freehunt/freehunt/frontend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-frontend:latest
     ports:
       - "5173:5173"
     deploy:
@@ -69,9 +83,11 @@ services:
 
   # Backend
   backend:
-    image: ghcr.io/freehunt/freehunt/backend:latest
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-backend:latest
     ports:
       - "3000:3000"
+    env_file:
+      - ./env/backend.env
     secrets:
       - minio_access_key
       - minio_secret_key

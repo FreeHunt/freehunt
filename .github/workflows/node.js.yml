@@ -7,12 +7,16 @@ on:
     branches: ["main"]
   workflow_dispatch:
     inputs:
-      deploy_frontend:
-        description: "Deploy frontend"
+      build_push_frontend:
+        description: "Build and push frontend"
         type: boolean
         default: false
-      deploy_backend:
-        description: "Deploy backend"
+      build_push_backend:
+        description: "Build and push backend"
+        type: boolean
+        default: false
+      deploy:
+        description: "Deploy to production"
         type: boolean
         default: false
 
@@ -40,7 +44,7 @@ jobs:
 
   backend:
     needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' || github.event.inputs.deploy_backend == 'true' }}
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
     name: Run backend tests
 
@@ -70,7 +74,7 @@ jobs:
 
   frontend:
     needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' || github.event.inputs.deploy_frontend == 'true' }}
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
     name: Run frontend tests
 
@@ -93,16 +97,16 @@ jobs:
         run: npm ci
 
       - name: Check TypeScript types
-        run: npm run tsc -- --noEmit
+        run: npx tsc --noEmit
 
       - name: Run ESLint
         run: npm run lint
 
-  deploy-frontend:
-    name: Deploy frontend
-    needs: [frontend]
+  build-frontend:
+    name: Build and push frontend
+    needs: frontend
     # Run on main branch pushes or manual workflow dispatch
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_frontend == 'true')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_push_frontend == 'true')
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -143,7 +147,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/frontend
+          images: ghcr.io/${{ github.repository_owner }}/freehunt-frontend
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,format=long
@@ -181,11 +185,11 @@ jobs:
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID }}
 
-  deploy-backend:
-    name: Deploy backend
-    needs: [backend]
+  build-backend:
+    name: Build and push backend
+    needs: backend
     # Run on main branch pushes or manual workflow dispatch
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_backend == 'true')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_push_backend == 'true')
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -226,7 +230,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}/backend
+          images: ghcr.io/${{ github.repository_owner }}/freehunt-backend
           tags: |
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,format=long
@@ -263,3 +267,45 @@ jobs:
             AUTHENTIK_URL=${{ vars.AUTHENTIK_URL }}
             FRONTEND_URL=${{ vars.FRONTEND_URL }}
             MINIO_URL=${{ vars.MINIO_URL }}
+
+  deploy:
+    name: Deploy to production
+    needs: [build-frontend, build-backend]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
+    runs-on: self-hosted
+    environment:
+      name: production
+      url: https://freehunt.fr
+
+    steps:
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          debug: true
+          script: |
+            # Navigate to the project directory
+            cd ${{ secrets.PROJECT_PATH }}
+
+            # Pull the latest changes from the repository
+            # git pull origin main
+            git pull
+
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull newest images 
+            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt/frontend:latest
+            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt/backend:latest
+
+            # Redeploy the stack with newest images
+            docker stack deploy -c compose.yaml -c compose.prod.yaml freehunt --with-registry-auth
+
+            # Verify the deployment
+            echo "État du déploiement:"
+            docker stack services freehunt
+
+            # Logout from registry
+            docker logout ghcr.io
