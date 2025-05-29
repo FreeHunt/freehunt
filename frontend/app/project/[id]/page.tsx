@@ -105,6 +105,9 @@ export default function ProjectDetailPage({
   // Handle checkpoint click
   const handleCheckpointClick = async (checkpoint: Checkpoint) => {
     checkpoint.status = "DONE";
+    console.log("project", project);
+    checkpoint.freelanceId = project?.freelanceId;
+    console.log("checkpoint", checkpoint);
     await updateCheckpoint(checkpoint);
 
     // Mettre à jour la liste des checkpoints

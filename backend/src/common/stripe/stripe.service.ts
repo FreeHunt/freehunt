@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CreateAccountConnectionDto } from './dto/create-account-connection.dto';
+import { ActivateCustomerConnectionDto } from './dto/activate-customer-connection.dto';
+import { CreateQuoteStripeDto } from './dto/create-quote-stripe.dto';
+import { CreateInvoiceStripeDto } from './dto/create-invoice-stripe.dto';
 
 @Injectable()
 export class StripeService {
@@ -9,16 +12,6 @@ export class StripeService {
 
   constructor() {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-  }
-
-  async getProducts(): Promise<Stripe.Product[]> {
-    const products = await this.stripe.products.list();
-    return products.data;
-  }
-
-  async getCustomers() {
-    const customers = await this.stripe.customers.list({});
-    return customers.data;
   }
 
   handleWebhook(body: Buffer, signature: string) {
@@ -77,6 +70,12 @@ export class StripeService {
           quantity: 1,
         },
       ],
+      invoice_creation: {
+        enabled: true,
+      },
+      automatic_tax: {
+        enabled: true,
+      },
       mode: 'payment',
       success_url: body.successUrl,
       cancel_url: body.cancelUrl,
@@ -89,25 +88,86 @@ export class StripeService {
     return checkoutSession;
   }
   async createAccountConnection(body: CreateAccountConnectionDto) {
+    console.log('createAccountConnection', process.env.STRIPE_SECRET_KEY);
     const accountConnection = await this.stripe.accounts.create({
       type: 'express',
       country: 'FR',
       email: body.email,
       metadata: {
         freelanceId: body.freelanceId,
-        client_id: 'ca_SIvOaEDhtyne4JKdLiaaYb3ufmm1Dsj0',
-      },
-      capabilities: {
-        transfers: {
-          requested: true,
-        },
       },
     });
     return accountConnection;
   }
 
-  async getAccountConnection(accountId: string) {
-    const accountConnection = await this.stripe.accounts.retrieve(accountId);
+  async activateAccountConnection(body: ActivateCustomerConnectionDto) {
+    const accountConnection = await this.stripe.accountLinks.create({
+      account: body.accountId,
+      refresh_url: body.refreshUrl,
+      return_url: body.returnUrl,
+      type: 'account_onboarding',
+    });
     return accountConnection;
+  }
+
+  async getAccountConnection(freelanceId: string) {
+    const accounts = await this.stripe.accounts.list();
+    const accountConnection = accounts.data.find((account) => {
+      return account.metadata?.freelanceId === freelanceId;
+    });
+    return accountConnection || null;
+  }
+
+  // faire un transfer de l'argent vers le compte stripe du freelance
+  async transferFundsToAccountStripe(accountId: string, amount: number) {
+    const transfer = await this.stripe.transfers.create({
+      amount: amount,
+      currency: 'eur',
+      destination: accountId,
+    });
+    return transfer;
+  }
+
+  async createQuote(body: CreateQuoteStripeDto) {
+    const quote = await this.stripe.quotes.create({
+      customer: body.customerId,
+      line_items: [
+        {
+          price_data: {
+            currency: 'eur',
+            unit_amount: body.amount * 100,
+            product: body.checkpointName,
+          },
+        },
+      ],
+      metadata: {
+        projectId: body.projectId,
+      },
+    });
+    return quote;
+  }
+
+  async getQuotesByProjectIdAndCustomerId(
+    customerId: string,
+    projectId: string,
+  ) {
+    const quotes = await this.stripe.quotes.list({
+      customer: customerId,
+    });
+    const quotesByProjectId = quotes.data.filter((quote) => {
+      return quote.metadata?.projectId === projectId;
+    });
+    return quotesByProjectId;
+  }
+
+  async createInvoice(body: CreateInvoiceStripeDto) {
+    const invoice = await this.stripe.invoices.create({
+      customer: body.customerId,
+      auto_advance: true,
+      metadata: {
+        projectId: body.projectId,
+      },
+    });
+    return invoice;
   }
 }

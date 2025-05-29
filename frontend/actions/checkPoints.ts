@@ -14,6 +14,8 @@ export const updateCheckpoint = async (checkpoint: Checkpoint) => {
     name: checkpoint.name,
     description: checkpoint.description,
     jobPostingId: checkpoint.jobPostingId,
+    freelanceId: checkpoint.freelanceId,
+    amount: checkpoint.amount,
   });
   return response.data;
 };

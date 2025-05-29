@@ -118,6 +118,7 @@ model Project {
   id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String
   description    String
+  amount         Float         @default(1)
   startDate      DateTime
   endDate        DateTime?
   jobPosting     JobPosting    @relation(fields: [jobPostingId], references: [id])
@@ -137,6 +138,7 @@ model Checkpoint {
   id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   description  String
+  amount       Float      @default(1)
   date         DateTime
   status       CheckpointStatus @default(TODO)
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])

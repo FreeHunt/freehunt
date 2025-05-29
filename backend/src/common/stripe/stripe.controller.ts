@@ -1,16 +1,9 @@
-import {
-  Controller,
-  Post,
-  Req,
-  Res,
-  Headers,
-  Body,
-  BadRequestException,
-} from '@nestjs/common';
+import { Controller, Post, Req, Res, Headers, Body } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { StripeService } from './stripe.service';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CreateAccountConnectionDto } from './dto/create-account-connection.dto';
+import { ActivateCustomerConnectionDto } from './dto/activate-customer-connection.dto';
 
 @Controller('stripe')
 export class StripeController {
@@ -46,14 +39,19 @@ export class StripeController {
 
   @Post('create-account-connection')
   async createAccountConnection(@Body() body: CreateAccountConnectionDto) {
-    // check if the account connection already exists
-    const existingAccountConnection =
-      await this.stripeService.getAccountConnection(body.freelanceId);
-    if (existingAccountConnection) {
-      throw new BadRequestException('Account connection already exists');
+    const existingAccount = await this.stripeService.getAccountConnection(
+      body.freelanceId,
+    );
+    if (existingAccount) {
+      return existingAccount;
     }
     const accountConnection =
       await this.stripeService.createAccountConnection(body);
     return accountConnection;
+  }
+
+  @Post('activate-account-connection')
+  activateAccountConnection(@Body() body: ActivateCustomerConnectionDto) {
+    return this.stripeService.activateAccountConnection(body);
   }
 }
