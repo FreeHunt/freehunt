@@ -14,7 +14,6 @@ import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CreateAccountConnectionDto } from './dto/create-account-connection.dto';
 import { ActivateCustomerConnectionDto } from './dto/activate-customer-connection.dto';
 import { CreateQuoteStripeDto } from './dto/create-quote-stripe.dto';
-import { CreateInvoiceStripeDto } from './dto/create-invoice-stripe.dto';
 import { CreateProductStripeDto } from './dto/create-product-stripe.dto';
 
 @Controller('stripe')
@@ -70,11 +69,6 @@ export class StripeController {
   @Post('create-quote')
   async createQuote(@Body() body: CreateQuoteStripeDto) {
     return this.stripeService.createQuote(body);
-  }
-
-  @Post('create-invoice')
-  createInvoice(@Body() body: CreateInvoiceStripeDto) {
-    return this.stripeService.createInvoice(body);
   }
 
   @Post('create-product')
