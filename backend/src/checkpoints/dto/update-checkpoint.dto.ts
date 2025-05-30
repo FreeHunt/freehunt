@@ -3,6 +3,7 @@ import { CreateCheckpointDto } from './create-checkpoint.dto';
 import { IsString } from 'class-validator';
 
 export class UpdateCheckpointDto extends PartialType(CreateCheckpointDto) {
+  @IsOptional()
   @IsString()
   @ApiProperty({
     description: 'The freelance ID of the checkpoint',
