@@ -71,7 +71,7 @@ export interface Project {
   name: string;
   description: string;
   endDate: string;
-  freelancerId: string;
+  freelanceId: string;
   companyId: string;
   conversationId: string;
   jobPostingId: string;
@@ -87,6 +87,8 @@ export interface Checkpoint {
   status: "TODO" | "IN_PROGRESS" | "DONE" | "DELAYED" | "CANCELED";
   jobPostingId: string;
   quoteId?: string;
+  freelanceId?: string;
+  amount: number;
 }
 
 export interface Conversation {

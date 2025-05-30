@@ -62,6 +62,7 @@ services:
       AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_PG_USER:-authentik}
       AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_PG_DB:-authentik}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     volumes:
       - authentik-media:/media
       - authentik-templates:/templates
@@ -83,6 +84,7 @@ services:
       AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_PG_USER:-authentik}
       AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_PG_DB:-authentik}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -136,6 +138,15 @@ services:
       - matomo-db
     volumes:
       - matomo-data:/var/www/html
+
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    env_file:
+      - .env
+    command: |
+      listen --api-key $STRIPE_SECRET_KEY
+      --skip-verify
+      --forward-to http://backend:3000/stripe/webhook
 
 volumes:
   db:
