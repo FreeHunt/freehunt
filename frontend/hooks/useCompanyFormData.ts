@@ -17,9 +17,15 @@ export function useCompanyFormData() {
   });
 
   const schemaFourthSection = z.object({
-    logo: z.instanceof(File).refine((file) => file.size > 0, {
-      message: "Le logo est obligatoire",
-    }),
+    logo: z.any().refine(
+      (file) => {
+        if (typeof window === "undefined") return true;
+        return file instanceof File && file.size > 0;
+      },
+      {
+        message: "Le logo est obligatoire",
+      },
+    ),
   });
 
   const schema = [

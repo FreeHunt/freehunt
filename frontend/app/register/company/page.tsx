@@ -20,9 +20,7 @@ import { useRouter } from "next/navigation";
 
 export default function CompanyRegisterPage() {
   const router = useRouter();
-  {
-    /* Utilisation des hooks faits maison pour gérer les états du formulaire et la navigation */
-  }
+
   const totalSections = 4;
 
   const {
