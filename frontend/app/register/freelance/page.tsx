@@ -45,9 +45,15 @@ const schemaThirdSection = z.object({
 });
 
 const schemaFourthSection = z.object({
-  avatar: z.instanceof(File).refine((file) => file.size > 0, {
-    message: "L'avatar est obligatoire",
-  }),
+  avatar: z.any().refine(
+    (file) => {
+      if (typeof window === "undefined") return true;
+      return file instanceof File && file.size > 0;
+    },
+    {
+      message: "L'avatar est obligatoire",
+    },
+  ),
 });
 
 const schema = [
