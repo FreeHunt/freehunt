@@ -5,6 +5,7 @@ import { CreateAccountConnectionDto } from './dto/create-account-connection.dto'
 import { ActivateCustomerConnectionDto } from './dto/activate-customer-connection.dto';
 import { CreateQuoteStripeDto } from './dto/create-quote-stripe.dto';
 import { CreateInvoiceStripeDto } from './dto/create-invoice-stripe.dto';
+import { CreateProductStripeDto } from './dto/create-product-stripe.dto';
 
 @Injectable()
 export class StripeService {
@@ -136,7 +137,7 @@ export class StripeService {
           price_data: {
             currency: 'eur',
             unit_amount: body.amount * 100,
-            product: body.checkpointName,
+            product: body.productId,
           },
         },
       ],
@@ -144,7 +145,8 @@ export class StripeService {
         projectId: body.projectId,
       },
     });
-    return quote;
+    const finalizedQuote = await this.stripe.quotes.finalizeQuote(quote.id);
+    return finalizedQuote;
   }
 
   async getQuotesByProjectIdAndCustomerId(
@@ -160,6 +162,24 @@ export class StripeService {
     return quotesByProjectId;
   }
 
+  async getQuotePdf(quoteId: string) {
+    try {
+      const quotePdf = await this.stripe.quotes.pdf(quoteId);
+
+      return {
+        data: quotePdf,
+        contentType: 'application/pdf',
+        filename: `quote-${quoteId}.pdf`,
+      };
+    } catch (error: any) {
+      throw new Error(
+        `Failed to generate quote PDF: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
   async createInvoice(body: CreateInvoiceStripeDto) {
     const invoice = await this.stripe.invoices.create({
       customer: body.customerId,
@@ -169,5 +189,21 @@ export class StripeService {
       },
     });
     return invoice;
+  }
+
+  async createProduct(body: CreateProductStripeDto) {
+    const newProduct = await this.stripe.products.create({
+      name: body.name,
+      default_price_data: {
+        currency: 'eur',
+        unit_amount: body.price * 100,
+      },
+    });
+    return newProduct;
+  }
+
+  async findProductByProductId(productId: string) {
+    const product = await this.stripe.products.retrieve(productId);
+    return product;
   }
 }

@@ -1,9 +1,21 @@
-import { Controller, Post, Req, Res, Headers, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  Res,
+  Headers,
+  Body,
+  Param,
+  Get,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { StripeService } from './stripe.service';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CreateAccountConnectionDto } from './dto/create-account-connection.dto';
 import { ActivateCustomerConnectionDto } from './dto/activate-customer-connection.dto';
+import { CreateQuoteStripeDto } from './dto/create-quote-stripe.dto';
+import { CreateInvoiceStripeDto } from './dto/create-invoice-stripe.dto';
+import { CreateProductStripeDto } from './dto/create-product-stripe.dto';
 
 @Controller('stripe')
 export class StripeController {
@@ -53,5 +65,41 @@ export class StripeController {
   @Post('activate-account-connection')
   activateAccountConnection(@Body() body: ActivateCustomerConnectionDto) {
     return this.stripeService.activateAccountConnection(body);
+  }
+
+  @Post('create-quote')
+  async createQuote(@Body() body: CreateQuoteStripeDto) {
+    return this.stripeService.createQuote(body);
+  }
+
+  @Post('create-invoice')
+  createInvoice(@Body() body: CreateInvoiceStripeDto) {
+    return this.stripeService.createInvoice(body);
+  }
+
+  @Post('create-product')
+  createProduct(@Body() body: CreateProductStripeDto) {
+    return this.stripeService.createProduct(body);
+  }
+
+  @Get('get-quote-pdf/:quoteId')
+  async getQuotePdf(@Param('quoteId') quoteId: string, @Res() res: Response) {
+    try {
+      const quotePdf = await this.stripeService.getQuotePdf(quoteId);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="quote-${quoteId}.pdf"`,
+      );
+
+      quotePdf.data.pipe(res);
+    } catch (error) {
+      res.status(500).json({
+        error:
+          'Failed to generate PDF ' +
+          (error instanceof Error ? error.message : String(error)),
+      });
+    }
   }
 }
