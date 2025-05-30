@@ -49,7 +49,6 @@ export class StripeService {
       }
       case 'checkout.session.expired': {
         const checkoutSessionCancelled = event.data.object;
-        console.log('checkoutSessionCancelled', checkoutSessionCancelled);
         break;
       }
       default:
@@ -89,7 +88,6 @@ export class StripeService {
     return checkoutSession;
   }
   async createAccountConnection(body: CreateAccountConnectionDto) {
-    console.log('createAccountConnection', process.env.STRIPE_SECRET_KEY);
     const accountConnection = await this.stripe.accounts.create({
       type: 'express',
       country: 'FR',
