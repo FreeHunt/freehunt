@@ -24,28 +24,32 @@ import { getCurrentUser } from "@/actions/auth";
 export default function ProjectDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const projectId = params.id;
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [activeTab, setActiveTab] = useState<"timeline" | "conversation">(
     "timeline",
   );
 
-  // Check if the viewport is mobile
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setProjectId(resolvedParams.id);
+    };
+    resolveParams();
+  }, [params]);
+
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
 
-    // Initial check
     checkIsMobile();
 
-    // Add event listener for window resize
     window.addEventListener("resize", checkIsMobile);
 
-    // Clean up
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
 
@@ -57,7 +61,6 @@ export default function ProjectDetailPage({
     fetchData();
   }, []);
 
-  // Sample data with proper structure for the timeline component
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [project, setProject] = useState<Project | null>(null);
   const [conversation, setConversation] =
@@ -70,6 +73,8 @@ export default function ProjectDetailPage({
   );
 
   useEffect(() => {
+    if (!projectId) return;
+
     const fetchData = async () => {
       const project = await getProject(projectId);
       setProject(project);
@@ -82,7 +87,6 @@ export default function ProjectDetailPage({
         const senderPicture = await getUserPicture(conversation.senderId);
         const receiverPicture = await getUserPicture(conversation.receiverId);
 
-        // Déterminer quel avatar appartient à l'utilisateur actuel
         if (currentUserId === conversation.senderId) {
           setCurrentUserPicture(senderPicture);
           setOtherUserPicture(receiverPicture);
@@ -91,7 +95,6 @@ export default function ProjectDetailPage({
           setOtherUserPicture(senderPicture);
         }
 
-        // Join the conversation room
         if (conversation?.id && currentUserId) {
           identifyUser(currentUserId);
           joinConversationRoom(conversation.id);
@@ -102,7 +105,6 @@ export default function ProjectDetailPage({
     fetchData();
   }, [projectId, currentUserId]);
 
-  // Handle checkpoint click
   const handleCheckpointClick = async (checkpoint: Checkpoint) => {
     checkpoint.status = "DONE";
     console.log("project", project);
@@ -110,20 +112,26 @@ export default function ProjectDetailPage({
     console.log("checkpoint", checkpoint);
     await updateCheckpoint(checkpoint);
 
-    // Mettre à jour la liste des checkpoints
     const updatedCheckpoints = checkpoints.map((cp) =>
       cp.id === checkpoint.id ? checkpoint : cp,
     );
     setCheckpoints(updatedCheckpoints);
   };
 
-  // Mobile tabs toggle
   const tabButtonClass = (tab: "timeline" | "conversation") =>
     `flex-1 py-3 text-center font-medium text-sm border-b-2 ${
       activeTab === tab
         ? "border-freehunt-main text-freehunt-main"
         : "border-transparent text-gray-500 hover:text-gray-700"
     }`;
+
+  if (!projectId) {
+    return (
+      <div className="flex w-full h-full p-2 md:p-4 items-center justify-center">
+        <div>Chargement...</div>
+      </div>
+    );
+  }
 
   return (
     <SocketProvider userId={currentUserId || ""}>
@@ -135,7 +143,6 @@ export default function ProjectDetailPage({
             </h1>
           </div>
 
-          {/* Mobile Tabs */}
           {isMobile && (
             <div className="flex w-full border-b border-gray-200">
               <button
@@ -154,7 +161,6 @@ export default function ProjectDetailPage({
           )}
 
           <div className="flex w-full h-full flex-col md:flex-row items-start gap-2 md:gap-3">
-            {/* Timeline Section */}
             {(!isMobile || activeTab === "timeline") && (
               <div className="flex w-full md:w-2/3 flex-col items-start gap-2 md:gap-3">
                 <div className="flex w-full flex-col items-start gap-2 md:gap-3 p-2 md:p-5">
@@ -213,7 +219,6 @@ export default function ProjectDetailPage({
                             )}
                           </div>
                         </div>
-                        {/* if checkpoint is not done, show the button */}
                         {checkpoint.status != "DONE" && (
                           <button
                             onClick={() => handleCheckpointClick(checkpoint)}
@@ -235,7 +240,6 @@ export default function ProjectDetailPage({
                           </button>
                         )}
 
-                        {/* if checkpoint is done, show the button */}
                         {checkpoint.status === "DONE" && (
                           <p className="text-sm text-green-500">
                             Checkpoint validé
@@ -254,7 +258,6 @@ export default function ProjectDetailPage({
               </div>
             )}
 
-            {/* Conversation Section */}
             {(!isMobile || activeTab === "conversation") && (
               <div className="flex w-full md:w-1/3 flex-col items-start gap-2 md:gap-3 h-full">
                 <div className="flex w-full flex-col items-start gap-2 md:gap-3 p-2 md:p-5">
