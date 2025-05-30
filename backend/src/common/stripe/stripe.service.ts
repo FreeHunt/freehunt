@@ -4,7 +4,6 @@ import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { CreateAccountConnectionDto } from './dto/create-account-connection.dto';
 import { ActivateCustomerConnectionDto } from './dto/activate-customer-connection.dto';
 import { CreateQuoteStripeDto } from './dto/create-quote-stripe.dto';
-import { CreateInvoiceStripeDto } from './dto/create-invoice-stripe.dto';
 import { CreateProductStripeDto } from './dto/create-product-stripe.dto';
 
 @Injectable()
@@ -33,22 +32,12 @@ export class StripeService {
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        const checkoutSessionCompleted = event.data.object;
-
-        if (!checkoutSessionCompleted.metadata) {
-          console.error('User id not found in checkout session');
-          return;
-        }
-
-        if (!checkoutSessionCompleted.metadata.userId) {
-          console.error('User id not found in checkout session');
-          return;
-        }
+        //const checkoutSessionCompleted = event.data.object;
 
         break;
       }
       case 'checkout.session.expired': {
-        const checkoutSessionCancelled = event.data.object;
+        //const checkoutSessionCancelled = event.data.object;
         break;
       }
       default:
@@ -176,17 +165,6 @@ export class StripeService {
         }`,
       );
     }
-  }
-
-  async createInvoice(body: CreateInvoiceStripeDto) {
-    const invoice = await this.stripe.invoices.create({
-      customer: body.customerId,
-      auto_advance: true,
-      metadata: {
-        projectId: body.projectId,
-      },
-    });
-    return invoice;
   }
 
   async createProduct(body: CreateProductStripeDto) {
