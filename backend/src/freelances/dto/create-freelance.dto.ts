@@ -76,6 +76,7 @@ export class CreateFreelanceDto {
   userId: string;
 
   @IsUUID()
+  @IsOptional()
   @ApiProperty({
     description:
       'The unique identifier for the document associated with the freelance',

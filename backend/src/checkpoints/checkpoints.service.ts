@@ -24,7 +24,14 @@ export class CheckpointsService {
   async update(id: string, updateCheckpointDto: UpdateCheckpointDto) {
     return this.prisma.checkpoint.update({
       where: { id },
-      data: updateCheckpointDto,
+      data: {
+        status: updateCheckpointDto.status,
+        date: updateCheckpointDto.date,
+        name: updateCheckpointDto.name,
+        description: updateCheckpointDto.description,
+        jobPostingId: updateCheckpointDto.jobPostingId,
+        amount: updateCheckpointDto.amount,
+      },
     });
   }
 

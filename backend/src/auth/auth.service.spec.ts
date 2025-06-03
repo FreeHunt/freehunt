@@ -6,6 +6,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponse } from './types/auth-success-response.interface';
 import { RegisterDto } from './dto/register.dto';
 import { AuthErrorResponse } from './types/auth-error-response.interface';
+import { EnvironmentService } from '../common/environment/environment.service';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -13,7 +14,7 @@ describe('AuthService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [HttpModule],
-      providers: [AuthService, AuthentikService],
+      providers: [AuthService, AuthentikService, EnvironmentService],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);

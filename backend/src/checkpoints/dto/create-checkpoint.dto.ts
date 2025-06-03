@@ -1,4 +1,12 @@
-import { IsDate, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -49,4 +57,12 @@ export class CreateCheckpointDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   quoteId?: string;
+
+  @IsNumber()
+  @IsPositive()
+  @ApiProperty({
+    description: 'The amount of the checkpoint',
+    example: 100,
+  })
+  amount: number;
 }

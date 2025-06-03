@@ -48,6 +48,7 @@ describe('FreelancesController', () => {
     id: '550e8400-e29b-41d4-a716-446655440000',
     createdAt: new Date(),
     updatedAt: new Date(),
+    stripeAccountId: '550e8400-e29b-41d4-a716-446655440000',
   };
 
   describe('create', () => {
@@ -112,6 +113,7 @@ describe('FreelancesController', () => {
         userId: '550e8400-e29b-41d4-a716-446655440000',
         createdAt: new Date(),
         updatedAt: new Date(),
+        stripeAccountId: '550e8400-e29b-41d4-a716-446655440000',
       },
       {
         id: '550e8400-e29b-41d4-a716-446655440001',
@@ -124,6 +126,7 @@ describe('FreelancesController', () => {
         userId: '550e8400-e29b-41d4-a716-446655440001',
         createdAt: new Date(),
         updatedAt: new Date(),
+        stripeAccountId: '550e8400-e29b-41d4-a716-446655440001',
       },
     ];
     const freelanceSearchResult = {

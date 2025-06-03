@@ -61,6 +61,7 @@ describe('ProjectController', () => {
     freelance: null,
     company: null,
     conversation: null,
+    amount: 1000,
   };
 
   const updatedProjectWithRelations = {

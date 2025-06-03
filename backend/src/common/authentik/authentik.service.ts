@@ -8,12 +8,15 @@ import { AuthFlowResponse } from '../../auth/types/auth-flow-response.interface'
 import { AuthErrorResponse } from '../../auth/types/auth-error-response.interface';
 import { User } from '@prisma/client';
 import { UserResponse } from './dto/user-info.dto';
+import { EnvironmentService } from '../environment/environment.service';
 
 @Injectable()
 export class AuthentikService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly environmentService: EnvironmentService,
+  ) {}
 
-  private readonly authentikUrl = process.env.AUTHENTIK_URL || '';
   private readonly loginFlowUrl =
     '/api/v3/flows/executor/default-authentication-flow/';
   private readonly registerFlowUrl =
@@ -29,16 +32,18 @@ export class AuthentikService {
   async login(
     loginDto: LoginDto,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
+    const authentikUrl = this.environmentService.get('AUTHENTIK_URL');
+
     try {
       const initialResponse = await this.httpService.axiosRef.get(
-        `${this.authentikUrl}${this.loginFlowUrl}`,
+        `${authentikUrl}${this.loginFlowUrl}`,
         this.axiosConfig,
       );
 
       const cookies = initialResponse.headers['set-cookie'];
 
       const loginResponse = await this.httpService.axiosRef.post(
-        `${this.authentikUrl}${this.loginFlowUrl}`,
+        `${authentikUrl}${this.loginFlowUrl}`,
         {
           uid_field: loginDto.email,
           password: loginDto.password,
@@ -70,15 +75,17 @@ export class AuthentikService {
   async register(
     registerDto: RegisterDto,
   ): Promise<AuthSuccessResponse | AuthErrorResponse> {
+    const authentikUrl = this.environmentService.get('AUTHENTIK_URL');
+
     try {
       const initialResponse = await this.httpService.axiosRef.get(
-        `${this.authentikUrl}${this.registerFlowUrl}`,
+        `${authentikUrl}${this.registerFlowUrl}`,
         this.axiosConfig,
       );
 
       const cookies = initialResponse.headers['set-cookie'];
       const registerResponse = await this.httpService.axiosRef.post(
-        `${this.authentikUrl}${this.registerFlowUrl}`,
+        `${authentikUrl}${this.registerFlowUrl}`,
         {
           component: 'ak-stage-prompt',
           email: registerDto.email,
@@ -111,8 +118,10 @@ export class AuthentikService {
   }
 
   async getMe(cookies: string): Promise<User> {
+    const authentikUrl = this.environmentService.get('AUTHENTIK_URL');
+
     const initialResponse = await this.httpService.axiosRef.get(
-      `${this.authentikUrl}/api/v3/core/users/me/`,
+      `${authentikUrl}/api/v3/core/users/me/`,
       {
         ...this.axiosConfig,
         headers: {

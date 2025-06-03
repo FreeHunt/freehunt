@@ -7,9 +7,9 @@ services:
     volumes:
       - freehunt-db:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: ${BACKEND_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${BACKEND_POSTGRES_PASSWORD}
-      POSTGRES_DB: ${BACKEND_POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     shm_size: 128mb
     restart: unless-stopped
 
@@ -33,11 +33,9 @@ services:
     volumes:
       - authentik-postgresql:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${AUTHENTIK_PG_PASS:?database password required}
-      POSTGRES_USER: ${AUTHENTIK_PG_USER:-authentik}
-      POSTGRES_DB: ${AUTHENTIK_PG_DB:-authentik}
-    env_file:
-      - .env
+      POSTGRES_PASSWORD: ${AUTHENTIK_PG_PASS}
+      POSTGRES_USER: ${AUTHENTIK_PG_USER}
+      POSTGRES_DB: ${AUTHENTIK_PG_DB}
 
   authentik-redis:
     image: docker.io/library/redis:alpine
@@ -64,11 +62,10 @@ services:
       AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_PG_USER:-authentik}
       AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_PG_DB:-authentik}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     volumes:
       - authentik-media:/media
       - authentik-templates:/templates
-    env_file:
-      - .env
     ports:
       - "${COMPOSE_PORT_HTTP:-9000}:9000"
       - "${COMPOSE_PORT_HTTPS:-9443}:9443"
@@ -87,31 +84,16 @@ services:
       AUTHENTIK_POSTGRESQL__USER: ${AUTHENTIK_PG_USER:-authentik}
       AUTHENTIK_POSTGRESQL__NAME: ${AUTHENTIK_PG_DB:-authentik}
       AUTHENTIK_POSTGRESQL__PASSWORD: ${AUTHENTIK_PG_PASS}
+      AUTHENTIK_SECRET_KEY: ${AUTHENTIK_SECRET_KEY}
     user: root
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - authentik-media:/media
       - authentik-certs:/certs
       - authentik-templates:/templates
-    env_file:
-      - .env
     depends_on:
       - authentik-postgresql
       - authentik-redis
-
-  minio:
-    image: minio/minio
-    container_name: minio
-    restart: unless-stopped
-    ports:
-      - "10000:9000"
-      - "10001:10000"
-    volumes:
-      - minio-data:/data
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-    command: server /data --console-address ":10000"
 
   matomo-db:
     image: mariadb:10.5
@@ -124,8 +106,6 @@ services:
       MYSQL_PASSWORD: ${MATOMO_DB_PASSWORD}
     volumes:
       - matomo-db-data:/var/lib/mysql
-    env_file:
-      - .env
 
   matomo:
     image: matomo:4.13.0
@@ -144,13 +124,10 @@ services:
       - matomo-db
     volumes:
       - matomo-data:/var/www/html
-    env_file:
-      - .env
 
 volumes:
   db:
   uptime-kuma-data:
-  minio-data:
   freehunt-db:
   authentik-postgresql:
   authentik-redis:

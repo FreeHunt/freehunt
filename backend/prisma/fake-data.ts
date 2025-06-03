@@ -48,6 +48,7 @@ export function fakeFreelance() {
     averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     location: faker.location.city(),
+    stripeAccountId: undefined,
   };
 }
 export function fakeFreelanceComplete() {
@@ -60,6 +61,7 @@ export function fakeFreelanceComplete() {
     averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     location: faker.location.city(),
+    stripeAccountId: undefined,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -121,6 +123,7 @@ export function fakeProjectComplete() {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
     description: faker.lorem.words(5),
+    amount: 1,
     startDate: faker.date.anytime(),
     endDate: undefined,
     jobPostingId: faker.string.uuid(),
@@ -143,6 +146,7 @@ export function fakeCheckpointComplete() {
     id: faker.string.uuid(),
     name: faker.person.fullName(),
     description: faker.lorem.words(5),
+    amount: 1,
     date: faker.date.anytime(),
     status: CheckpointStatus.TODO,
     jobPostingId: faker.string.uuid(),
@@ -153,6 +157,8 @@ export function fakeCheckpointComplete() {
 export function fakeQuote() {
   return {
     amount: undefined,
+    stripeSessionId: faker.lorem.words(5),
+    devisLink: undefined,
   };
 }
 export function fakeQuoteComplete() {
@@ -160,6 +166,8 @@ export function fakeQuoteComplete() {
     id: faker.string.uuid(),
     checkpointId: faker.string.uuid(),
     amount: undefined,
+    stripeSessionId: faker.lorem.words(5),
+    devisLink: undefined,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -168,6 +176,8 @@ export function fakeInvoice() {
   return {
     amount: undefined,
     valueAddedTax: undefined,
+    stripeSessionId: faker.lorem.words(5),
+    invoiceLink: faker.lorem.words(5),
     documentId: faker.lorem.words(5),
   };
 }
@@ -177,6 +187,8 @@ export function fakeInvoiceComplete() {
     quoteId: faker.string.uuid(),
     amount: undefined,
     valueAddedTax: undefined,
+    stripeSessionId: faker.lorem.words(5),
+    invoiceLink: faker.lorem.words(5),
     documentId: faker.lorem.words(5),
     projectId: undefined,
     createdAt: new Date(),

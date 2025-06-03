@@ -10,6 +10,7 @@ import { LoginDto } from './dto/login.dto';
 import { AuthSuccessResponse } from './types/auth-success-response.interface';
 import { RegisterDto } from './dto/register.dto';
 import { response } from 'express';
+import { EnvironmentService } from '../common/environment/environment.service';
 describe('AuthController', () => {
   let authController: AuthController;
   const mockHttpService = {
@@ -28,6 +29,7 @@ describe('AuthController', () => {
         AuthentikService,
         UsersService,
         PrismaService,
+        EnvironmentService,
         {
           provide: HttpService,
           useValue: mockHttpService,

@@ -67,6 +67,7 @@ model Freelance {
   skills           Skill[]
   documents        Document[]
   projects         Project[]
+  stripeAccountId  String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @default(now()) @updatedAt
 }
@@ -117,6 +118,7 @@ model Project {
   id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name           String
   description    String
+  amount         Float         @default(1)
   startDate      DateTime
   endDate        DateTime?
   jobPosting     JobPosting    @relation(fields: [jobPostingId], references: [id])
@@ -136,6 +138,7 @@ model Checkpoint {
   id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   description  String
+  amount       Float      @default(1)
   date         DateTime
   status       CheckpointStatus @default(TODO)
   jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
@@ -157,6 +160,8 @@ model Quote {
   checkpoint   Checkpoint @relation(fields: [checkpointId], references: [id])
   checkpointId String     @unique @db.Uuid
   amount       Float?
+  stripeSessionId String @unique @db.Uuid
+  devisLink    String?
   document     Document?
   invoice      Invoice?
   createdAt    DateTime   @default(now())
@@ -169,6 +174,8 @@ model Invoice {
   quoteId       String    @unique @db.Uuid
   amount        Float?
   valueAddedTax Float?
+  stripeSessionId String @unique @db.Uuid
+  invoiceLink String
   document      Document?
   documentId    String    @db.Uuid
   project       Project?  @relation(fields: [projectId], references: [id])

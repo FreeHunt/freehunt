@@ -19,14 +19,12 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedUsers = new Map();
 
   handleConnection(client: Socket): void {
-    console.log('client connected', client.id);
     client.broadcast.emit('userConnected', {
       message: `user connected ${client.id}`,
     });
   }
 
   handleDisconnect(client: Socket): void {
-    console.log('client disconnected', client.id);
     // Remove user from connectedUsers
     this.connectedUsers.forEach((socketId, userId) => {
       if (socketId === client.id) {
@@ -45,7 +43,6 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     // Store user's socket id for direct messaging
     this.connectedUsers.set(data.userId, client.id);
-    console.log(`User ${data.userId} identified with socket ${client.id}`);
   }
 
   @SubscribeMessage('joinRoom')
@@ -54,7 +51,6 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     await client.join(data.roomId);
-    console.log(`Client ${client.id} joined room ${data.roomId}`);
     client.emit('joinedRoom', { roomId: data.roomId });
     client.to(data.roomId).emit('userJoinedRoom', {
       message: `Un nouvel utilisateur a rejoint la conversation`,
@@ -68,7 +64,6 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     await client.leave(data.roomId);
-    console.log(`Client ${client.id} left room ${data.roomId}`);
     client.emit('leftRoom', { roomId: data.roomId });
     client.to(data.roomId).emit('userLeftRoom', {
       message: `Un utilisateur a quitté la conversation`,
@@ -83,7 +78,6 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Also create a room for this conversation
     const roomId = data.conversation.id;
-    console.log(`Room created for conversation ${roomId}`);
   }
 
   @SubscribeMessage('newMessage')
@@ -108,8 +102,6 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
     if (receiverSocket) {
       this.server.to(receiverSocket).emit('newMessage', data.message);
     }
-
-    console.log(`Message broadcast to conversation ${conversationId}`);
   }
 
   @SubscribeMessage('deleteMessage')
