@@ -19,6 +19,17 @@ interface SearchJobPostingsParams {
   pageSize?: number;
 }
 
+export interface JobPostingsCreate {
+  title: string;
+  description: string;
+  location: string;
+  isPromoted: boolean;
+  averageDailyRate: number;
+  seniority: number;
+  companyId: string;
+  skillIds: string[];
+}
+
 export async function searchJobPostings(
   params: SearchJobPostingsParams,
 ): Promise<JobPostingSearchResult> {
@@ -74,4 +85,25 @@ export async function getJobPostingsByUserId(
 ): Promise<JobPosting[]> {
   const response = await api.get<JobPosting[]>(`/job-postings/user/${userId}`);
   return response.data;
+}
+
+export async function submitJobPosting(formData: JobPostingsCreate) {
+  try {
+    console.log("Données soumises avec succès:", formData);
+    const response = await api.post<JobPosting>("/job-postings/", formData);
+    console.log("Réponse de l'API:", response.data);
+
+    return {
+      success: true,
+      data: response.data,
+      message: "Formulaire soumis avec succès!",
+    };
+  } catch (error) {
+    console.error("Erreur lors de la soumission du formulaire:", error);
+    return {
+      success: false,
+      error: "Une erreur est survenue lors de la soumission du formulaire",
+      message: "Une erreur est survenue. Veuillez réessayer plus tard.",
+    };
+  }
 }

@@ -8,9 +8,10 @@ import { MultiSelect } from "../common/multi-select";
 import { DatePicker } from "../common/date-picker";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
-import { AlertCircle, Plus, Trash2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { JobPostingLocation } from "@/lib/interfaces";
+import { submitJobPosting } from "@/actions/jobPostings";
 
 type Step = {
   id: string;
@@ -110,7 +111,10 @@ const profileSchema = z.object({
     .refine((val) => val !== "", {
       message: "Le type de présence est requis",
     }),
-  experience: z.string(),
+  seniority: z
+    .string()
+    .min(0, "L'expérience doit être un nombre positif")
+    .regex(/^\d+$/, "Le niveau d'expérience doit être un nombre valide"),
 });
 
 const checkpointSchema = z.object({
@@ -146,12 +150,15 @@ const formSchema = z.object({
   dateOfStart: profileSchema.shape.dateOfStart,
   dateOfEnd: profileSchema.shape.dateOfEnd,
   typePresence: profileSchema.shape.typePresence,
-  experience: profileSchema.shape.experience,
+  seniority: profileSchema.shape.seniority,
   checkpoints: z.array(checkpointSchema),
 });
 
 // Type inféré à partir du schéma Zod
-type FormData = Omit<z.infer<typeof formSchema>, "checkpoints" | "skills"> & {
+export type FormData = Omit<
+  z.infer<typeof formSchema>,
+  "checkpoints" | "skills"
+> & {
   checkpoints: Checkpoint[];
   skills: Skill[];
 };
@@ -164,7 +171,7 @@ export default function MultiStepForm() {
     { id: "summary", label: "Récapitulatif" },
   ];
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -173,7 +180,7 @@ export default function MultiStepForm() {
     dateOfStart: "",
     dateOfEnd: "",
     typePresence: "",
-    experience: "Intermédiaire",
+    seniority: "",
     checkpoints: [],
   });
   const [selectedDateStart, setSelectedDateStart] = useState<Date | undefined>(
@@ -185,6 +192,13 @@ export default function MultiStepForm() {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
+  // États pour la soumission du formulaire
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{
+    success?: boolean;
+    message?: string;
+  } | null>(null);
 
   // État pour gérer les dates des deadlines des checkpoints
   const [checkpointDeadlines, setCheckpointDeadlines] = useState<
@@ -402,7 +416,7 @@ export default function MultiStepForm() {
             dateOfStart: formData.dateOfStart,
             dateOfEnd: formData.dateOfEnd,
             typePresence: formData.typePresence,
-            experience: formData.experience,
+            seniority: formData.seniority,
           });
 
           // Validation des dates
@@ -544,7 +558,7 @@ export default function MultiStepForm() {
       fieldsToTouch.add("dateOfStart");
       fieldsToTouch.add("dateOfEnd");
       fieldsToTouch.add("typePresence");
-      fieldsToTouch.add("experience");
+      fieldsToTouch.add("seniority");
     } else if (currentStep === 2) {
       // Marquer tous les champs des checkpoints comme touchés
       formData.checkpoints.forEach((checkpoint) => {
@@ -578,17 +592,37 @@ export default function MultiStepForm() {
     }
   };
 
-  const handleSubmitForm = () => {
+  const handleSubmitForm = async () => {
     // Valider le formulaire complet avec Zod
     try {
       const validatedData = formSchema.parse(formData);
       console.log("Données validées:", validatedData);
-      alert("Formulaire soumis avec succès!");
+      setSubmitResult(null);
+      setIsSubmitting(true);
+      const result = await submitJobPosting({
+        title: validatedData.jobTitle,
+        description: validatedData.jobDescription,
+        location: validatedData.typePresence,
+        isPromoted: false,
+        averageDailyRate: +validatedData.tjm,
+        seniority: +validatedData.seniority,
+        companyId: "5eb345d3-013e-4fa5-bf04-a853370f49c6", // Remplacer par l'ID de la société réelle
+        skillIds: [],
+        // skillIds: validatedData.skills.map((skill) => skill.value),
+        // dateOfStart: validatedData.dateOfStart,
+        // dateOfEnd: validatedData.dateOfEnd,
+      });
+
+      setSubmitResult({
+        success: result.success,
+        message: result.message,
+      });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        console.error("Erreurs de validation:", error.errors);
         alert("Le formulaire contient des erreurs. Veuillez les corriger.");
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -869,6 +903,35 @@ export default function MultiStepForm() {
                 </p>
               )}
             </div>
+
+            {/* Input Expérience */}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-xl font-bold text-freehunt-main">
+                  Niveau d&apos;expérience (en années)
+                </h2>
+                <p className="text-gray-400">
+                  Quel niveau d&apos;expérience est requis pour cette mission ?
+                </p>
+              </div>
+              <Input
+                type="number"
+                name="seniority"
+                value={formData.seniority}
+                onChange={handleChange}
+                onBlur={() => handleBlur("seniority")}
+                className={`text-freehunt-black-two rounded-full ${
+                  errors.seniority ? "border-red-500" : ""
+                }`}
+                placeholder="Exemple : 3 (pour 3 ans d'expérience)"
+              />
+              {errors.seniority && (
+                <p className="mt-1 text-sm text-red-500 flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.seniority}
+                </p>
+              )}
+            </div>
           </div>
         )}
 
@@ -1042,6 +1105,27 @@ export default function MultiStepForm() {
             <h2 className="text-2xl font-bold text-freehunt-main">
               Récapitulatif de la mission
             </h2>
+
+            {/* Message de résultat de soumission */}
+            {submitResult && (
+              <div
+                className={`p-4 mb-4 rounded-md ${
+                  submitResult.success
+                    ? "bg-green-50 border border-green-200 text-green-800"
+                    : "bg-red-50 border border-red-200 text-red-800"
+                }`}
+              >
+                <div className="flex items-center">
+                  {submitResult.success ? (
+                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                  )}
+                  <p>{submitResult.message}</p>
+                </div>
+              </div>
+            )}
+
             <p className="text-gray-600 mb-2">
               Veuillez vérifier toutes les informations avant de soumettre votre
               offre de mission.
@@ -1208,7 +1292,7 @@ export default function MultiStepForm() {
         <Button
           variant="outline"
           onClick={goToPreviousStep}
-          disabled={currentStep === 0}
+          disabled={currentStep === 0 || isSubmitting}
         >
           Précédent
         </Button>
@@ -1216,7 +1300,20 @@ export default function MultiStepForm() {
         {currentStep < steps.length - 1 ? (
           <Button onClick={goToNextStep}>Suivant</Button>
         ) : (
-          <Button onClick={handleSubmitForm}>Soumettre</Button>
+          <Button
+            onClick={handleSubmitForm}
+            disabled={isSubmitting}
+            className="min-w-[120px]"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Envoi...
+              </>
+            ) : (
+              "Soumettre"
+            )}
+          </Button>
         )}
       </div>
     </div>
