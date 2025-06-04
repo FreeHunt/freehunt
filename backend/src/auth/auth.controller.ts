@@ -92,4 +92,11 @@ export class AuthController {
     }
     return user;
   }
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) response: Response): boolean {
+    response.clearCookie('authentik_csrf');
+    response.clearCookie('authentik_session');
+    return true;
+  }
 }
