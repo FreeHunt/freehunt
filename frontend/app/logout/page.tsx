@@ -1,26 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { api } from "@/lib/api";
+import { useAuth } from "@/actions/auth";
 
 export default function LogoutPage() {
-  const router = useRouter();
-
+  const { logout } = useAuth();
   useEffect(() => {
-    const handleLogout = async () => {
-      try {
-        await api.post("/auth/logout", {}, { withCredentials: true });
-        router.refresh();
-      } catch (error) {
-        console.error("Erreur lors de la déconnexion:", error);
-      } finally {
-        router.push("/login");
-      }
-    };
-
-    handleLogout();
-  }, [router]);
+    logout();
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

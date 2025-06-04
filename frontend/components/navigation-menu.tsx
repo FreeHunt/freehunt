@@ -116,18 +116,22 @@ export default function NavigationMenu() {
 
   const UserButtons = ({ mobile = false }) => (
     <>
-      {USER_LINKS.map((link, index) => (
-        <Button
-          key={`${link.label}-${index}`}
-          variant={link.variant}
-          className={`${mobile ? "w-full" : ""} rounded-full`}
-          asChild
-        >
-          <Link href={link.href} onClick={() => mobile && setIsOpen(false)}>
-            {link.label}
-          </Link>
-        </Button>
-      ))}
+      {USER_LINKS.map((link, index) => {
+        const isOutline = link.variant === "outline";
+
+        return (
+          <Button
+            key={`${link.label}-${index}`}
+            variant={isOutline ? "outline" : "default"}
+            className={`${mobile ? "w-full" : ""} rounded-full`}
+            asChild
+          >
+            <Link href={link.href} onClick={() => mobile && setIsOpen(false)}>
+              {link.label}
+            </Link>
+          </Button>
+        );
+      })}
     </>
   );
 
