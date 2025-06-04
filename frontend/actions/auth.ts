@@ -1,8 +1,64 @@
 import { api } from "@/lib/api";
+import { useState, useEffect } from "react";
 
 export const getCurrentUser = async () => {
   const response = await api.get("/auth/getme", {
     withCredentials: true,
   });
   return response.data;
+};
+
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
+}
+
+export const useAuth = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const checkAuth = async () => {
+    try {
+      setIsLoading(true);
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      setIsAuthenticated(true);
+    } catch (error) {
+      console.error(
+        "Erreur lors de la vérification de l'authentification:",
+        error,
+      );
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const logout = async () => {
+    try {
+      await api.post("/auth/logout", {}, { withCredentials: true });
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    } finally {
+      setUser(null);
+      setIsAuthenticated(false);
+      window.location.href = "/login";
+    }
+  };
+
+  return {
+    user,
+    isLoading,
+    isAuthenticated,
+    checkAuth,
+    logout,
+  };
 };
