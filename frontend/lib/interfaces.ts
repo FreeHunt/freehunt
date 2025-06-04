@@ -42,8 +42,8 @@ export interface Company {
   id: string;
   name: string;
   description?: string;
-  website?: string;
-  logoUrl?: string;
+  address: string;
+  siren: string;
   user?: User;
 }
 

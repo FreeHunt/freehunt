@@ -12,6 +12,8 @@ import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
 import { JobPostingLocation } from "@/lib/interfaces";
 import { submitJobPosting } from "@/actions/jobPostings";
+import { getCurrentUser } from "@/actions/auth";
+import { getCurrentCompany } from "@/actions/company";
 
 type Step = {
   id: string;
@@ -595,8 +597,11 @@ export default function MultiStepForm() {
   const handleSubmitForm = async () => {
     // Valider le formulaire complet avec Zod
     try {
+      const auth = await getCurrentUser();
+      const currentCompany = await getCurrentCompany(auth.id);
+
       const validatedData = formSchema.parse(formData);
-      console.log("Données validées:", validatedData);
+      console.log("Données validées:", validatedData); //TODO remove
       setSubmitResult(null);
       setIsSubmitting(true);
       const result = await submitJobPosting({
@@ -606,7 +611,7 @@ export default function MultiStepForm() {
         isPromoted: false,
         averageDailyRate: +validatedData.tjm,
         seniority: +validatedData.seniority,
-        companyId: "5eb345d3-013e-4fa5-bf04-a853370f49c6", // Remplacer par l'ID de la société réelle
+        companyId: currentCompany.id,
         skillIds: [],
         // skillIds: validatedData.skills.map((skill) => skill.value),
         // dateOfStart: validatedData.dateOfStart,
@@ -1106,26 +1111,6 @@ export default function MultiStepForm() {
               Récapitulatif de la mission
             </h2>
 
-            {/* Message de résultat de soumission */}
-            {submitResult && (
-              <div
-                className={`p-4 mb-4 rounded-md ${
-                  submitResult.success
-                    ? "bg-green-50 border border-green-200 text-green-800"
-                    : "bg-red-50 border border-red-200 text-red-800"
-                }`}
-              >
-                <div className="flex items-center">
-                  {submitResult.success ? (
-                    <CheckCircle2 className="h-5 w-5 mr-2" />
-                  ) : (
-                    <AlertCircle className="h-5 w-5 mr-2" />
-                  )}
-                  <p>{submitResult.message}</p>
-                </div>
-              </div>
-            )}
-
             <p className="text-gray-600 mb-2">
               Veuillez vérifier toutes les informations avant de soumettre votre
               offre de mission.
@@ -1186,7 +1171,7 @@ export default function MultiStepForm() {
                     Niveau d&apos;expérience
                   </p>
                   <p className="font-medium">
-                    {formData.experience || "Non spécifié"}
+                    {formData.seniority || "Non spécifié"}
                   </p>
                 </div>
                 <div>
@@ -1283,6 +1268,26 @@ export default function MultiStepForm() {
                 freelances.
               </p>
             </div>
+
+            {/* Message de résultat de soumission */}
+            {submitResult && (
+              <div
+                className={`p-4 mb-4 rounded-md ${
+                  submitResult.success
+                    ? "bg-green-50 border border-green-200 text-green-800"
+                    : "bg-red-50 border border-red-200 text-red-800"
+                }`}
+              >
+                <div className="flex items-center">
+                  {submitResult.success ? (
+                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                  )}
+                  <p>{submitResult.message}</p>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
