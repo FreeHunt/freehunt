@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { getCurrentUser } from "@/actions/auth"; // Ajustez le chemin selon votre structure
+import { getCurrentUser } from "@/actions/auth";
 
 // Navigation links configuration
 const NAV_LINKS: { href: string; label: string }[] = [
@@ -43,10 +44,12 @@ export default function NavigationMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
+        setIsLoading(true);
         const currentUser = await getCurrentUser();
         setUser(currentUser);
       } catch (error) {
@@ -62,9 +65,8 @@ export default function NavigationMenu() {
     };
 
     checkAuthStatus();
-  }, []);
+  }, [pathname]);
 
-  // Component for navigation links
   const NavLinks = ({ mobile = false, onClick = () => {} }) => (
     <>
       {NAV_LINKS.map((link, index) => (
