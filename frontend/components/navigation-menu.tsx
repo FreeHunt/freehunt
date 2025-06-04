@@ -119,17 +119,7 @@ export default function NavigationMenu() {
       {USER_LINKS.map((link, index) => (
         <Button
           key={`${link.label}-${index}`}
-          variant={
-            link.variant as
-              | "outline"
-              | "default"
-              | "link"
-              | "destructive"
-              | "secondary"
-              | "ghost"
-              | null
-              | undefined
-          }
+          variant={link.variant}
           className={`${mobile ? "w-full" : ""} rounded-full`}
           asChild
         >
