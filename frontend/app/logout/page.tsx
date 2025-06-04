@@ -5,9 +5,10 @@ import { useAuth } from "@/actions/auth";
 
 export default function LogoutPage() {
   const { logout } = useAuth();
+
   useEffect(() => {
     logout();
-  }, []);
+  }, [logout]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

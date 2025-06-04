@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { getCurrentUser } from "@/actions/auth";
+import { useAuth } from "@/actions/auth"; // Utilisez votre hook existant
 
 // Navigation links configuration
 const NAV_LINKS: { href: string; label: string }[] = [
@@ -33,39 +33,15 @@ const USER_LINKS = [
   { href: "/logout", label: "Déconnexion", variant: "default" },
 ];
 
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-}
-
 export default function NavigationMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isLoading, checkAuth } = useAuth();
   const pathname = usePathname();
 
+  // Re-vérifier l'authentification à chaque changement d'URL
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        setIsLoading(true);
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-      } catch (error) {
-        console.error(
-          "Erreur lors de la vérification de l'authentification:",
-          error,
-        );
-        console.log("User not authenticated");
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuthStatus();
-  }, [pathname]);
+    checkAuth();
+  }, [pathname, checkAuth]);
 
   const NavLinks = ({ mobile = false, onClick = () => {} }) => (
     <>
@@ -84,7 +60,6 @@ export default function NavigationMenu() {
     </>
   );
 
-  // Component for auth buttons (when not authenticated)
   const AuthButtons = ({ mobile = false }) => (
     <>
       {AUTH_LINKS.map((link, index) => {
@@ -135,7 +110,6 @@ export default function NavigationMenu() {
     </>
   );
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <header className="sticky top-0 z-50 flex border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-8">
@@ -164,18 +138,15 @@ export default function NavigationMenu() {
           <Link href="/">
             <span className="text-xl font-bold">FreeHunt</span>
           </Link>
-          {/* Desktop Navigation - Left aligned after company name */}
           <nav className="hidden md:flex items-center gap-6">
             <NavLinks />
           </nav>
         </div>
 
-        {/* Desktop Auth/User Buttons */}
         <div className="hidden md:flex items-center gap-2">
           {user ? <UserButtons /> : <AuthButtons />}
         </div>
 
-        {/* Mobile Menu */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="ml-auto md:hidden">

@@ -1,5 +1,5 @@
 import { api } from "@/lib/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export const getCurrentUser = async () => {
   const response = await api.get("/auth/getme", {
@@ -20,7 +20,8 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const checkAuth = async () => {
+  // Utilisation de useCallback pour éviter les re-créations inutiles
+  const checkAuth = useCallback(async () => {
     try {
       setIsLoading(true);
       const currentUser = await getCurrentUser();
@@ -36,13 +37,13 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkAuth();
-  }, []);
+  }, [checkAuth]);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout", {}, { withCredentials: true });
     } catch (error) {
@@ -52,7 +53,7 @@ export const useAuth = () => {
       setIsAuthenticated(false);
       window.location.href = "/login";
     }
-  };
+  }, []);
 
   return {
     user,
