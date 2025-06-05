@@ -231,7 +231,7 @@ const FreelanceProfile = () => {
         <div className="flex justify-center mt-8">
           <Button
             type="submit"
-            className="w-full max-w-2xl text-white font-bold"
+            className="w-full max-w-2xl text-white font-bold p-6"
             style={{ backgroundColor: '#FF4D6D' }}
           >
             Enregistrer les modifications
