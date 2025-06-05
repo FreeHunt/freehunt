@@ -31,6 +31,7 @@ const FreelanceProfile = () => {
                       <MapPin className="w-4 h-4 mr-1" />
                       Paris, France
                     </div>
+                    <Badge className="text-white" style={{backgroundColor: '#FF4D6D'}}>Freelance</Badge>
                   </div>
                 </div>
               </CardContent>
