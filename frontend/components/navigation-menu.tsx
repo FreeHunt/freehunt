@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useAuth } from "@/actions/auth"; // Utilisez votre hook existant
 
 // Navigation links configuration
 const NAV_LINKS: { href: string; label: string }[] = [
-  // { href: "/", label: "Lien 1" },
-  // { href: "/", label: "Lien 2" },
-  // { href: "/", label: "Lien 3" },
+  { href: "/", label: "Accueil" },
+  { href: "/about", label: "À propos" },
+  { href: "/contact", label: "Contact" },
 ];
 
 // Auth links configuration
@@ -25,10 +27,22 @@ const AUTH_LINKS = [
   { href: "/register/choice", label: "S'inscrire", variant: "default" },
 ];
 
+// Authenticated user links
+const USER_LINKS = [
+  { href: "/account", label: "Mon compte", variant: "outline" },
+  { href: "/logout", label: "Déconnexion", variant: "default" },
+];
+
 export default function NavigationMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, isLoading, checkAuth } = useAuth();
+  const pathname = usePathname();
 
-  // Component for navigation links
+  // Re-vérifier l'authentification à chaque changement d'URL
+  useEffect(() => {
+    checkAuth();
+  }, [pathname, checkAuth]);
+
   const NavLinks = ({ mobile = false, onClick = () => {} }) => (
     <>
       {NAV_LINKS.map((link, index) => (
@@ -46,7 +60,6 @@ export default function NavigationMenu() {
     </>
   );
 
-  // Component for auth buttons
   const AuthButtons = ({ mobile = false }) => (
     <>
       {AUTH_LINKS.map((link, index) => {
@@ -76,6 +89,48 @@ export default function NavigationMenu() {
     </>
   );
 
+  const UserButtons = ({ mobile = false }) => (
+    <>
+      {USER_LINKS.map((link, index) => {
+        const isOutline = link.variant === "outline";
+
+        return (
+          <Button
+            key={`${link.label}-${index}`}
+            variant={isOutline ? "outline" : "default"}
+            className={`${mobile ? "w-full" : ""} rounded-full`}
+            asChild
+          >
+            <Link href={link.href} onClick={() => mobile && setIsOpen(false)}>
+              {link.label}
+            </Link>
+          </Button>
+        );
+      })}
+    </>
+  );
+
+  if (isLoading) {
+    return (
+      <header className="sticky top-0 z-50 flex border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-8">
+        <div className="flex flex-1 justify-between h-16 items-center">
+          <div className="flex items-center gap-10">
+            <Link href="/">
+              <span className="text-xl font-bold">FreeHunt</span>
+            </Link>
+            <nav className="hidden md:flex items-center gap-6">
+              <NavLinks />
+            </nav>
+          </div>
+          <div className="hidden md:flex items-center gap-2">
+            <div className="h-9 w-24 bg-gray-200 animate-pulse rounded-full"></div>
+            <div className="h-9 w-24 bg-gray-200 animate-pulse rounded-full"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className="sticky top-0 z-50 flex border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-8">
       <div className="flex flex-1 justify-between h-16 items-center">
@@ -83,18 +138,15 @@ export default function NavigationMenu() {
           <Link href="/">
             <span className="text-xl font-bold">FreeHunt</span>
           </Link>
-          {/* Desktop Navigation - Left aligned after company name */}
           <nav className="hidden md:flex items-center gap-6">
             <NavLinks />
           </nav>
         </div>
 
-        {/* Desktop Auth Buttons */}
         <div className="hidden md:flex items-center gap-2">
-          <AuthButtons />
+          {user ? <UserButtons /> : <AuthButtons />}
         </div>
 
-        {/* Mobile Menu */}
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon" className="ml-auto md:hidden">
@@ -129,8 +181,13 @@ export default function NavigationMenu() {
                 <NavLinks mobile onClick={() => setIsOpen(false)} />
               </nav>
               <div className="mt-auto flex flex-col gap-4 border-t pt-6">
-                <AuthButtons mobile />
+                {user ? <UserButtons mobile /> : <AuthButtons mobile />}
               </div>
+              {user && (
+                <div className="text-sm text-gray-600 mt-2 text-center">
+                  Connecté en tant que {user.username}
+                </div>
+              )}
             </div>
           </SheetContent>
         </Sheet>
