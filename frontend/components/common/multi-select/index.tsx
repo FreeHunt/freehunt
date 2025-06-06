@@ -11,46 +11,12 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Command as CommandPrimitive } from "cmdk";
-
-type Skill = Record<"value" | "label", string>;
-
-// const SKILLS = [
-//   {
-//     value: "next.js",
-//     label: "Next.js",
-//   },
-//   {
-//     value: "sveltekit",
-//     label: "SvelteKit",
-//   },
-//   {
-//     value: "nuxt.js",
-//     label: "Nuxt.js",
-//   },
-//   {
-//     value: "remix",
-//     label: "Remix",
-//   },
-//   {
-//     value: "astro",
-//     label: "Astro",
-//   },
-//   {
-//     value: "wordpress",
-//     label: "WordPress",
-//   },
-//   {
-//     value: "express.js",
-//     label: "Express.js",
-//   },
-//   {
-//     value: "nest.js",
-//     label: "Nest.js",
-//   },
-// ] satisfies Skill[];
+import { Skill } from "@/lib/interfaces";
+import { createSkill } from "@/actions/skills";
 
 interface MultiSelectProps {
   options?: Skill[];
+  addOptions?: (selected: Skill[]) => void;
   selected?: Skill[];
   onChange?: (selected: Skill[]) => void;
   className?: string;
@@ -58,8 +24,9 @@ interface MultiSelectProps {
 }
 
 export function MultiSelect({
-  options,
+  options = [],
   selected = [],
+  addOptions,
   onChange,
   className,
   placeholder = "Selectionner un élément",
@@ -72,7 +39,7 @@ export function MultiSelect({
 
   const handleUnselectItem = React.useCallback(
     (skill: Skill) => {
-      const newSelected = selected.filter((val) => val.value !== skill.value);
+      const newSelected = selected.filter((val) => val.name !== skill.name);
       onChange?.(newSelected);
     },
     [selected, onChange],
@@ -85,6 +52,17 @@ export function MultiSelect({
       setInputValue("");
     },
     [selected, onChange],
+  );
+
+  const handleSelectItemAndAddItem = React.useCallback(
+    (skill: Skill) => {
+      const newSelected = [...selected, skill];
+      const newOptions = [...options, skill];
+      onChange?.(newSelected);
+      addOptions?.(newOptions);
+      setInputValue("");
+    },
+    [selected, onChange, options, addOptions],
   );
 
   const handleKeyDown = React.useCallback(
@@ -120,8 +98,8 @@ export function MultiSelect({
         <div className="flex flex-wrap gap-1">
           {selected?.map((skill) => {
             return (
-              <Badge key={skill.value} variant="secondary">
-                {skill.label}
+              <Badge key={skill.id} variant="secondary">
+                {skill.name}
                 <button
                   className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
                   onKeyDown={(e) => {
@@ -163,7 +141,7 @@ export function MultiSelect({
                 {selectablesItems?.map((skill) => {
                   return (
                     <CommandItem
-                      key={skill.value}
+                      key={skill.id}
                       onMouseDown={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -171,7 +149,7 @@ export function MultiSelect({
                       onSelect={() => handleSelectItem(skill)}
                       className={"cursor-pointer"}
                     >
-                      {skill.label}
+                      {skill.name}
                     </CommandItem>
                   );
                 })}
@@ -183,11 +161,17 @@ export function MultiSelect({
                       e.preventDefault();
                       e.stopPropagation();
                     }}
-                    onSelect={() => {
-                      handleSelectItem({
-                        value: inputValue,
-                        label: inputValue,
-                      });
+                    onSelect={async () => {
+                      try {
+                        const skillCreated = await createSkill({
+                          name: inputValue,
+                          aliases: [inputValue],
+                          type: "TECHNICAL",
+                        });
+                        handleSelectItemAndAddItem(skillCreated);
+                      } catch (error) {
+                        console.log("Skill already exists:", error);
+                      }
                     }}
                     className={"cursor-pointer"}
                   >

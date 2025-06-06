@@ -10,10 +10,11 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
-import { JobPostingLocation } from "@/lib/interfaces";
+import { JobPostingLocation, Skill } from "@/lib/interfaces";
 import { submitJobPosting } from "@/actions/jobPostings";
 import { getCurrentUser } from "@/actions/auth";
 import { getCurrentCompany } from "@/actions/company";
+import { getSkills } from "@/actions/skills";
 
 type Step = {
   id: string;
@@ -27,43 +28,6 @@ type Checkpoint = {
   deadline: string;
 };
 
-type Skill = Record<"value" | "label", string>;
-
-const SKILLS = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-  {
-    value: "wordpress",
-    label: "WordPress",
-  },
-  {
-    value: "express.js",
-    label: "Express.js",
-  },
-  {
-    value: "nest.js",
-    label: "Nest.js",
-  },
-] satisfies Skill[];
-
 const validPresenceForZod = Object.values(JobPostingLocation) as [
   string,
   ...string[],
@@ -74,15 +38,18 @@ const jobSchema = z.object({
   jobTitle: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
   jobDescription: z
     .string()
-    .min(20, "La description doit contenir au moins 20 caractères"),
+    .min(10, "La description doit contenir au moins 20 caractères"),
 });
 
 const profileSchema = z.object({
   skills: z
     .array(
       z.object({
-        value: z.string(),
-        label: z.string(),
+        id: z.string(),
+        name: z.string(),
+        normalizedName: z.string(),
+        aliases: z.array(z.string()),
+        type: z.enum(["TECHNICAL", "SOFT"]),
       }),
     )
     .nonempty("Au moins une compétence est requise."),
@@ -191,6 +158,8 @@ export default function MultiStepForm() {
   const [selectedDateEnd, setSelectedDateEnd] = useState<Date | undefined>(
     undefined,
   );
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
@@ -206,6 +175,35 @@ export default function MultiStepForm() {
   const [checkpointDeadlines, setCheckpointDeadlines] = useState<
     Record<string, Date | undefined>
   >({});
+
+  // Charger les compétences disponibles
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        const skillsResponse = await getSkills();
+        setSkills(skillsResponse);
+      } catch (error) {
+        console.error("Erreur lors du chargement des compétences :", error);
+      }
+    };
+
+    fetchSkills();
+  }, []);
+
+  // Mettre à jour formData.skills lorsque selectedSkills change
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: selectedSkills,
+    }));
+
+    // Marquer le champ comme touché
+    // setTouchedFields((prev) => {
+    //   const newTouched = new Set(prev);
+    //   newTouched.add("skills");
+    //   return newTouched;
+    // });
+  }, [selectedSkills]);
 
   // Mettre à jour formData.dateOfStart lorsque selectedDate change
   useEffect(() => {
@@ -612,8 +610,7 @@ export default function MultiStepForm() {
         averageDailyRate: +validatedData.tjm,
         seniority: +validatedData.seniority,
         companyId: currentCompany.id,
-        skillIds: [],
-        // skillIds: validatedData.skills.map((skill) => skill.value),
+        skillIds: validatedData.skills.map((skill) => skill.id),
         // dateOfStart: validatedData.dateOfStart,
         // dateOfEnd: validatedData.dateOfEnd,
       });
@@ -743,15 +740,10 @@ export default function MultiStepForm() {
               </div>
               <MultiSelect
                 // name="skills"
-                options={SKILLS}
-                selected={formData.skills}
-                onChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    skills: value as [Skill, ...Skill[]],
-                  })
-                }
-                // onBlur={() => handleBlur("skills")}
+                options={skills}
+                addOptions={setSkills}
+                selected={selectedSkills}
+                onChange={setSelectedSkills}
                 className={`${errors.skills ? "border-red-500" : ""}`}
                 placeholder="Sélectionnez les compétences"
               />
@@ -1149,10 +1141,10 @@ export default function MultiStepForm() {
                     {formData.skills && formData.skills.length > 0 ? (
                       formData.skills.map((skill) => (
                         <span
-                          key={skill.value}
+                          key={skill.id}
                           className="bg-freehunt-main/10 text-freehunt-main px-2 py-1 rounded-full text-sm"
                         >
-                          {skill.label}
+                          {skill.name}
                         </span>
                       ))
                     ) : (

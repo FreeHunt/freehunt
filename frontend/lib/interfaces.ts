@@ -4,6 +4,12 @@ export interface User {
   role: "FREELANCE" | "COMPANY";
 }
 
+export interface SkillCreate {
+  name: string;
+  aliases: string[];
+  type: "TECHNICAL" | "SOFT";
+}
+
 export interface Skill {
   id: string;
   name: string;
