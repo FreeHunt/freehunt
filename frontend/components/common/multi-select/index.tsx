@@ -92,9 +92,11 @@ export function MultiSelect({
   return (
     <Command
       onKeyDown={handleKeyDown}
-      className={`overflow-visible bg-transparent ${className}`}
+      className={`overflow-visible bg-transparent`}
     >
-      <div className="rounded-md border px-3 py-2 text-sm ring-offset-background focus-within:ring-[3px] focus-within:ring-ring/50">
+      <div
+        className={`rounded-md border px-3 py-2 text-sm ring-offset-background focus-within:ring-[3px] focus-within:ring-ring/50 ${className}`}
+      >
         <div className="flex flex-wrap gap-1">
           {selected?.map((skill) => {
             return (

@@ -404,9 +404,9 @@ export default function MultiStepForm() {
     }
   };
 
-  useEffect(() => {
-    console.log(errors);
-  }, [errors]);
+  // useEffect(() => {
+  //   console.log(errors);
+  // }, [errors]);
 
   // Validation avec Zod selon l'étape actuelle
   const validateCurrentStep = () => {
@@ -672,9 +672,17 @@ export default function MultiStepForm() {
                 : "text-white hover:bg-freehunt-grey-light hover:text-freehunt-black-two cursor-pointer"
             }`}
             onClick={() => {
-              // Only allow navigation to previous steps or current step
+              // allow navigation to previous steps or current step or next step if data is valid
               if (index <= currentStep) {
                 setCurrentStep(index);
+              } else if (index === currentStep + 1) {
+                const currentErrors = validateCurrentStep();
+                if (Object.keys(currentErrors).length === 0) {
+                  setCurrentStep(index);
+                } else {
+                  // Update errors to show all errors in the current step
+                  setErrors(currentErrors);
+                }
               }
             }}
           >
@@ -768,7 +776,9 @@ export default function MultiStepForm() {
                 addOptions={setSkills}
                 selected={selectedSkills}
                 onChange={setSelectedSkills}
-                className={`${errors.skills ? "border-red-500" : ""}`}
+                className={`rounded-full ${
+                  errors.skills ? "border-red-500" : ""
+                }`}
                 placeholder="Sélectionnez les compétences"
               />
               {errors.skills && (
@@ -809,7 +819,7 @@ export default function MultiStepForm() {
               )}
             </div>
 
-            <div className="flex gap-24">
+            <div className="flex gap-24 flex-wrap">
               {/* Input Date de Début */}
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
@@ -959,21 +969,6 @@ export default function MultiStepForm() {
         {/* Step Three */}
         {currentStep === 2 && (
           <div className="flex flex-col gap-8">
-            <div className="flex justify-between items-center mb-2">
-              {/* <label className="block text-sm font-medium">
-                Checkpoints du projet <span className="text-red-500">*</span>
-              </label> */}
-              <Button
-                onClick={addCheckpoint}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 cursor-pointer border-full"
-              >
-                <Plus className="h-4 w-4 text-freehunt-main" />
-                Ajouter une étape
-              </Button>
-            </div>
-
             {formData.checkpoints.length === 0 ? (
               <div className="text-center py-8 border border-dashed rounded-md bg-gray-50">
                 <p className="text-gray-500">
@@ -995,7 +990,7 @@ export default function MultiStepForm() {
                   >
                     {/* Checkpoint Header + Delete */}
                     <div className="flex justify-between items-start">
-                      <h2 className="text-xl font-bold text-freehunt-grey-dark underline">
+                      <h2 className="text-xl font-bold text-freehunt-black-two">
                         Checkpoint {index + 1} :
                       </h2>
                       <Button
@@ -1191,6 +1186,19 @@ export default function MultiStepForm() {
                 ))}
               </div>
             )}
+
+            {/* Bouton pour ajouter un checkpoint */}
+            <div className="flex justify-between items-center mb-2">
+              <Button
+                onClick={addCheckpoint}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1 cursor-pointer border-full"
+              >
+                <Plus className="h-4 w-4 text-freehunt-main" />
+                Ajouter une étape
+              </Button>
+            </div>
           </div>
         )}
 
