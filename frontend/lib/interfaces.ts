@@ -44,6 +44,14 @@ export enum JobPostingLocation {
   HYBRID = "HYBRID",
 }
 
+export enum CheckpointStatus {
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  DONE = "DONE",
+  DELAYED = "DELAYED",
+  CANCELED = "CANCELED",
+}
+
 export interface Company {
   id: string;
   name: string;
@@ -51,6 +59,18 @@ export interface Company {
   address: string;
   siren: string;
   user?: User;
+}
+
+export interface JobPostingsCreate {
+  title: string;
+  description: string;
+  location: string;
+  isPromoted: boolean;
+  averageDailyRate: number;
+  seniority: number;
+  companyId: string;
+  skillIds: string[];
+  checkpointIds?: string[];
 }
 
 export interface JobPosting {
@@ -83,6 +103,17 @@ export interface Project {
   jobPostingId: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CheckpointCreate {
+  name: string;
+  description?: string;
+  date: string | Date;
+  status: CheckpointStatus;
+  jobPostingId: string;
+  quoteId?: string;
+  freelanceId?: string;
+  amount: number;
 }
 
 export interface Checkpoint {

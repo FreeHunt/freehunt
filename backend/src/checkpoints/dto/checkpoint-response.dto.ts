@@ -1,68 +1,56 @@
-import {
-  IsDate,
-  IsEnum,
-  IsNumber,
-  IsOptional,
-  IsPositive,
-  IsString,
-  IsUUID,
-} from 'class-validator';
-
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
 import { CheckpointStatus } from '@prisma/client';
 
-export class CreateCheckpointDto {
-  @IsString()
+export class CheckpointResponseDto {
+  @ApiProperty({
+    description: 'The unique identifier for the checkpoint',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  id: string;
+
   @ApiProperty({
     description: 'The name of the checkpoint',
-    example: 'SEO Optimization Specialist',
+    example: 'Achieve the MVP of the project',
   })
   name: string;
 
-  @IsString()
   @ApiProperty({
     description: 'The description of the checkpoint',
     example:
-      'We are looking for an SEO Optimization Specialist to improve our website',
+      'The MVP (Minimum Viable Product) is the first version of the project.',
   })
   description: string;
 
-  @Type(() => Date)
-  @IsDate()
   @ApiProperty({
     description: 'The date of the checkpoint',
-    example: '2025-01-01',
+    example: '2025-01-01T00:00:00Z',
   })
   date: Date;
 
-  @IsEnum(CheckpointStatus)
   @ApiProperty({
     description: 'The status of the checkpoint',
-    example: 'TODO',
+    enum: CheckpointStatus,
+    example: CheckpointStatus.TODO,
   })
   status: CheckpointStatus;
 
-  @IsUUID()
   @ApiProperty({
-    description: 'The ID of the job posting',
+    description: 'The ID of the job posting associated with the checkpoint',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   jobPostingId: string;
 
-  @IsOptional()
-  @IsUUID()
   @ApiProperty({
-    description: 'The ID of the quote',
+    description:
+      'The ID of the quote associated with the checkpoint (optional)',
     example: '123e4567-e89b-12d3-a456-426614174000',
+    required: false,
   })
   quoteId?: string;
 
-  @IsNumber()
-  @IsPositive()
   @ApiProperty({
-    description: 'The amount of the checkpoint',
-    example: 100,
+    description: 'The amount of funds to be transferred for the checkpoint',
+    example: 1000,
   })
   amount: number;
 }

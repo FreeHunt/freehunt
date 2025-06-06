@@ -5,6 +5,8 @@ import {
   JobPostingSearchResult,
   JobPostingLocation,
   JobPosting,
+  JobPostingsCreate,
+  Checkpoint,
 } from "@/lib/interfaces";
 
 interface SearchJobPostingsParams {
@@ -17,17 +19,6 @@ interface SearchJobPostingsParams {
   maxSeniority?: number;
   page?: number;
   pageSize?: number;
-}
-
-export interface JobPostingsCreate {
-  title: string;
-  description: string;
-  location: string;
-  isPromoted: boolean;
-  averageDailyRate: number;
-  seniority: number;
-  companyId: string;
-  skillIds: string[];
 }
 
 export async function searchJobPostings(
@@ -87,11 +78,29 @@ export async function getJobPostingsByUserId(
   return response.data;
 }
 
-export async function submitJobPosting(formData: JobPostingsCreate) {
+export async function submitJobPosting(
+  formData: JobPostingsCreate,
+  checkpoints: Checkpoint[],
+) {
   try {
     console.log("Données soumises avec succès:", formData);
     const response = await api.post<JobPosting>("/job-postings/", formData);
     console.log("Réponse de l'API:", response.data);
+
+    // Si des checkpoints sont fournis, les soumettre avec le job posting id
+    if (checkpoints && checkpoints.length > 0) {
+      const checkpointPromises = checkpoints.map((checkpoint) =>
+        api.post<Checkpoint>("/checkpoints", {
+          name: checkpoint.name,
+          description: checkpoint.description,
+          date: checkpoint.date,
+          status: checkpoint.status,
+          jobPostingId: response.data.id,
+          amount: checkpoint.amount,
+        }),
+      );
+      await Promise.all(checkpointPromises);
+    }
 
     return {
       success: true,

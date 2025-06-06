@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { StripeService } from '../common/stripe/stripe.service';
 import { CheckpointStatus } from '@prisma/client';
 import { QuoteService } from '../quote/quote.service';
+import { CheckpointResponseDto } from './dto/checkpoint-response.dto';
 
 @Controller('checkpoints')
 @ApiTags('Checkpoints')
@@ -26,7 +27,9 @@ export class CheckpointsController {
   ) {}
 
   @Post()
-  create(@Body() createCheckpointDto: CreateCheckpointDto) {
+  create(
+    @Body() createCheckpointDto: CreateCheckpointDto,
+  ): Promise<CheckpointResponseDto> {
     return this.checkpointsService.create(createCheckpointDto);
   }
 

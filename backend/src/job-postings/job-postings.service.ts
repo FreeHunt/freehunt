@@ -29,6 +29,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -42,6 +43,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -56,6 +58,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -82,6 +85,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -96,6 +100,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -160,6 +165,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
       skip,
       take,

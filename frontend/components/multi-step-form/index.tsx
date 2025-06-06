@@ -10,22 +10,27 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
-import { JobPostingLocation, Skill } from "@/lib/interfaces";
+import {
+  Checkpoint,
+  CheckpointStatus,
+  JobPostingLocation,
+  Skill,
+} from "@/lib/interfaces";
 import { submitJobPosting } from "@/actions/jobPostings";
 import { getCurrentUser } from "@/actions/auth";
 import { getCurrentCompany } from "@/actions/company";
 import { getSkills } from "@/actions/skills";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 type Step = {
   id: string;
   label: string;
-};
-
-type Checkpoint = {
-  id: string;
-  name: string;
-  description: string;
-  deadline: string;
 };
 
 const validPresenceForZod = Object.values(JobPostingLocation) as [
@@ -38,7 +43,7 @@ const jobSchema = z.object({
   jobTitle: z.string().min(3, "Le titre doit contenir au moins 3 caractères"),
   jobDescription: z
     .string()
-    .min(10, "La description doit contenir au moins 20 caractères"),
+    .min(5, "La description doit contenir au moins 5 caractères"),
 });
 
 const profileSchema = z.object({
@@ -87,11 +92,12 @@ const profileSchema = z.object({
 });
 
 const checkpointSchema = z.object({
+  id: z.string(),
   name: z.string().min(1, "Le nom de l'étape est requis"),
   description: z.string().min(1, "La description de l'étape est requise"),
-  deadline: z
+  date: z
     .string()
-    .min(1, "La date limite est requise")
+    .min(1, "La date fin est requise")
     .refine(
       (date) => {
         return (
@@ -102,12 +108,14 @@ const checkpointSchema = z.object({
         message: "La date limite ne peut pas être dans le passé",
       },
     ),
-});
-
-const projectSchema = z.object({
-  checkpoints: z
-    .array(checkpointSchema)
-    .min(1, "Au moins un checkpoint du projet est requis"),
+  status: z.enum([
+    CheckpointStatus.TODO,
+    CheckpointStatus.IN_PROGRESS,
+    CheckpointStatus.DONE,
+    CheckpointStatus.DELAYED,
+    CheckpointStatus.CANCELED,
+  ]),
+  amount: z.string().regex(/^\d+$/, "Le montant doit être un nombre valide"),
 });
 
 // Schéma complet du formulaire
@@ -172,7 +180,7 @@ export default function MultiStepForm() {
   } | null>(null);
 
   // État pour gérer les dates des deadlines des checkpoints
-  const [checkpointDeadlines, setCheckpointDeadlines] = useState<
+  const [checkpointDatesOfEnd, setCheckpointDatesOfEnd] = useState<
     Record<string, Date | undefined>
   >({});
 
@@ -304,13 +312,13 @@ export default function MultiStepForm() {
     }
   };
 
-  // Mettre à jour les deadlines des checkpoints
+  // Mettre à jour les dates des checkpoints
   useEffect(() => {
     const updatedCheckpoints = formData.checkpoints.map((checkpoint) => {
-      if (checkpointDeadlines[checkpoint.id]) {
+      if (checkpointDatesOfEnd[checkpoint.id]) {
         return {
           ...checkpoint,
-          deadline: (checkpointDeadlines[checkpoint.id] as Date).toISOString(),
+          date: (checkpointDatesOfEnd[checkpoint.id] as Date).toISOString(),
         };
       }
       return checkpoint;
@@ -325,7 +333,7 @@ export default function MultiStepForm() {
         checkpoints: updatedCheckpoints,
       }));
     }
-  }, [checkpointDeadlines]);
+  }, [checkpointDatesOfEnd]);
 
   const addCheckpoint = () => {
     const newCheckpointId = `checkpoint-${Date.now()}`;
@@ -333,7 +341,10 @@ export default function MultiStepForm() {
       id: newCheckpointId,
       name: "",
       description: "",
-      deadline: "",
+      date: "",
+      status: "TODO",
+      jobPostingId: "",
+      amount: 0,
     };
 
     setFormData((prev) => ({
@@ -350,10 +361,10 @@ export default function MultiStepForm() {
       ),
     }));
 
-    // Supprimer également la deadline associée
-    const newDeadlines = { ...checkpointDeadlines };
+    // Supprimer également la date associée
+    const newDeadlines = { ...checkpointDatesOfEnd };
     delete newDeadlines[id];
-    setCheckpointDeadlines(newDeadlines);
+    setCheckpointDatesOfEnd(newDeadlines);
   };
 
   const updateCheckpoint = (
@@ -377,8 +388,8 @@ export default function MultiStepForm() {
   };
 
   // Fonction pour définir la deadline d'un checkpoint
-  const setCheckpointDeadline = (id: string, date: Date | undefined) => {
-    setCheckpointDeadlines((prev) => ({
+  const handleSetCheckpointDateOfEnd = (id: string, date: Date | undefined) => {
+    setCheckpointDatesOfEnd((prev) => ({
       ...prev,
       [id]: date,
     }));
@@ -387,7 +398,7 @@ export default function MultiStepForm() {
       // Marquer le champ comme touché
       setTouchedFields((prev) => {
         const newTouched = new Set(prev);
-        newTouched.add(`checkpoints.${id}.deadline`);
+        newTouched.add(`checkpoints.${id}.date`);
         return newTouched;
       });
     }
@@ -564,7 +575,9 @@ export default function MultiStepForm() {
       formData.checkpoints.forEach((checkpoint) => {
         fieldsToTouch.add(`checkpoints.${checkpoint.id}.name`);
         fieldsToTouch.add(`checkpoints.${checkpoint.id}.description`);
-        fieldsToTouch.add(`checkpoints.${checkpoint.id}.deadline`);
+        fieldsToTouch.add(`checkpoints.${checkpoint.id}.date`);
+        fieldsToTouch.add(`checkpoints.${checkpoint.id}.status`);
+        fieldsToTouch.add(`checkpoints.${checkpoint.id}.amount`);
       });
 
       // Si aucun checkpoint n'est défini, marquer le champ checkpoints comme touché
@@ -602,18 +615,29 @@ export default function MultiStepForm() {
       console.log("Données validées:", validatedData); //TODO remove
       setSubmitResult(null);
       setIsSubmitting(true);
-      const result = await submitJobPosting({
-        title: validatedData.jobTitle,
-        description: validatedData.jobDescription,
-        location: validatedData.typePresence,
-        isPromoted: false,
-        averageDailyRate: +validatedData.tjm,
-        seniority: +validatedData.seniority,
-        companyId: currentCompany.id,
-        skillIds: validatedData.skills.map((skill) => skill.id),
-        // dateOfStart: validatedData.dateOfStart,
-        // dateOfEnd: validatedData.dateOfEnd,
-      });
+      const result = await submitJobPosting(
+        {
+          title: validatedData.jobTitle,
+          description: validatedData.jobDescription,
+          location: validatedData.typePresence,
+          isPromoted: false,
+          averageDailyRate: +validatedData.tjm,
+          seniority: +validatedData.seniority,
+          companyId: currentCompany.id,
+          skillIds: validatedData.skills.map((skill) => skill.id),
+          // dateOfStart: validatedData.dateOfStart,
+          // dateOfEnd: validatedData.dateOfEnd,
+        },
+        validatedData.checkpoints.map((checkpoint) => ({
+          id: checkpoint.id,
+          name: checkpoint.name,
+          description: checkpoint.description,
+          date: checkpoint.date,
+          status: checkpoint.status,
+          jobPostingId: "", // Est rempli par l'API suite à la création du job
+          amount: +checkpoint.amount,
+        })),
+      );
 
       setSubmitResult({
         success: result.success,
@@ -1061,31 +1085,105 @@ export default function MultiStepForm() {
                       )}
                     </div>
 
-                    {/* Input Deadline Checkpoint */}
+                    {/* Input Date de Fin Checkpoint */}
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-col gap-1">
                         <h2 className="text-xl font-bold text-freehunt-main">
-                          Deadline
+                          Date de fin
                         </h2>
                         <p className="text-gray-400">
                           Sélectionnez une date limite pour cette étape.
                         </p>
                       </div>
                       <DatePicker
-                        date={checkpointDeadlines[checkpoint.id]}
+                        date={checkpointDatesOfEnd[checkpoint.id]}
                         setDate={(date) =>
-                          setCheckpointDeadline(checkpoint.id, date)
+                          handleSetCheckpointDateOfEnd(checkpoint.id, date)
                         }
                         className={
-                          errors[`checkpoints.${checkpoint.id}.deadline`]
+                          errors[`checkpoints.${checkpoint.id}.date`]
                             ? "border-red-500"
                             : ""
                         }
                       />
-                      {errors[`checkpoints.${checkpoint.id}.deadline`] && (
+                      {errors[`checkpoints.${checkpoint.id}.date`] && (
                         <p className="mt-1 text-sm text-red-500 flex items-center">
                           <AlertCircle className="h-4 w-4 mr-1" />
-                          {errors[`checkpoints.${checkpoint.id}.deadline`]}
+                          {errors[`checkpoints.${checkpoint.id}.date`]}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Input Status Checkpoint */}
+                    <div className="flex flex-col gap-1">
+                      <h2 className="text-xl font-bold text-freehunt-main">
+                        Statut
+                      </h2>
+                      <p className="text-gray-400">
+                        Statut actuel de cette étape.
+                      </p>
+                      <Select
+                        value={checkpoint.status}
+                        onValueChange={(value) =>
+                          updateCheckpoint(checkpoint.id, "status", value)
+                        }
+                        // className={`w-full ${
+                        //   errors[`checkpoints.${checkpoint.id}.status`]
+                        //     ? "border-red-500"
+                        //     : ""
+                        // }`}
+                      >
+                        <SelectTrigger className="rounded-full">
+                          <SelectValue placeholder="Sélectionnez un statut" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.values(CheckpointStatus).map((status) => (
+                            <SelectItem key={status} value={status}>
+                              {status}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {errors[`checkpoints.${checkpoint.id}.status`] && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center">
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          {errors[`checkpoints.${checkpoint.id}.status`]}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Input Amount Checkpoint */}
+                    <div className="flex flex-col gap-1">
+                      <h2 className="text-xl font-bold text-freehunt-main">
+                        Montant
+                      </h2>
+                      <p className="text-gray-400">
+                        Montant versé lors de la réalisation de cette étape.
+                      </p>
+                      <Input
+                        type="number"
+                        value={checkpoint.amount}
+                        onChange={(e) =>
+                          updateCheckpoint(
+                            checkpoint.id,
+                            "amount",
+                            e.target.value,
+                          )
+                        }
+                        onBlur={() =>
+                          handleBlur(`checkpoints.${checkpoint.id}.amount`)
+                        }
+                        className={`w-full p-2 border rounded-md ${
+                          errors[`checkpoints.${checkpoint.id}.amount`]
+                            ? "border-red-500"
+                            : ""
+                        }`}
+                        placeholder="Exemple : 1000 €"
+                      />
+                      {errors[`checkpoints.${checkpoint.id}.amount`] && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center">
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          {errors[`checkpoints.${checkpoint.id}.amount`]}
                         </p>
                       )}
                     </div>
@@ -1232,9 +1330,9 @@ export default function MultiStepForm() {
                         {checkpoint.description || "Aucune description"}
                       </p>
                       <p className="text-sm text-gray-500 mt-2">
-                        Deadline:{" "}
-                        {checkpoint.deadline
-                          ? new Date(checkpoint.deadline).toLocaleDateString(
+                        Date de fin:{" "}
+                        {checkpoint.date
+                          ? new Date(checkpoint.date).toLocaleDateString(
                               "fr-FR",
                               {
                                 day: "numeric",
