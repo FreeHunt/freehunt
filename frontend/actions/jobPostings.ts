@@ -83,9 +83,7 @@ export async function submitJobPosting(
   checkpoints: Checkpoint[],
 ) {
   try {
-    console.log("Données soumises avec succès:", formData);
     const response = await api.post<JobPosting>("/job-postings/", formData);
-    console.log("Réponse de l'API:", response.data);
 
     // Si des checkpoints sont fournis, les soumettre avec le job posting id
     if (checkpoints && checkpoints.length > 0) {

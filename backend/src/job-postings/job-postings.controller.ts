@@ -36,7 +36,6 @@ export class JobPostingsController {
   create(
     @Body() createJobPostingDto: CreateJobPostingDto,
   ): Promise<JobPostingResponseDto> {
-    console.log('Creating job posting with DTO:', createJobPostingDto);
     return this.jobPostingsService.create(createJobPostingDto);
   }
 

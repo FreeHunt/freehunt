@@ -67,7 +67,6 @@ const profileSchema = z.object({
     .min(1, "La date de début est requise")
     .refine(
       (date) => {
-        console.log("dateStart", date);
         return (
           new Date(date).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
         );
@@ -612,7 +611,7 @@ export default function MultiStepForm() {
       const currentCompany = await getCurrentCompany(auth.id);
 
       const validatedData = formSchema.parse(formData);
-      console.log("Données validées:", validatedData); //TODO remove
+      // console.log("Données validées:", validatedData);
       setSubmitResult(null);
       setIsSubmitting(true);
       const result = await submitJobPosting(
