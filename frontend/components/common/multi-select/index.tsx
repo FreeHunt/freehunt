@@ -82,7 +82,7 @@ export function MultiSelect({
   );
 
   const selectablesItems = options?.filter(
-    (skill) => !selected?.includes(skill),
+    (skill) => !selected?.some((selectedSkill) => selectedSkill.name === skill.name),
   );
 
   // console.log("selectablesItems", selectablesItems);
