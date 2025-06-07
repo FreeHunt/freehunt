@@ -77,6 +77,34 @@ export class CompaniesController {
     return this.companiesService.findOne(id);
   }
 
+  @Get('user/:userId')
+  @ApiOperation({
+    summary: 'Find a company by user ID',
+    description: 'Retrieve a company associated with a specific user ID',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'The ID of the user (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the company associated with the specified user ID',
+    type: CompanyResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Company not found for the specified user ID',
+  })
+  findByUserId(
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ): Promise<CompanyResponseDto | null> {
+    return this.companiesService.findByUserId(userId);
+  }
+
   @Patch(':id')
   @ApiOperation({
     summary: 'Update a company',

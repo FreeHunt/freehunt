@@ -28,6 +28,13 @@ export class CompaniesService {
     });
   }
 
+  async findByUserId(userId: string): Promise<Company | null> {
+    return this.prisma.company.findFirst({
+      where: { userId },
+      include: { user: true },
+    });
+  }
+
   async update(id: string, data: UpdateCompanyDto): Promise<Company> {
     return this.prisma.company.update({
       where: { id },
