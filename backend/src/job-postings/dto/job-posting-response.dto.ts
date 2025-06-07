@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { JobPostingLocation } from '@prisma/client';
 import { CompanyResponseDto } from '../../companies/dto/company-response.dto';
 import { SkillResponseDto } from '../../skills/dto/skill-response.dto';
-import { CheckpointResponseDto } from '@/src/checkpoints/dto/checkpoint-response.dto';
+import { CheckpointResponseDto } from '../../checkpoints/dto/checkpoint-response.dto';
 
 export class JobPostingResponseDto {
   @ApiProperty({
