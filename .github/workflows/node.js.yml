@@ -297,8 +297,8 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # Pull newest images 
-            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt/frontend:latest
-            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt/backend:latest
+            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-frontend:latest
+            docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-backend:latest
 
             # Redeploy the stack with newest images
             docker stack deploy -c compose.yaml -c compose.prod.yaml freehunt --with-registry-auth
