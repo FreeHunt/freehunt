@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { MultiSelect } from "../common/multi-select";
-import { DatePicker } from "../common/date-picker";
+import { ComponentDatePicker } from "../common/date-picker/comp-41";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
@@ -148,7 +148,7 @@ export default function MultiStepForm() {
     { id: "summary", label: "Récapitulatif" },
   ];
 
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -830,7 +830,7 @@ export default function MultiStepForm() {
                     Sélectionnez une date de début de mission.
                   </p>
                 </div>
-                <DatePicker
+                <ComponentDatePicker
                   date={selectedDateStart}
                   setDate={setSelectedDateStart}
                   className={`text-freehunt-black-two rounded-full ${
@@ -855,7 +855,7 @@ export default function MultiStepForm() {
                     Sélectionnez une date de fin de mission.
                   </p>
                 </div>
-                <DatePicker
+                <ComponentDatePicker
                   date={selectedDateEnd}
                   setDate={handleEndDateChange}
                   className={`text-freehunt-black-two rounded-full ${
@@ -1090,7 +1090,7 @@ export default function MultiStepForm() {
                           Sélectionnez une date limite pour cette étape.
                         </p>
                       </div>
-                      <DatePicker
+                      <ComponentDatePicker
                         date={checkpointDatesOfEnd[checkpoint.id]}
                         setDate={(date) =>
                           handleSetCheckpointDateOfEnd(checkpoint.id, date)
