@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { MultiSelect } from "../common/multi-select";
-import { ComponentDatePicker } from "../common/date-picker/comp-41";
+import { ComponentDatePicker } from "../ui/comp-41";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
@@ -148,7 +148,7 @@ export default function MultiStepForm() {
     { id: "summary", label: "Récapitulatif" },
   ];
 
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     jobTitle: "",
     jobDescription: "",
@@ -819,9 +819,9 @@ export default function MultiStepForm() {
               )}
             </div>
 
-            <div className="flex gap-24 flex-wrap">
+            <div className="flex gap-x-24 gap-y-8 flex-wrap">
               {/* Input Date de Début */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 flex-1 min-w-[250px]">
                 <div className="flex flex-col gap-1">
                   <h2 className="text-xl font-bold text-freehunt-main">
                     Date de début
@@ -846,7 +846,7 @@ export default function MultiStepForm() {
               </div>
 
               {/* Input Date de Fin */}
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 flex-1 min-w-[250px]">
                 <div className="flex flex-col gap-1">
                   <h2 className="text-xl font-bold text-freehunt-main">
                     Date de fin (optionnelle)
