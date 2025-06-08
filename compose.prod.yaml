@@ -91,6 +91,9 @@ services:
     secrets:
       - minio_access_key
       - minio_secret_key
+      - stripe_secret_key
+      - stripe_webhook_secret
+      - stripe_public_key
 
     deploy:
       replicas: 3
@@ -118,4 +121,8 @@ secrets:
   minio_access_key:
     external: true
   minio_secret_key:
+    external: true
+  stripe_api_secret:
+    external: true
+  stripe_webhook_secret:
     external: true
