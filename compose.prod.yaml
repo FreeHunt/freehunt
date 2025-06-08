@@ -122,7 +122,9 @@ secrets:
     external: true
   minio_secret_key:
     external: true
-  stripe_api_secret:
+  stripe_secret_key:
     external: true
   stripe_webhook_secret:
+    external: true
+  stripe_public_key:
     external: true
