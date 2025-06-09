@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { z } from 'zod';
 
 interface Company {
   id: string;
@@ -34,11 +35,21 @@ interface FormData {
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
 
+const companySchema = z.object({
+  name: z.string().min(2, "Le nom doit faire au moins 2 caractères"),
+  address: z.string().min(5, "L'adresse doit faire au moins 5 caractères"),
+  siren: z.string().regex(/^\d{9}$/, "Le numéro SIREN doit comporter exactement 9 chiffres"),
+  description: z.string().min(10, "La description doit faire au moins 10 caractères"),
+});
+
+type CompanyFormErrors = Partial<Record<keyof z.infer<typeof companySchema>, string>>;
+
 const CompanyProfile = () => {
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<CompanyFormErrors>({});
   const [formData, setFormData] = useState<FormData>({
     name: '',
     address: '',
@@ -46,7 +57,6 @@ const CompanyProfile = () => {
     description: '',
   });
 
-  // Récupration des données de l'utilisateur connecté
   const fetchCurrentUser = async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/getme`, {
@@ -63,7 +73,6 @@ const CompanyProfile = () => {
 
       const userData: User = await response.json();
       setUser(userData);
-      console.log('Utilisateur récupéré:', userData);
 
       if (userData.company) {
         setCompany(userData.company);
@@ -83,7 +92,6 @@ const CompanyProfile = () => {
       }
     } catch (err: any) {
       setError(err.message);
-      console.error('Erreur:', err);
     } finally {
       setLoading(false);
     }
@@ -112,6 +120,20 @@ const CompanyProfile = () => {
       alert('Erreur: utilisateur non identifié');
       return;
     }
+
+    const result = companySchema.safeParse(formData);
+
+    if (!result.success) {
+      const fieldErrors: CompanyFormErrors = {};
+      result.error.errors.forEach((err) => {
+        const fieldName = err.path[0] as keyof CompanyFormErrors;
+        fieldErrors[fieldName] = err.message;
+      });
+      setFormErrors(fieldErrors);
+      return;
+    }
+
+    setFormErrors({});
 
     try {
       let response: Response;
@@ -145,7 +167,7 @@ const CompanyProfile = () => {
 
       const updatedCompany: Company = await response.json();
       setCompany(updatedCompany);
-      alert('Profil entreprise mis à jour avec succès !');
+      alert('Profil mis à jour avec succès !');
     } catch (err: any) {
       console.error('Erreur:', err);
       alert('Erreur lors de la mise à jour du profil');
@@ -195,9 +217,7 @@ const CompanyProfile = () => {
                     <h3 className="text-xl font-semibold text-gray-900 mb-1">
                       {company?.name || formData.name || "Nom de l'entreprise"}
                     </h3>
-                    <Badge className="bg-pink-500 text-white" style={{ backgroundColor: '#FF4D6D' }}>
-                      Entreprise
-                    </Badge>
+                    <Badge className=" text-white" style={{ backgroundColor: '#FF4D6D' }}>Entreprise</Badge>
                     <div className="flex items-center text-gray-500 text-sm my-4">
                       <MapPin className="w-4 h-4 mr-1" />
                       {company?.address || formData.address || 'Adresse non renseignée'}
@@ -209,7 +229,6 @@ const CompanyProfile = () => {
                 </p>
               </CardContent>
             </Card>
-
             {/* Statistiques */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
@@ -273,7 +292,6 @@ const CompanyProfile = () => {
             </Card>
           </div>
 
-          {/* Formulaire d'édition */}
           <div className="space-y-6">
             <Card className="p-0">
               <div className="px-6 py-4 rounded-t-xl" style={{ backgroundColor: '#FF4D6D' }}>
@@ -281,49 +299,72 @@ const CompanyProfile = () => {
               </div>
               <CardContent className="p-6 space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nom de l'entreprise</Label>
-                  <Input
+                    <Label htmlFor="name">Nom de l'entreprise</Label>
+                    <Input
                     id="name"
                     name="name"
                     type="text"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-100 border-0 focus:bg-white focus:ring-2 focus:ring-pink-500"
-                  />
+                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
+                        formErrors.name ? 'border border-red-500' : 'border-0'
+                    }`}
+                    />
+                    {formErrors.name && (
+                    <p className="text-sm text-red-600">{formErrors.name}</p>
+                    )}
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="address">Adresse</Label>
-                  <Input
+                    <Label htmlFor="address">Adresse</Label>
+                    <Input
                     id="address"
                     name="address"
                     type="text"
                     value={formData.address}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-100 border-0 focus:bg-white focus:ring-2 focus:ring-pink-500"
-                  />
+                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
+                        formErrors.address ? 'border border-red-500' : 'border-0'
+                    }`}
+                    />
+                    {formErrors.address && (
+                    <p className="text-sm text-red-600">{formErrors.address}</p>
+                    )}
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="siren">Siren</Label>
-                  <Input
+                    <Label htmlFor="siren">Siren</Label>
+                    <Input
                     id="siren"
                     name="siren"
                     type="text"
                     value={formData.siren}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-100 border-0 focus:bg-white focus:ring-2 focus:ring-pink-500"
-                  />
+                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
+                        formErrors.siren ? 'border border-red-500' : 'border-0'
+                    }`}
+                    />
+                    {formErrors.siren && (
+                    <p className="text-sm text-red-600">{formErrors.siren}</p>
+                    )}
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
                     id="description"
                     name="description"
                     rows={4}
                     value={formData.description}
                     onChange={handleInputChange}
-                    className="w-full bg-gray-100 border-0 focus:bg-white focus:ring-2 focus:ring-pink-500 resize-none"
+                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 resize-none ${
+                        formErrors.description ? 'border border-red-500' : 'border-0'
+                    }`}
                     placeholder="Décrivez votre entreprise..."
-                  />
+                    />
+                    {formErrors.description && (
+                    <p className="text-sm text-red-600">{formErrors.description}</p>
+                    )}
                 </div>
               </CardContent>
             </Card>
