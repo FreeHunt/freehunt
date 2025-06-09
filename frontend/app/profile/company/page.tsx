@@ -168,31 +168,6 @@ const CompanyProfile = () => {
                     placeholder="Décrivez votre entreprise..."
                   />
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="website" className="text-sm font-medium text-gray-700">
-                    Site web
-                  </Label>
-                  <Input 
-                    id="website" 
-                    name='website'
-                    type="url" 
-                    placeholder="https://..."
-                    className="w-full bg-gray-100 border-0 focus:bg-white focus:ring-2 focus:ring-pink-500" 
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="stripeId" className="text-sm font-medium text-gray-700">
-                    Id stripe
-                  </Label>
-                  <Input 
-                    id="stripeId" 
-                    name='stripeId'
-                    type="text" 
-                    className="w-full bg-gray-100 border-0 focus:bg-white focus:ring-2 focus:ring-pink-500" 
-                  />
-                </div>
               </CardContent>
             </Card>
           </div>
