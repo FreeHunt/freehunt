@@ -24,7 +24,7 @@ export class EnvironmentService {
 
     // 1. Check env
     if (process.env[envKey]) {
-      return process.env[envKey] as string;
+      return process.env[envKey];
     }
 
     // 2. Check Swarm secret cache

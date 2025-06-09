@@ -48,13 +48,6 @@ services:
         constraints:
           - node.role == manager
 
-  minio:
-    env_file:
-      - ./env/minio.env
-    deploy:
-      # 'Disable' minio
-      replicas: 0
-
   matomo-db:
     env_file:
       - ./env/matomo.env
