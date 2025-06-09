@@ -12,7 +12,9 @@ export class StripeService {
   private stripe: Stripe;
 
   constructor(private readonly environmentService: EnvironmentService) {
-    this.stripe = new Stripe(this.environmentService.get('STRIPE_SECRET_KEY'));
+    this.stripe = new Stripe(
+      this.environmentService.get('STRIPE_SECRET_KEY', ''),
+    );
   }
 
   handleWebhook(body: Buffer, signature: string) {
@@ -22,7 +24,7 @@ export class StripeService {
       event = this.stripe.webhooks.constructEvent(
         body,
         signature,
-        this.environmentService.get('STRIPE_WEBHOOK_SECRET'),
+        this.environmentService.get('STRIPE_WEBHOOK_SECRET', ''),
       );
     } catch (error: any) {
       throw new Error(
