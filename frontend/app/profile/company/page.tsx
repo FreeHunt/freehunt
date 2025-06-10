@@ -45,8 +45,8 @@ interface FormData {
   logo: File | null;
 }
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+const DEFAULT_LOGO_URL = "../assets/logo.jpg";
 
 const companySchema = z.object({
   name: z.string().min(2, "Le nom doit faire au moins 2 caractères"),
@@ -134,7 +134,6 @@ export default function CompanyProfile() {
 
   const fetchCompanyLogo = async (userId: string) => {
     try {
-      console.log("Récupération du logo pour userId:", userId);
       const response = await fetch(
         `${BACKEND_URL}/upload?userId=${userId}&type=AVATAR`,
         {
@@ -354,7 +353,6 @@ export default function CompanyProfile() {
     return null;
   }
 
-  const DEFAULT_LOGO_URL = "../assets/logo.jpg";
   const displayLogo = logoPreview || logoUrl || DEFAULT_LOGO_URL;
 
   return (
