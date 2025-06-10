@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,7 @@ interface User {
   id: string;
   email: string;
   name: string;
+  role: "FREELANCE" | "COMPANY";
   company?: Company;
 }
 
@@ -62,6 +64,7 @@ type CompanyFormErrors = Partial<
 >;
 
 export default function CompanyProfile() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -93,6 +96,12 @@ export default function CompanyProfile() {
       }
 
       const userData: User = await response.json();
+      
+      if (userData.role !== "COMPANY") {
+        router.push("/");
+        return;
+      }
+
       setUser(userData);
 
       if (userData.company) {
@@ -137,29 +146,21 @@ export default function CompanyProfile() {
         },
       );
 
-      console.log("Response status:", response.status);
-
       if (response.ok) {
         const documents: Document[] = await response.json();
-        console.log("Documents récupérés:", documents);
 
         if (documents.length > 0) {
           const sortedDocuments = documents.sort(
-            (a, b) =>
-              new Date(b.createdAt || 0).getTime() -
-              new Date(a.createdAt || 0).getTime(),
+            (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
           );
           const latestDocument = sortedDocuments[0];
-          console.log("Logo URL définie:", latestDocument.url);
           setLogoUrl(latestDocument.url);
         } else {
-          console.log("Aucun document AVATAR trouvé");
+          setLogoUrl(null);
         }
-      } else {
-        console.error("Erreur response:", await response.text());
       }
     } catch (err) {
-      console.error("Erreur lors de la récupération du logo:", err);
+      setError("Erreur lors de la récupération du logo");
     }
   };
 
@@ -229,16 +230,13 @@ export default function CompanyProfile() {
 
       if (!uploadResponse.ok) {
         const errorText = await uploadResponse.text();
-        console.error("Erreur serveur:", errorText);
         throw new Error("Erreur lors de l'upload du logo");
       }
 
       const uploadData = await uploadResponse.json();
-      console.log("Réponse complète:", uploadData);
 
       return uploadData.url;
     } catch (error) {
-      console.error("Erreur lors de l'upload du logo:", error);
       throw error;
     }
   };
@@ -321,7 +319,6 @@ export default function CompanyProfile() {
 
       alert("Profil mis à jour avec succès !");
     } catch (err: any) {
-      console.error("Erreur:", err);
       alert("Erreur lors de la mise à jour du profil");
     }
   };
@@ -353,7 +350,12 @@ export default function CompanyProfile() {
     );
   }
 
-  const displayLogo = logoPreview || logoUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+  if (!user || user.role !== "COMPANY") {
+    return null;
+  }
+
+  const DEFAULT_LOGO_URL = "../assets/logo.jpg";
+  const displayLogo = logoPreview || logoUrl || DEFAULT_LOGO_URL;
 
   return (
     <form onSubmit={handleSubmit}>
