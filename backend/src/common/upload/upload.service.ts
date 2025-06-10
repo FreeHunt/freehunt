@@ -90,7 +90,6 @@ export class UploadService {
             await this.minioClient.send(deleteCommand);
           }
         } catch (deleteError) {
-          console.error('Erreur lors de la suppression de l\'ancien avatar:', deleteError);
           throw new Error('Erreur lors de la suppression de l\'ancien avatar');
         }
 
@@ -131,7 +130,6 @@ export class UploadService {
         };
       }
     } catch (error) {
-      console.error('Erreur lors de la mise à jour de l\'avatar:', error);
       throw new Error('Erreur lors de la mise à jour de l\'avatar');
     }
   }
