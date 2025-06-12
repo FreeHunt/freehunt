@@ -78,6 +78,11 @@ export async function getJobPostingsByUserId(
   return response.data;
 }
 
+export async function getJobPosting(id: string): Promise<JobPosting> {
+  const response = await api.get<JobPosting>(`/job-postings/${id}`);
+  return response.data;
+}
+
 export async function submitJobPosting(
   formData: JobPostingsCreate,
   checkpoints: Checkpoint[],
