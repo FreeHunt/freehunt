@@ -21,7 +21,7 @@ import { useParams } from "next/navigation";
 import { Checkpoint, Company, JobPosting, Skill } from "@/lib/interfaces";
 import { getCheckpoints } from "@/actions/checkPoints";
 import { getCompany } from "@/actions/company";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 const getLocationLabel = (location: string) => {
   switch (location) {
@@ -68,6 +68,8 @@ const getStatusLabel = (status: string) => {
 };
 
 export default function JobPostingDetail() {
+  const router = useRouter();
+
   const [showAllSkills, setShowAllSkills] = useState(false);
   const { id } = useParams();
   const [jobPosting, setJobPosting] = useState<JobPosting | null>(null);
@@ -120,7 +122,7 @@ export default function JobPostingDetail() {
             variant="outline"
             theme="secondary"
             className="mb-4 flex items-center gap-2"
-            onClick={() => router.back()}
+            onClick={() => router.push("/job-postings/search")}
           >
             <ArrowLeft size={16} />
             Retour aux offres
