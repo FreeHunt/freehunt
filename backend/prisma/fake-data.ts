@@ -1,4 +1,4 @@
-import { Role, SkillType, JobPostingLocation, CheckpointStatus, DocumentType } from '@prisma/client';
+import { Role, SkillType, JobPostingLocation, CheckpointStatus, DocumentType, CandidateStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import Decimal from 'decimal.js';
 
@@ -257,6 +257,16 @@ export function fakeMessageComplete() {
     documentId: undefined,
     timestamp: new Date(),
     content: faker.lorem.words(5),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+export function fakeCandidateComplete() {
+  return {
+    id: faker.string.uuid(),
+    jobPostingId: faker.string.uuid(),
+    freelanceId: faker.string.uuid(),
+    status: CandidateStatus.PENDING,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
