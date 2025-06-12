@@ -121,12 +121,13 @@ function JobPostingCard(jobPosting: JobPosting) {
             <strong>{formatNumberToEuros(averageDailyRate)}</strong> / jour
           </p>
           {/* TODO: Link this button to the job posting details page */}
-          <Link
-            href={`/job-postings/${jobPosting.id}`}
-            className="font-semibold bg-secondary text-white py-2 px-4 rounded-md text-center"
+          <Button
+            theme="secondary"
+            className="font-semibold"
+            onClick={() => router.push(`/job-postings/${jobPosting.id}`)}
           >
             Voir l&apos;offre
-          </Link>
+          </Button>
         </CardAction>
       </CardFooter>
     </Card>
