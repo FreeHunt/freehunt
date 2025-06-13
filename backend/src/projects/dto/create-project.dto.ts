@@ -4,6 +4,7 @@ import {
   IsDate,
   IsOptional,
   IsUUID,
+  IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -62,4 +63,21 @@ export class CreateProjectDto {
     required: false,
   })
   freelanceId?: string | null | undefined;
+
+  @IsUUID()
+  @IsNotEmpty()
+  @ApiProperty({
+    description:
+      'The unique identifier for the company associated with the project',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  companyId: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: 'The amount of the project',
+    example: 1000,
+  })
+  amount: number;
 }
