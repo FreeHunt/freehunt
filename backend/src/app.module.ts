@@ -17,9 +17,11 @@ import { DocumentsModule } from './documents/documents.module';
 import { CheckpointsModule } from './checkpoints/checkpoints.module';
 import { StripeModule } from './common/stripe/stripe.module';
 import { CandidatesModule } from './candidates/candidates.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot(),
     PrismaModule,
     UsersModule,

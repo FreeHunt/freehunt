@@ -32,6 +32,8 @@ describe('ProjectController', () => {
     endDate: null,
     jobPostingId: 'job-posting-id',
     freelanceId: null,
+    companyId: 'company-id',
+    amount: 1000,
   };
 
   const projectWithRelationsMock = {
