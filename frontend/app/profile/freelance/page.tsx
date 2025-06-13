@@ -117,9 +117,7 @@ export default function FreelanceProfile() {
       }
 
       setUser(userData);
-
-      console.log("User data:", userData);
-      
+            
       if (userData.freelance) {
         setFreelance(userData.freelance);
         setFormData({
