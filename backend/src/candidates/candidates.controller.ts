@@ -12,7 +12,7 @@ export class CandidatesController {
     return this.candidatesService.createCandidate(createCandidateDto);
   }
 
-  @Get(':jobPostingId')
+  @Get('job-posting/:jobPostingId')
   async getCandidatesByJobPostingId(
     @Param('jobPostingId') jobPostingId: string,
   ) {
