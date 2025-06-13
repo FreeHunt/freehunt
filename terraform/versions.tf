@@ -1,4 +1,12 @@
 terraform {
+  cloud {
+    organization = "FreeHunt"
+
+    workspaces {
+      name = "production"
+    }
+  }
+
   required_version = "~>1.12.0"
 
   required_providers {
