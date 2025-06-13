@@ -132,7 +132,7 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
   try {
     // Create a FormData object for the file upload
     const fileFormData = new FormData();
-    const bucketName = "avatar";
+    const bucketName = "freehunt-avatar";
 
     // Append the file if it exists
     if (formData.avatar) {
@@ -183,7 +183,7 @@ export const RegisterFreelance = async (formData: ProfileFormData) => {
 export const RegisterCompany = async (formData: CompanyFormData) => {
   try {
     const fileFormData = new FormData();
-    const bucketName = "avatar";
+    const bucketName = "freehunt-avatar";
 
     // Append the file if it exists
     if (formData.logo) {
