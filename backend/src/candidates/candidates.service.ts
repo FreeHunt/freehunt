@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
@@ -7,6 +7,23 @@ export class CandidatesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createCandidate(data: CreateCandidateDto) {
+    const checkPoint = await this.prisma.checkpoint.findFirst({
+      where: {
+        jobPostingId: data.jobPostingId,
+      },
+    });
+    if (!checkPoint) {
+      throw new BadRequestException('Job posting does not have a checkpoint');
+    }
+    const checkCandidate = await this.prisma.candidate.findFirst({
+      where: {
+        jobPostingId: data.jobPostingId,
+        freelanceId: data.freelanceId,
+      },
+    });
+    if (checkCandidate) {
+      throw new BadRequestException('Candidate already exists');
+    }
     return await this.prisma.candidate.create({
       data: {
         ...data,
