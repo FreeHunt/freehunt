@@ -82,8 +82,8 @@ services:
     env_file:
       - ./env/backend.env
     secrets:
-      - minio_access_key
-      - minio_secret_key
+      - s3_access_key
+      - s3_secret_key
       - stripe_secret_key
       - stripe_webhook_secret
       - stripe_public_key
@@ -111,9 +111,9 @@ volumes:
   uptime-kuma-data:
 
 secrets:
-  minio_access_key:
+  s3_access_key:
     external: true
-  minio_secret_key:
+  s3_secret_key:
     external: true
   stripe_secret_key:
     external: true
