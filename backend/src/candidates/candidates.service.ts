@@ -52,6 +52,16 @@ export class CandidatesService {
   }
 
   async updateCandidate(id: string, data: UpdateCandidateDto) {
+    const candidate = await this.prisma.candidate.findFirst({
+      where: {
+        jobPostingId: data.jobPostingId,
+        status: 'ACCEPTED',
+      },
+    });
+    if (candidate) {
+      throw new BadRequestException('Candidate already accepted');
+    }
+
     return await this.prisma.candidate.update({
       where: { id },
       data: {
