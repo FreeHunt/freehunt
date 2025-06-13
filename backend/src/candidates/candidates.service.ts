@@ -52,9 +52,18 @@ export class CandidatesService {
   }
 
   async updateCandidate(id: string, data: UpdateCandidateDto) {
+    // Fetch the existing candidate by id
+    const existingCandidate = await this.prisma.candidate.findUnique({
+      where: { id },
+    });
+    if (!existingCandidate) {
+      throw new BadRequestException('Candidate not found');
+    }
+
+    // Use the jobPostingId from the existing candidate for the acceptance check
     const candidate = await this.prisma.candidate.findFirst({
       where: {
-        jobPostingId: data.jobPostingId,
+        jobPostingId: existingCandidate.jobPostingId,
         status: 'ACCEPTED',
       },
     });
