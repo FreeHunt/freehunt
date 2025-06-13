@@ -14,7 +14,7 @@ resource "aws_s3_bucket" "freehunt_avatar" {
   force_destroy = true
 }
 
-resource "aws_s3_bucket_versioning" "versioning_example" {
+resource "aws_s3_bucket_versioning" "freehunt_avatar_versioning" {
   bucket = aws_s3_bucket.freehunt_avatar.id
 
   versioning_configuration {
