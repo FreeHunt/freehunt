@@ -16,5 +16,5 @@ output "s3_bucket_name" {
 # S3 endpoint URL for S3_URL environment variable
 output "s3_endpoint_url" {
   description = "S3 endpoint URL to use as S3_URL in production (regional endpoint)"
-  value       = "https://${aws_s3_bucket.freehunt_avatar.bucket_regional_domain_name}"
+  value       = "https://s3.${var.aws_region}.amazonaws.com"
 }
