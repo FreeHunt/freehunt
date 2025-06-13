@@ -54,7 +54,9 @@ export class CandidatesService {
   async updateCandidate(id: string, data: UpdateCandidateDto) {
     return await this.prisma.candidate.update({
       where: { id },
-      data,
+      data: {
+        status: data.status,
+      },
     });
   }
 }
