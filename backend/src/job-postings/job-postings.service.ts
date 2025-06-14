@@ -189,6 +189,15 @@ export class JobPostingsService {
   async getJobPostingsByUserId(userId: string): Promise<JobPosting[]> {
     return this.prisma.jobPosting.findMany({
       where: { company: { userId } },
+      include: {
+        skills: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        checkpoints: true,
+      },
     });
   }
 }
