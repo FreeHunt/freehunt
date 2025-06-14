@@ -81,9 +81,9 @@ export class UpdateFreelanceDto {
   @IsOptional()
   @IsString()
   @ApiProperty({
-    description: 'The Stripe ID associated with the freelance',
-    example: 'cus_J5t2v1a2b3c4d5e6f7g8h9i0',
+    description: 'The Stripe account ID associated with the freelance',
+    example: 'acct_1234567890',
     required: false,
   })
-  IdStripe?: string;
+  stripeAccountId?: string;
 }
