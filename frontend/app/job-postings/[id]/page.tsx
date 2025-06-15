@@ -135,9 +135,7 @@ export default function JobPostingDetail() {
 
     const fetchFreelanceUser = async () => {
       const currentUser = await getCurrentUser();
-      console.log("Current user:", currentUser);
       if (!currentUser) {
-        console.log("No user is currently logged in.");
         return;
       }
       setUser(currentUser);
