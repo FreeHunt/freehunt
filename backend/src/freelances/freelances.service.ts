@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFreelanceDto } from './dto/create-freelance.dto';
 import { UpdateFreelanceDto } from './dto/update-freelance.dto';
 import { PrismaService } from '../common/prisma/prisma.service';
@@ -46,6 +46,24 @@ export class FreelancesService {
         skills: true,
       },
     });
+  }
+
+  async findByUserId(userId: string): Promise<Freelance> {
+    const freelance = await this.prisma.freelance.findFirst({
+      where: { userId },
+      include: {
+        user: true,
+        skills: true,
+      },
+    });
+
+    if (!freelance) {
+      throw new NotFoundException(
+        `Freelance profile not found for user ID: ${userId}`,
+      );
+    }
+
+    return freelance;
   }
 
   async update(id: string, data: UpdateFreelanceDto): Promise<Freelance> {

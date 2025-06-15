@@ -80,6 +80,34 @@ export class FreelancesController {
     return this.freelancesService.findOne(id);
   }
 
+  @Get('user/:userId')
+  @ApiOperation({
+    summary: 'Find a freelance by user ID',
+    description: 'Retrieve a freelance profile by the user ID',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'The ID of the user (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the freelance profile associated with the user ID',
+    type: FreelanceResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid user ID format',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Freelance not found for the given user ID',
+  })
+  async findByUserId(
+    @Param('userId', ParseUUIDPipe) userId: string,
+  ): Promise<FreelanceResponseDto> {
+    return this.freelancesService.findByUserId(userId);
+  }
+
   @Patch(':id')
   @ApiOperation({
     summary: 'Update a freelance by ID',

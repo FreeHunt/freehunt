@@ -1,19 +1,13 @@
 import { api } from "@/lib/api";
+import { User } from "@/lib/interfaces";
 import { useState, useEffect, useCallback } from "react";
 
 export const getCurrentUser = async () => {
-  const response = await api.get("/auth/getme", {
+  const response = await api.get<User>("/auth/getme", {
     withCredentials: true,
   });
   return response.data;
 };
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-}
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
