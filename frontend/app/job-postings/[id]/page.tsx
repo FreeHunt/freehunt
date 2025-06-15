@@ -14,14 +14,32 @@ import {
   CheckCircle2,
   Circle,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getJobPosting } from "@/actions/jobPostings";
 import { useParams } from "next/navigation";
-import { Checkpoint, Company, JobPosting, Skill } from "@/lib/interfaces";
+import {
+  Candidate,
+  CandidateStatus,
+  Checkpoint,
+  Company,
+  Freelance,
+  JobPosting,
+  Skill,
+  User,
+  UserRole,
+} from "@/lib/interfaces";
 import { getCheckpoints } from "@/actions/checkPoints";
 import { getCompany } from "@/actions/company";
 import { useRouter } from "next/navigation";
+import { getCurrentUser } from "@/actions/auth";
+import {
+  createCandidate,
+  deleteCandidate,
+  getCandidateByFreelanceIdAndJobPostingId,
+} from "@/actions/candidates";
+import { getFreelanceByUserId } from "@/actions/freelances";
 
 const getLocationLabel = (location: string) => {
   switch (location) {
@@ -77,6 +95,10 @@ export default function JobPostingDetail() {
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
   const [technicalSkills, setTechnicalSkills] = useState<Skill[]>([]);
   const [softSkills, setSoftSkills] = useState<Skill[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [freelance, setFreelance] = useState<Freelance | null>(null);
+  const [candidate, setCandidate] = useState<Candidate | null>(null); // Si une candidature est créé pour l'utilisateur connecté
+  const [isApplying, setIsApplying] = useState(false);
 
   const displayedTechnicalSkills = showAllSkills
     ? technicalSkills
@@ -110,8 +132,76 @@ export default function JobPostingDetail() {
         setCompany(company);
       }
     };
+
+    const fetchFreelanceUser = async () => {
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        return;
+      }
+      setUser(currentUser);
+
+      if (currentUser.role == UserRole.FREELANCE) {
+        const currentFreelance = await getFreelanceByUserId(currentUser.id);
+        if (!currentFreelance) {
+          console.log("No freelance profile found for the current user.");
+          return;
+        }
+        setFreelance(currentFreelance);
+      }
+    };
+
     fetchJobPosting();
+    fetchFreelanceUser();
   }, [id]);
+
+  // Récupération de la candidature de l'utilisateur connecté pour cette offre
+  useEffect(() => {
+    const fetchApplicationForUser = async () => {
+      if (!user || !jobPosting || !freelance) return;
+
+      const application = await getCandidateByFreelanceIdAndJobPostingId(
+        freelance.id,
+        jobPosting.id,
+      );
+
+      if (application) {
+        setCandidate(application);
+      } else {
+        setCandidate(null);
+      }
+    };
+
+    fetchApplicationForUser();
+  }, [user, jobPosting, freelance]);
+
+  // Permet de postuler une candidature ou de la supprimer si elle existe déjà
+  const handleApply = async () => {
+    if (!user || !jobPosting || !freelance) return;
+    setIsApplying(true);
+
+    if (candidate) {
+      try {
+        await deleteCandidate(candidate.id);
+        setCandidate(null);
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      try {
+        const createdCandidate = await createCandidate({
+          freelanceId: freelance.id,
+          jobPostingId: jobPosting.id,
+          status: CandidateStatus.PENDING,
+        });
+        setCandidate(createdCandidate);
+      } catch (error) {
+        console.error(error);
+        setCandidate(null);
+      }
+    }
+
+    setIsApplying(false);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -366,8 +456,20 @@ export default function JobPostingDetail() {
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-3">
-                  <FreeHuntButton className="w-full">
-                    Postuler à cette offre
+                  <FreeHuntButton
+                    className="w-full"
+                    onClick={handleApply}
+                    disabled={isApplying}
+                  >
+                    {isApplying ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        {candidate
+                          ? "Annuler ma candidature"
+                          : "Postuler à cette offre"}
+                      </>
+                    )}
                   </FreeHuntButton>
                   <FreeHuntButton
                     variant="outline"

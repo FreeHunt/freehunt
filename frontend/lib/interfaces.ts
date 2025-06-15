@@ -1,7 +1,13 @@
+export enum UserRole {
+  FREELANCE = "FREELANCE",
+  COMPANY = "COMPANY",
+}
+
 export interface User {
   id: string;
   email: string;
-  role: "FREELANCE" | "COMPANY";
+  username: string;
+  role: UserRole;
 }
 
 export interface SkillCreate {
@@ -52,6 +58,12 @@ export enum CheckpointStatus {
   CANCELED = "CANCELED",
 }
 
+export enum CandidateStatus {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+}
+
 export interface Company {
   id: string;
   name: string;
@@ -90,6 +102,21 @@ export interface JobPosting {
 export interface JobPostingSearchResult {
   data: JobPosting[];
   total: number;
+}
+
+export interface CreateCandidate {
+  freelanceId: string;
+  jobPostingId: string;
+  status: CandidateStatus;
+}
+
+export interface Candidate {
+  id: string;
+  freelanceId: string;
+  jobPostingId: string;
+  status: CandidateStatus;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Project {

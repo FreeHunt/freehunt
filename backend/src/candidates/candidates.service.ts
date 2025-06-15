@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
@@ -55,6 +59,24 @@ export class CandidatesService {
     });
   }
 
+  async getCandidateByFreelanceIdAndJobPostingId(
+    freelanceId: string,
+    jobPostingId: string,
+  ) {
+    const candidate = await this.prisma.candidate.findFirst({
+      where: {
+        freelanceId,
+        jobPostingId,
+      },
+    });
+
+    if (!candidate) {
+      throw new NotFoundException('Candidate not found');
+    }
+
+    return candidate;
+  }
+
   async updateCandidate(id: string, data: UpdateCandidateDto) {
     // Fetch the existing candidate by id
     const existingCandidate = await this.prisma.candidate.findUnique({
@@ -95,5 +117,17 @@ export class CandidatesService {
     }
 
     return updatedCandidate;
+  }
+
+  async deleteCandidate(id: string) {
+    const candidate = await this.prisma.candidate.findUnique({
+      where: { id },
+    });
+    if (!candidate) {
+      throw new NotFoundException('Candidate not found');
+    }
+    return await this.prisma.candidate.delete({
+      where: { id },
+    });
   }
 }
