@@ -82,6 +82,8 @@ export default function FreelanceProfile() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [errorSkillsSection, setErrorSkillsSection] = useState<z.ZodError | null>(null);
+  const [stripeConnectionStatus, setStripeConnectionStatus] = useState<string>("");
+  const [isConnectingStripe, setIsConnectingStripe] = useState<boolean>(false);
   
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -354,6 +356,134 @@ export default function FreelanceProfile() {
       alert("Erreur lors de la mise à jour du profil");
     }
   };
+
+  const createStripeConnection = async () => {
+    if (!freelance?.id) {
+      alert("Erreur: profil freelance non trouvé. Veuillez d'abord enregistrer votre profil.");
+      return;
+    }
+  
+    if (!user?.email) {
+      alert("Erreur: email utilisateur non trouvé.");
+      return;
+    }
+  
+    const fullName = `${formData.firstName || freelance.firstName || ''} ${formData.lastName || freelance.lastName || ''}`.trim() || user.username || 'Utilisateur';
+  
+    setIsConnectingStripe(true);
+    
+    try {
+      const requestData = {
+        freelanceId: freelance.id,
+        email: user.email,
+        name: fullName,
+      };
+      
+      const response = await fetch(`${BACKEND_URL}/stripe/create-account-connection`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+  
+      const responseText = await response.text();
+  
+      if (!response.ok) {
+        let errorMessage = `Erreur ${response.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          errorMessage = responseText || response.statusText;
+        }
+        
+        throw new Error(errorMessage);
+      }
+  
+      if (!responseText.trim()) {
+        throw new Error('Réponse vide du serveur');
+      }
+  
+      let accountConnection;
+      try {
+        accountConnection = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Erreur de parsing JSON:', parseError);
+        console.log('Réponse brute:', responseText);
+        throw new Error('Format de réponse invalide du serveur');
+      }
+      
+      if (accountConnection.accountLink) {
+        window.location.href = accountConnection.accountLink;
+      } else if (accountConnection.stripeAccountId) {
+        setFormData(prev => ({
+          ...prev,
+          stripeAccountId: accountConnection.stripeAccountId
+        }));
+        
+        setStripeConnectionStatus("Compte Stripe connecté avec succès !");
+      } else if (accountConnection.account_id) {
+        setFormData(prev => ({
+          ...prev,
+          stripeAccountId: accountConnection.account_id
+        }));
+        
+        setStripeConnectionStatus("Compte Stripe connecté avec succès !");
+      } else {
+        await fetchCurrentUser();
+        setStripeConnectionStatus("Connexion Stripe initiée. Vous pouvez maintenant enregistrer les modifications");
+      }
+      
+    } catch (error) {
+      console.error('Erreur complète:', error);
+      alert("Erreur lors de la connexion Stripe: " + (error instanceof Error ? error.message : String(error)));
+    } finally {
+      setIsConnectingStripe(false);
+    }
+  };
+
+  const activateStripeConnection = async (accountId: string) => {
+    if (!freelance?.id) return;
+
+    try {
+      const response = await fetch(`${BACKEND_URL}/stripe/activate-account-connection`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          freelanceId: freelance.id,
+          stripeAccountId: accountId,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de l'activation de la connexion Stripe");
+      }
+
+      const result = await response.json();
+      setStripeConnectionStatus("Compte Stripe activé avec succès !");
+      
+    } catch (error: any) {
+      console.error("Erreur activation Stripe:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCurrentUser();
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const stripeReturn = urlParams.get('stripe_return');
+    const accountId = urlParams.get('account_id');
+    
+    if (stripeReturn === 'success' && accountId) {
+      activateStripeConnection(accountId);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -674,16 +804,53 @@ export default function FreelanceProfile() {
 
                 <div className="space-y-2">
                   <Label htmlFor="stripeAccountId" className="text-sm font-medium text-gray-700">
-                    Id Stripe
+                    Compte Stripe
                   </Label>
-                  <Input 
-                    id="stripeAccountId" 
-                    name='stripeAccountId'
-                    type="text" 
-                    value={formData.stripeAccountId}
-                    onChange={handleInputChange}
-                    className="w-full bg-gray-100 border-0 focus:bg-white focus:ring-2 focus:ring-pink-500" 
-                  />
+                  
+                  {formData.stripeAccountId ? (
+                    <div className="space-y-2">
+                      <Input 
+                        id="stripeAccountId" 
+                        name='stripeAccountId'
+                        type="text" 
+                        value={formData.stripeAccountId}
+                        readOnly
+                        className="w-full bg-gray-50 border text-gray-600" 
+                      />
+                      <div className="flex items-center text-green-600 text-sm">
+                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        Compte Stripe connecté
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <Button
+                        type="button"
+                        onClick={createStripeConnection}
+                        disabled={isConnectingStripe}
+                        className="w-full text-white"
+                        style={{backgroundColor: '#FF4D6D'}}
+                      >
+                        {isConnectingStripe ? (
+                          <div className="flex items-center">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Connexion en cours...
+                          </div>
+                        ) : (
+                          "Connecter mon compte Stripe"
+                        )}
+                      </Button>
+                      <p className="text-xs text-gray-500">
+                        Connectez votre compte Stripe pour recevoir vos paiements
+                      </p>
+                    </div>
+                  )}
+                  
+                  {stripeConnectionStatus && (
+                    <p className="text-sm text-green-600">{stripeConnectionStatus}</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
