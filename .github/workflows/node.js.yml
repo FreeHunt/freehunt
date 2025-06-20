@@ -266,7 +266,7 @@ jobs:
           build-args: |
             AUTHENTIK_URL=${{ vars.AUTHENTIK_URL }}
             FRONTEND_URL=${{ vars.FRONTEND_URL }}
-            MINIO_URL=${{ vars.MINIO_URL }}
+            S3_URL=${{ vars.S3_URL }}
 
   deploy:
     name: Deploy to production
