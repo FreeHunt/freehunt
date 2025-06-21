@@ -5,6 +5,8 @@ import {
   JobPostingSearchResult,
   JobPostingLocation,
   JobPosting,
+  JobPostingsCreate,
+  Checkpoint,
 } from "@/lib/interfaces";
 
 interface SearchJobPostingsParams {
@@ -74,4 +76,46 @@ export async function getJobPostingsByUserId(
 ): Promise<JobPosting[]> {
   const response = await api.get<JobPosting[]>(`/job-postings/user/${userId}`);
   return response.data;
+}
+
+export async function getJobPosting(id: string): Promise<JobPosting> {
+  const response = await api.get<JobPosting>(`/job-postings/${id}`);
+  return response.data;
+}
+
+export async function submitJobPosting(
+  formData: JobPostingsCreate,
+  checkpoints: Checkpoint[],
+) {
+  try {
+    const response = await api.post<JobPosting>("/job-postings/", formData);
+
+    // Si des checkpoints sont fournis, les soumettre avec le job posting id
+    if (checkpoints && checkpoints.length > 0) {
+      const checkpointPromises = checkpoints.map((checkpoint) =>
+        api.post<Checkpoint>("/checkpoints", {
+          name: checkpoint.name,
+          description: checkpoint.description,
+          date: checkpoint.date,
+          status: checkpoint.status,
+          jobPostingId: response.data.id,
+          amount: checkpoint.amount,
+        }),
+      );
+      await Promise.all(checkpointPromises);
+    }
+
+    return {
+      success: true,
+      data: response.data,
+      message: "Formulaire soumis avec succès!",
+    };
+  } catch (error) {
+    console.error("Erreur lors de la soumission du formulaire:", error);
+    return {
+      success: false,
+      error: "Une erreur est survenue lors de la soumission du formulaire",
+      message: "Une erreur est survenue. Veuillez réessayer plus tard.",
+    };
+  }
 }

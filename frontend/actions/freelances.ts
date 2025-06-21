@@ -1,7 +1,7 @@
 "use server";
 
 import { api } from "@/lib/api";
-import { FreelanceSearchResult, Skill } from "@/lib/interfaces";
+import { Freelance, FreelanceSearchResult, Skill } from "@/lib/interfaces";
 
 interface SearchFreelanceParams {
   query?: string;
@@ -38,4 +38,15 @@ export const searchFreelances = async ({
   });
 
   return response.data;
+};
+
+export const getFreelanceByUserId = async (
+  userId: string,
+): Promise<Freelance> => {
+  try {
+    const response = await api.get(`/freelances/user/${userId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };

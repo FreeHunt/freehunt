@@ -5,13 +5,16 @@ import { CreateAccountConnectionDto } from './dto/create-account-connection.dto'
 import { ActivateCustomerConnectionDto } from './dto/activate-customer-connection.dto';
 import { CreateQuoteStripeDto } from './dto/create-quote-stripe.dto';
 import { CreateProductStripeDto } from './dto/create-product-stripe.dto';
+import { EnvironmentService } from '../environment/environment.service';
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
 
-  constructor() {
-    this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+  constructor(private readonly environmentService: EnvironmentService) {
+    this.stripe = new Stripe(
+      this.environmentService.get('STRIPE_SECRET_KEY', ''),
+    );
   }
 
   handleWebhook(body: Buffer, signature: string) {
@@ -21,7 +24,7 @@ export class StripeService {
       event = this.stripe.webhooks.constructEvent(
         body,
         signature,
-        process.env.STRIPE_WEBHOOK_SECRET as string,
+        this.environmentService.get('STRIPE_WEBHOOK_SECRET', ''),
       );
     } catch (error: any) {
       throw new Error(

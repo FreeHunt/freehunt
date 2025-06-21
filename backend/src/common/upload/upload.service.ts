@@ -6,21 +6,21 @@ import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class UploadService {
   constructor(
-    private readonly minioClient: S3Client,
+    private readonly s3Client: S3Client,
     private readonly environmentService: EnvironmentService,
     private readonly prisma: PrismaService,
   ) {
-    this.minioClient = new S3Client({
-      region: 'us-east-1',
-      endpoint: this.environmentService.get('MINIO_URL', ''),
+    this.s3Client = new S3Client({
+      region: 'eu-west-3',
+      endpoint: this.environmentService.get('S3_URL', ''),
       forcePathStyle: true,
       credentials: {
         accessKeyId: this.environmentService.get(
-          'MINIO_ACCESS_KEY',
+          'S3_ACCESS_KEY',
           'vT86tO0pmnyWimIrVtTN',
         ),
         secretAccessKey: this.environmentService.get(
-          'MINIO_SECRET_KEY',
+          'S3_SECRET_KEY',
           'YkNAG8oMYc4dcsGGi2uywOBSoj3yHCJUzGieBMx8',
         ),
       },
@@ -37,9 +37,9 @@ export class UploadService {
       Key: uniqueKey,
       Body: file.buffer,
     });
-    await this.minioClient.send(command);
+    await this.s3Client.send(command);
     return {
-      url: `${this.environmentService.get('MINIO_URL')}/${bucketName}/${uniqueKey}`,
+      url: `${this.environmentService.get('S3_URL')}/${bucketName}/${uniqueKey}`,
       key: uniqueKey,
     };
   }
