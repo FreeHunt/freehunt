@@ -103,7 +103,6 @@ export class AuthController {
     } catch (error) {
       console.error('Error in getMe:', error);
       throw new UnauthorizedException('Unauthorized access');
-      
     }
   }
 

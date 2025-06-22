@@ -10,6 +10,8 @@ import { FreelancesService } from '../freelances/freelances.service';
 
 @Injectable()
 export class JobPostingsService {
+  private readonly RECOMMENDED_THRESHOLD = 3;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly skillsService: SkillsService,
@@ -206,7 +208,7 @@ export class JobPostingsService {
         freelanceSkillIds.includes(skillId),
       );
       const commonSkillsCount = commonSkills.length;
-      const recommended = commonSkillsCount >= JobPostingsService.RECOMMENDED_THRESHOLD;
+      const recommended = commonSkillsCount >= this.RECOMMENDED_THRESHOLD;
 
       return {
         ...jobPosting,
