@@ -87,7 +87,7 @@ export class UploadService {
               Bucket: bucketName,
               Key: oldKey,
             });
-            await this.minioClient.send(deleteCommand);
+            await this.s3Client.send(deleteCommand);
           }
         } catch (deleteError) {
           throw new Error('Erreur lors de la suppression de l\'ancien avatar');
