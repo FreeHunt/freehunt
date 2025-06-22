@@ -476,7 +476,7 @@ export default function JobPostingDetail() {
                     theme="secondary"
                     className="w-full"
                   >
-                    Mettre en favoris
+                    Ajouter aux favoris
                   </FreeHuntButton>
                   <FreeHuntButton
                     variant="outline"
