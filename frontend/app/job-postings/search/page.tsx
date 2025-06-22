@@ -224,12 +224,6 @@ function SearchPageContent() {
     maximumAverageDailyRate,
   ]);
 
-  const handleSearch = async (formData: FormData) => {
-    const query = formData.get("search") as string;
-    setSearchQuery(query);
-    setCurrentPage(1);
-  };
-
   const handleSkillToggle = useCallback((skill: Skill) => {
     setSelectedSkills((prev) =>
       prev.some((s) => s.id === skill.id)
@@ -405,15 +399,13 @@ function SearchPageContent() {
         )}
 
         <main className="flex flex-col gap-5 w-full py-2 lg:py-5">
-          <form action={handleSearch} className="w-full">
-            <SearchInput
-              placeholder="Intitulé du poste, technologies..."
-              className="w-full text-sm lg:text-base px-6 lg:px-12 mt-2 lg:mt-0"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              name="search"
-            />
-          </form>
+          <SearchInput
+            placeholder="Intitulé du poste, technologies..."
+            className="w-full text-sm lg:text-base px-6 lg:px-12 mt-2 lg:mt-0"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            name="search"
+          />
 
           <FreeHuntButton
             variant="outline"
@@ -578,7 +570,9 @@ function SearchPageContent() {
 // Main page component with suspense boundary
 function Page() {
   return (
-    <Suspense fallback={<div className="flex justify-center p-10">Chargement...</div>}>
+    <Suspense
+      fallback={<div className="flex justify-center p-10">Chargement...</div>}
+    >
       <SearchPageContent />
     </Suspense>
   );

@@ -42,7 +42,9 @@ export default function Home() {
   const handleSearch = (formData: FormData) => {
     const query = formData.get("search") as string;
     if (query?.trim()) {
-      router.push(`/job-postings/search?title=${encodeURIComponent(query.trim())}`);
+      router.push(
+        `/job-postings/search?title=${encodeURIComponent(query.trim())}`,
+      );
     }
   };
 
