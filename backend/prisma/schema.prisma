@@ -67,6 +67,7 @@ model Freelance {
   skills           Skill[]
   documents        Document[]
   projects         Project[]
+  candidates       Candidate[]
   stripeAccountId  String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @default(now()) @updatedAt
@@ -110,6 +111,7 @@ model JobPosting {
   skills           Skill[]
   checkpoints      Checkpoint[]
   project          Project?
+  candidates       Candidate[]
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @default(now()) @updatedAt
 }
@@ -244,4 +246,21 @@ model Message {
   content        String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @default(now()) @updatedAt
+}
+
+model Candidate {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id])
+  jobPostingId String @db.Uuid
+  freelance Freelance @relation(fields: [freelanceId], references: [id])
+  freelanceId String @db.Uuid
+  status CandidateStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+enum CandidateStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }

@@ -580,7 +580,7 @@ export default function CompanyProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Adresse</Label>
+                  <Label htmlFor="address">Lieu</Label>
                   <Input
                     id="address"
                     name="address"

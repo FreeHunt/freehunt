@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateCheckpointDto } from './dto/create-checkpoint.dto';
 import { UpdateCheckpointDto } from './dto/update-checkpoint.dto';
+import { Checkpoint } from '@prisma/client';
 
 @Injectable()
 export class CheckpointsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createCheckpointDto: CreateCheckpointDto) {
+  async create(createCheckpointDto: CreateCheckpointDto): Promise<Checkpoint> {
     return this.prisma.checkpoint.create({
       data: createCheckpointDto,
     });

@@ -10,7 +10,7 @@ import {
 
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { CheckpointStatus } from './checkpointStatus.dto';
+import { CheckpointStatus } from '@prisma/client';
 
 export class CreateCheckpointDto {
   @IsString()

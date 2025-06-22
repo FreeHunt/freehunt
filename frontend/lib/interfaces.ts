@@ -1,7 +1,19 @@
+export enum UserRole {
+  FREELANCE = "FREELANCE",
+  COMPANY = "COMPANY",
+}
+
 export interface User {
   id: string;
   email: string;
-  role: "FREELANCE" | "COMPANY";
+  username: string;
+  role: UserRole;
+}
+
+export interface SkillCreate {
+  name: string;
+  aliases: string[];
+  type: "TECHNICAL" | "SOFT";
 }
 
 export interface Skill {
@@ -38,13 +50,39 @@ export enum JobPostingLocation {
   HYBRID = "HYBRID",
 }
 
+export enum CheckpointStatus {
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  DONE = "DONE",
+  DELAYED = "DELAYED",
+  CANCELED = "CANCELED",
+}
+
+export enum CandidateStatus {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+}
+
 export interface Company {
   id: string;
   name: string;
   description?: string;
-  website?: string;
-  logoUrl?: string;
+  address: string;
+  siren: string;
   user?: User;
+}
+
+export interface JobPostingsCreate {
+  title: string;
+  description: string;
+  location: string;
+  isPromoted: boolean;
+  averageDailyRate: number;
+  seniority: number;
+  companyId: string;
+  skillIds: string[];
+  checkpointIds?: string[];
 }
 
 export interface JobPosting {
@@ -53,6 +91,7 @@ export interface JobPosting {
   description: string;
   location: JobPostingLocation;
   isPromoted: boolean;
+  recommended?: boolean;
   averageDailyRate: number;
   seniority: number;
   company?: Company;
@@ -66,6 +105,21 @@ export interface JobPostingSearchResult {
   total: number;
 }
 
+export interface CreateCandidate {
+  freelanceId: string;
+  jobPostingId: string;
+  status: CandidateStatus;
+}
+
+export interface Candidate {
+  id: string;
+  freelanceId: string;
+  jobPostingId: string;
+  status: CandidateStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -77,6 +131,17 @@ export interface Project {
   jobPostingId: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CheckpointCreate {
+  name: string;
+  description?: string;
+  date: string | Date;
+  status: CheckpointStatus;
+  jobPostingId: string;
+  quoteId?: string;
+  freelanceId?: string;
+  amount: number;
 }
 
 export interface Checkpoint {

@@ -1,12 +1,24 @@
 import { Test } from '@nestjs/testing';
 import { JobPostingsController } from './job-postings.controller';
 import { JobPostingsService } from './job-postings.service';
-import { JobPosting, JobPostingLocation } from '@prisma/client';
+import { JobPosting, JobPostingLocation, Role, User } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { PrismaServiceMock } from '../../test/mocks/prisma.mock';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { SearchJobPostingDto } from './dto/search-job-posting.dto';
 import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
+import { SkillsService } from '../skills/skills.service';
+import { FreelancesService } from '../freelances/freelances.service';
+import { UsersService } from '../users/users.service';
+import { AuthService } from '../auth/auth.service';
+import { EnvironmentService } from '../common/environment/environment.service';
+import { AuthentikService } from '../common/authentik/authentik.service';
+import { HttpModule } from '@nestjs/axios';
+
+// Interface pour les job postings avec recommandation
+interface JobPostingWithRecommendation extends JobPosting {
+  recommended: boolean;
+}
 
 describe('JobPostingsController', () => {
   let jobPostingsController: JobPostingsController;
@@ -14,6 +26,7 @@ describe('JobPostingsController', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [HttpModule],
       controllers: [JobPostingsController],
       providers: [
         JobPostingsService,
@@ -21,6 +34,12 @@ describe('JobPostingsController', () => {
           provide: PrismaService,
           useValue: PrismaServiceMock,
         },
+        SkillsService,
+        FreelancesService,
+        UsersService,
+        AuthService,
+        EnvironmentService,
+        AuthentikService,
       ],
     }).compile();
 
@@ -44,6 +63,25 @@ describe('JobPostingsController', () => {
   const jobPosting: JobPosting = {
     ...createJobPostingDto,
     id: '3246540a-3ecd-4912-a909-953c881816fc',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  // Mock user freelance pour les tests de recommandation
+  const mockFreelanceUser: User = {
+    id: 'freelance-user-id',
+    email: 'freelance@test.com',
+    username: 'testfreelance',
+    role: Role.FREELANCE,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockCompanyUser: User = {
+    id: 'company-user-id',
+    email: 'company@test.com',
+    username: 'testcompany',
+    role: Role.COMPANY,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -98,33 +136,50 @@ describe('JobPostingsController', () => {
   });
 
   describe('search', () => {
-    const jobPostings: JobPosting[] = [
+    const jobPostings: JobPostingWithRecommendation[] = [
       {
         id: '3246540a-3ecd-4912-a909-953c881816fc',
         title: 'Frontend Developer',
         description:
           'We are looking for a Frontend Developer to join our team.',
-        location: 'REMOTE',
+        location: JobPostingLocation.REMOTE,
         isPromoted: true,
         averageDailyRate: 600,
         seniority: 3,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         createdAt: new Date(),
         updatedAt: new Date(),
+        recommended: false,
       },
       {
         id: '4246540a-3ecd-4912-a909-953c881816fd',
         title: 'Backend Developer',
         description: 'We are looking for a Backend Developer to join our team.',
-        location: 'ONSITE',
+        location: JobPostingLocation.ONSITE,
         isPromoted: false,
         averageDailyRate: 650,
         seniority: 4,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         createdAt: new Date(),
         updatedAt: new Date(),
+        recommended: false,
       },
     ];
+
+    const recommendedJobPosting: JobPostingWithRecommendation = {
+      id: '5246540a-3ecd-4912-a909-953c881816fe',
+      title: 'Full Stack Developer',
+      description:
+        'We are looking for a Full Stack Developer to join our team.',
+      location: JobPostingLocation.HYBRID,
+      isPromoted: false,
+      averageDailyRate: 700,
+      seniority: 5,
+      companyId: '3246540a-3ecd-4912-a909-953c881816fc',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      recommended: true,
+    };
 
     it('should search job postings by title', async () => {
       const searchDto: SearchJobPostingDto = {
@@ -141,7 +196,7 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
     });
 
@@ -160,7 +215,7 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
     });
 
@@ -179,7 +234,7 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
     });
 
@@ -199,7 +254,7 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
     });
 
@@ -226,7 +281,7 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
     });
 
@@ -243,7 +298,7 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
     });
 
@@ -263,7 +318,7 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
     });
 
@@ -283,8 +338,98 @@ describe('JobPostingsController', () => {
 
       const result = await jobPostingsController.search(searchDto);
 
-      expect(searchSpy).toHaveBeenCalledWith(searchDto);
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
       expect(result).toEqual(searchResult);
+    });
+
+    // Nouveaux tests pour les recommandations
+    it('should prioritize recommended job postings for freelance users', async () => {
+      const searchDto: SearchJobPostingDto = {};
+
+      const searchResult: JobPostingSearchResult = {
+        data: [recommendedJobPosting, ...jobPostings], // Recommended en premier
+        total: 3,
+      };
+
+      const searchSpy = jest.spyOn(jobPostingsService, 'search');
+      searchSpy.mockResolvedValue(searchResult);
+
+      const result = await jobPostingsController.search(
+        searchDto,
+        mockFreelanceUser,
+      );
+
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, mockFreelanceUser);
+      expect(result).toEqual(searchResult);
+      expect(result.data[0].recommended).toBe(true);
+    });
+
+    it('should not apply recommendations for company users', async () => {
+      const searchDto: SearchJobPostingDto = {};
+
+      const searchResult: JobPostingSearchResult = {
+        data: jobPostings,
+        total: jobPostings.length,
+      };
+
+      const searchSpy = jest.spyOn(jobPostingsService, 'search');
+      searchSpy.mockResolvedValue(searchResult);
+
+      const result = await jobPostingsController.search(
+        searchDto,
+        mockCompanyUser,
+      );
+
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, mockCompanyUser);
+      expect(result).toEqual(searchResult);
+      expect(result.data.every((job) => job.recommended === false)).toBe(true);
+    });
+
+    it('should search without user context', async () => {
+      const searchDto: SearchJobPostingDto = {
+        title: 'Developer',
+      };
+
+      const searchResult: JobPostingSearchResult = {
+        data: jobPostings,
+        total: jobPostings.length,
+      };
+
+      const searchSpy = jest.spyOn(jobPostingsService, 'search');
+      searchSpy.mockResolvedValue(searchResult);
+
+      const result = await jobPostingsController.search(searchDto);
+
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, undefined);
+      expect(result).toEqual(searchResult);
+    });
+
+    it('should handle search with freelance user having matching skills', async () => {
+      const searchDto: SearchJobPostingDto = {
+        skillNames: ['React', 'Node.js', 'TypeScript'],
+      };
+
+      const matchingJobPosting: JobPostingWithRecommendation = {
+        ...jobPostings[0],
+        recommended: true,
+      };
+
+      const searchResult: JobPostingSearchResult = {
+        data: [matchingJobPosting],
+        total: 1,
+      };
+
+      const searchSpy = jest.spyOn(jobPostingsService, 'search');
+      searchSpy.mockResolvedValue(searchResult);
+
+      const result = await jobPostingsController.search(
+        searchDto,
+        mockFreelanceUser,
+      );
+
+      expect(searchSpy).toHaveBeenCalledWith(searchDto, mockFreelanceUser);
+      expect(result).toEqual(searchResult);
+      expect(result.data[0].recommended).toBe(true);
     });
   });
 });

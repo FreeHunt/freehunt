@@ -16,8 +16,13 @@ import { ConfigModule } from '@nestjs/config';
 import { DocumentsModule } from './documents/documents.module';
 import { CheckpointsModule } from './checkpoints/checkpoints.module';
 import { StripeModule } from './common/stripe/stripe.module';
+import { CandidatesModule } from './candidates/candidates.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { HealthModule } from './health/health.module';
+
 @Module({
   imports: [
+    EventEmitterModule.forRoot(),
     ConfigModule.forRoot(),
     PrismaModule,
     UsersModule,
@@ -35,6 +40,8 @@ import { StripeModule } from './common/stripe/stripe.module';
     DocumentsModule,
     CheckpointsModule,
     StripeModule,
+    CandidatesModule,
+    HealthModule,
   ],
   controllers: [],
   providers: [],

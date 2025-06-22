@@ -2,10 +2,35 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from '@/src/projects/dto/create-project.dto';
 import { UpdateProjectDto } from '@/src/projects/dto/update-project.dto';
 import { PrismaService } from '@/src/common/prisma/prisma.service';
+import { OnEvent } from '@nestjs/event-emitter';
+import { CandidateAcceptedEvent } from '../job-postings/dto/candidate-accepted-event.dto';
 
 @Injectable()
 export class ProjectsService {
   constructor(private readonly prismaService: PrismaService) {}
+
+  @OnEvent('candidate.accepted')
+  async handleCandidateAcceptedEvent(payload: CandidateAcceptedEvent) {
+    const jobPosting = await this.prismaService.jobPosting.findUnique({
+      where: { id: payload.jobPostingId },
+    });
+    if (!jobPosting) {
+      throw new NotFoundException(
+        `Job posting with id ${payload.jobPostingId} does not exist`,
+      );
+    }
+
+    await this.create({
+      freelanceId: payload.freelancerId,
+      jobPostingId: payload.jobPostingId,
+      companyId: jobPosting.companyId,
+      name: jobPosting.title,
+      description: jobPosting.description,
+      startDate: new Date(),
+      endDate: new Date(),
+      amount: jobPosting.averageDailyRate,
+    });
+  }
 
   // Create a new project
   async create(createProjectDto: CreateProjectDto) {

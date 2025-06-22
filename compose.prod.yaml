@@ -48,13 +48,6 @@ services:
         constraints:
           - node.role == manager
 
-  minio:
-    env_file:
-      - ./env/minio.env
-    deploy:
-      # 'Disable' minio
-      replicas: 0
-
   matomo-db:
     env_file:
       - ./env/matomo.env
@@ -89,8 +82,11 @@ services:
     env_file:
       - ./env/backend.env
     secrets:
-      - minio_access_key
-      - minio_secret_key
+      - s3_access_key
+      - s3_secret_key
+      - stripe_secret_key
+      - stripe_webhook_secret
+      - stripe_public_key
 
     deploy:
       replicas: 3
@@ -115,7 +111,13 @@ volumes:
   uptime-kuma-data:
 
 secrets:
-  minio_access_key:
+  s3_access_key:
     external: true
-  minio_secret_key:
+  s3_secret_key:
+    external: true
+  stripe_secret_key:
+    external: true
+  stripe_webhook_secret:
+    external: true
+  stripe_public_key:
     external: true

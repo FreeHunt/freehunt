@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { JobPostingLocation } from '@prisma/client';
 import { CompanyResponseDto } from '../../companies/dto/company-response.dto';
 import { SkillResponseDto } from '../../skills/dto/skill-response.dto';
+import { CheckpointResponseDto } from '../../checkpoints/dto/checkpoint-response.dto';
 
 export class JobPostingResponseDto {
   @ApiProperty({
@@ -59,4 +60,16 @@ export class JobPostingResponseDto {
     type: [SkillResponseDto],
   })
   skills?: SkillResponseDto[];
+
+  @ApiProperty({
+    description: 'The checkpoints associated with the job posting',
+    type: [CheckpointResponseDto],
+  })
+  checkpoints?: CheckpointResponseDto[];
+
+  @ApiProperty({
+    description: 'Whether the job posting is recommended or not',
+    example: false,
+  })
+  recommended?: boolean;
 }

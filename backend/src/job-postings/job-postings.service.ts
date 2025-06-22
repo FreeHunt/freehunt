@@ -1,14 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma/prisma.service';
-import { JobPosting, Prisma } from '@prisma/client';
+import { JobPosting, Prisma, Role, Skill, User } from '@prisma/client';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { SearchJobPostingDto } from './dto/search-job-posting.dto';
 import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
+import { SkillsService } from '../skills/skills.service';
+import { FreelancesService } from '../freelances/freelances.service';
 
 @Injectable()
 export class JobPostingsService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly RECOMMENDED_THRESHOLD = 3;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly skillsService: SkillsService,
+    private readonly freelancesService: FreelancesService,
+  ) {}
 
   async create(data: CreateJobPostingDto): Promise<JobPosting> {
     const { skillIds, ...jobPostingData } = data;
@@ -29,6 +37,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -42,6 +51,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -56,6 +66,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -82,6 +93,7 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
@@ -96,13 +108,28 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
     });
   }
 
   async search(
     searchParams: SearchJobPostingDto,
+    user?: User,
   ): Promise<JobPostingSearchResult> {
+    let freelanceSkills: Skill[] = [];
+    let freelanceSkillIds: string[] = [];
+
+    if (user && user.role === Role.FREELANCE) {
+      const freelance = await this.freelancesService.findByUserId(user.id);
+      if (freelance) {
+        freelanceSkills = await this.skillsService.getSkillsByFreelanceId(
+          freelance.id,
+        );
+        freelanceSkillIds = freelanceSkills.map((skill) => skill.id);
+      }
+    }
+
     const {
       title,
       skillNames,
@@ -151,7 +178,8 @@ export class JobPostingsService {
 
     const total = await this.prisma.jobPosting.count({ where });
 
-    const data = await this.prisma.jobPosting.findMany({
+    // Récupérer tous les résultats sans pagination d'abord
+    const allData = await this.prisma.jobPosting.findMany({
       where,
       include: {
         skills: true,
@@ -160,9 +188,8 @@ export class JobPostingsService {
             user: true,
           },
         },
+        checkpoints: true,
       },
-      skip,
-      take,
       ...(title && {
         orderBy: {
           _relevance: {
@@ -174,8 +201,49 @@ export class JobPostingsService {
       }),
     });
 
+    // Calculer les recommandations et trier
+    const dataWithRecommendations = allData.map((jobPosting) => {
+      const jobSkillIds = jobPosting.skills.map((skill) => skill.id);
+      const commonSkills = jobSkillIds.filter((skillId) =>
+        freelanceSkillIds.includes(skillId),
+      );
+      const commonSkillsCount = commonSkills.length;
+      const recommended = commonSkillsCount >= this.RECOMMENDED_THRESHOLD;
+
+      return {
+        ...jobPosting,
+        recommended,
+        commonSkillsCount, // Propriété temporaire pour le tri
+      };
+    });
+
+    // Trier : recommended en premier, puis par nombre de skills en commun, puis par ordre original
+    const sortedData = dataWithRecommendations.sort((a, b) => {
+      // D'abord les recommended
+      if (a.recommended && !b.recommended) return -1;
+      if (!a.recommended && b.recommended) return 1;
+
+      // Si les deux sont recommended ou non recommended, trier par nombre de skills en commun
+      if (a.commonSkillsCount !== b.commonSkillsCount) {
+        return b.commonSkillsCount - a.commonSkillsCount;
+      }
+
+      // Si égalité, garder l'ordre original (par pertinence si title search)
+      return 0;
+    });
+
+    // retirer les job postings sans checkpoints
+    const dataWithoutCheckpoints = sortedData.filter(
+      (jobPosting) => jobPosting.checkpoints.length === 0,
+    );
+
+    // Appliquer la pagination sur les données triées
+    const paginatedData = dataWithoutCheckpoints
+      .slice(skip || 0, (skip || 0) + (take || sortedData.length))
+      .map(({ ...jobPosting }) => jobPosting); // Retirer la propriété temporaire
+
     return {
-      data,
+      data: paginatedData,
       total,
     };
   }
@@ -183,6 +251,15 @@ export class JobPostingsService {
   async getJobPostingsByUserId(userId: string): Promise<JobPosting[]> {
     return this.prisma.jobPosting.findMany({
       where: { company: { userId } },
+      include: {
+        skills: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        checkpoints: true,
+      },
     });
   }
 }

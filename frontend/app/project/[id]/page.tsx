@@ -55,8 +55,11 @@ export default function ProjectDetailPage({
 
   useEffect(() => {
     const fetchData = async () => {
-      const currentUserId = await getCurrentUser();
-      setCurrentUserId(currentUserId);
+      const currentUser = await getCurrentUser();
+      if (!currentUser) {
+        return;
+      }
+      setCurrentUserId(currentUser.id);
     };
     fetchData();
   }, []);

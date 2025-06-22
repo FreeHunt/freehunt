@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode } from "react";
 import { SearchInput } from "@/components/common/search-input";
 import { cn } from "@/lib/utils";
@@ -6,6 +8,7 @@ import {
   RedPointer,
   RedPointerWithSpiral,
 } from "@/components/common/red-pointer";
+import { useRouter } from "next/navigation";
 
 function HomeCardColumn({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-3 lg:gap-[34px]">{children}</div>;
@@ -34,6 +37,15 @@ function HomeCard({
 }
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.target as HTMLFormElement);
+    const search = formData.get("search") as string;
+    router.push(`/job-postings/search?title=${search}&page=1`);
+  };
+
   return (
     <>
       <section className="flex items-center justify-between p-10 lg:p-20 bg-freehunt-beige-dark">
@@ -62,7 +74,7 @@ export default function Home() {
           </h2>
 
           {/* Search Bar */}
-          <form className="w-full">
+          <form className="w-full" onSubmit={handleSubmit}>
             {" "}
             <SearchInput
               placeholder="Exemple : React, MongoDB..."
