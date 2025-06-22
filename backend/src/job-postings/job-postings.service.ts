@@ -119,8 +119,7 @@ export class JobPostingsService {
     let freelanceSkillIds: string[] = [];
 
     if (user && user.role === Role.FREELANCE) {
-      const freelance = await this.freelancesService.findOne(user.id);
-
+      const freelance = await this.freelancesService.findByUserId(user.id);
       if (freelance) {
         freelanceSkills = await this.skillsService.getSkillsByFreelanceId(
           freelance.id,
@@ -231,8 +230,13 @@ export class JobPostingsService {
       return 0;
     });
 
+    // reitrer les job posting sans checkponts
+    const dataWithoutCheckpoints = sortedData.filter(
+      (jobPosting) => jobPosting.checkpoints.length === 0,
+    );
+
     // Appliquer la pagination sur les données triées
-    const paginatedData = sortedData
+    const paginatedData = dataWithoutCheckpoints
       .slice(skip || 0, (skip || 0) + (take || sortedData.length))
       .map(({ ...jobPosting }) => jobPosting); // Retirer la propriété temporaire
 
