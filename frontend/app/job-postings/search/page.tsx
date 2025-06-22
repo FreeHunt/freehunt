@@ -446,8 +446,8 @@ function SearchPageContent() {
               !jobPostingsLoading &&
               [...jobPostingResults.data]
                 .sort((a, b) => {
-                  if (a.isPromoted && !b.isPromoted) return -1;
-                  if (!a.isPromoted && b.isPromoted) return 1;
+                  if (a.recommended && !b.recommended) return -1;
+                  if (!a.recommended && b.recommended) return 1;
                   return 0;
                 })
                 .map((jobPosting) => (
@@ -578,7 +578,9 @@ function SearchPageContent() {
 // Main page component with suspense boundary
 function Page() {
   return (
-    <Suspense fallback={<div className="flex justify-center p-10">Chargement...</div>}>
+    <Suspense
+      fallback={<div className="flex justify-center p-10">Chargement...</div>}
+    >
       <SearchPageContent />
     </Suspense>
   );
