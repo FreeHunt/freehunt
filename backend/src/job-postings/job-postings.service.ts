@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../common/prisma/prisma.service';
 import { JobPosting, Prisma } from '@prisma/client';
+import { PrismaService } from '../common/prisma/prisma.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
-import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
-import { SearchJobPostingDto } from './dto/search-job-posting.dto';
 import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
+import { SearchJobPostingDto } from './dto/search-job-posting.dto';
+import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 
 @Injectable()
 export class JobPostingsService {
@@ -121,17 +121,33 @@ export class JobPostingsService {
     } = searchParams;
 
     const where: Prisma.JobPostingWhereInput = {};
+    const andConditions: Prisma.JobPostingWhereInput[] = [];
 
     if (title) {
-      where.title = { contains: title, mode: 'insensitive' };
+      andConditions.push({
+        OR: [
+          { title: { contains: title, mode: 'insensitive' } },
+          {
+            skills: {
+              some: { name: { contains: title, mode: 'insensitive' } },
+            },
+          },
+        ],
+      });
     }
 
     if (skillNames && skillNames.length > 0) {
-      where.skills = {
-        some: {
-          name: { in: skillNames, mode: 'insensitive' },
+      andConditions.push({
+        skills: {
+          some: {
+            name: { in: skillNames, mode: 'insensitive' },
+          },
         },
-      };
+      });
+    }
+
+    if (andConditions.length > 0) {
+      where.AND = andConditions;
     }
 
     if (location) {
@@ -169,15 +185,6 @@ export class JobPostingsService {
       },
       skip,
       take,
-      ...(title && {
-        orderBy: {
-          _relevance: {
-            fields: ['title', 'description'],
-            search: title,
-            sort: 'desc',
-          },
-        },
-      }),
     });
 
     return {
