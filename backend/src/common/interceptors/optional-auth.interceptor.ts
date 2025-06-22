@@ -1,37 +1,54 @@
 import {
   Injectable,
-  CanActivate,
+  NestInterceptor,
   ExecutionContext,
-  UnauthorizedException,
+  CallHandler,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom, mergeMap } from 'rxjs';
-import { UserResponseDto } from './dto/user-response.dto';
-import { UsersService } from '../users/users.service';
-import { EnvironmentService } from '../common/environment/environment.service';
+import { firstValueFrom, Observable } from 'rxjs';
+import { catchError, mergeMap, of } from 'rxjs';
 import { User } from '@prisma/client';
+import { EnvironmentService } from '../environment/environment.service';
+import { UsersService } from '@/src/users/users.service';
+import { UserResponseDto } from '../../auth/dto/user-response.dto';
 
 @Injectable()
-export class AuthentikAuthGuard implements CanActivate {
+export class OptionalAuthInterceptor implements NestInterceptor {
   constructor(
     private readonly httpService: HttpService,
     private readonly usersService: UsersService,
     private readonly environmentService: EnvironmentService,
   ) {}
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest<
       Request & { cookies?: { authentik_session?: string } } & {
-        user: User;
+        user?: User;
       }
     >();
-    const authentikSessionCookie = request.cookies?.authentik_session;
+
+    await this.tryAuthenticateUser(request);
+
+    return next.handle();
+  }
+
+  private async tryAuthenticateUser(
+    request: Request & {
+      cookies?: { authentik_session?: string };
+      user?: User;
+    },
+  ): Promise<void> {
+    const authentikSessionCookie = request.cookies?.authentik_session as string;
 
     if (!authentikSessionCookie) {
-      throw new UnauthorizedException('Cookie de session Authentik non trouvé');
+      request.user = undefined;
+      return;
     }
 
     try {
-      // Appel à l'API Authentik pour vérifier l'utilisateur
       const response = await firstValueFrom(
         this.httpService
           .get(
@@ -49,26 +66,28 @@ export class AuthentikAuthGuard implements CanActivate {
               const userData = await this.usersService.getUserByEmail(
                 user.user.email,
               );
+
               if (!userData || userData.email !== user.user.email) {
-                throw new UnauthorizedException('User not found');
+                return undefined;
               }
+
               request.user = userData;
-              return true;
+
+              return userData;
             }),
             catchError((error) => {
-              // Si l'API renvoie une erreur, l'utilisateur n'est pas authentifié
-              throw new UnauthorizedException(
-                'Utilisateur non authentifié dans Authentik : ' + error,
+              console.warn(
+                'Erreur lors de la vérification Authentik:',
+                (error as Error).message,
               );
+              return of(undefined);
             }),
           ),
       );
-
-      return response;
+      request.user = response;
     } catch (error) {
-      throw new UnauthorizedException(
-        "Échec de l'authentification Authentik : " + error,
-      );
+      console.warn("Erreur lors de l'authentification Authentik:", error);
+      request.user = undefined;
     }
   }
 }

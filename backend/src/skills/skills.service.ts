@@ -46,4 +46,16 @@ export class SkillsService {
   async remove(id: string): Promise<Skill> {
     return this.prisma.skill.delete({ where: { id } });
   }
+
+  async getSkillsByFreelanceId(freelanceId: string): Promise<Skill[]> {
+    return this.prisma.skill.findMany({
+      where: {
+        freelance: {
+          some: {
+            id: freelanceId,
+          },
+        },
+      },
+    });
+  }
 }
