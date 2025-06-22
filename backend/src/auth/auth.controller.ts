@@ -101,9 +101,9 @@ export class AuthController {
       }
       return user;
     } catch (error) {
-      throw new UnauthorizedException(
-        'User not found + ' + (error as Error).message,
-      );
+      console.error('Error in getMe:', error);
+      throw new UnauthorizedException('Unauthorized access');
+      
     }
   }
 
