@@ -62,7 +62,7 @@ export class UploadService {
   }
 
   async updateAvatar(userId: string, file: Express.Multer.File) {
-    const bucketName = 'avatar';
+    const bucketName = 'freehunt-avatar';
     
     try {
       // Récupérer l'ancien avatar s'il existe
