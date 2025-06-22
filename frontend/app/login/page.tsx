@@ -26,7 +26,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100svh-64px)] bg-gray-50">
       <div className="w-full max-w-md px-6 py-8">
         <div className="flex justify-center mb-8">
           <div className="text-3xl font-bold text-gray-800">
