@@ -1,4 +1,12 @@
-import { Controller, Post, Res, Body, Get, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Res,
+  Body,
+  Get,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -84,13 +92,19 @@ export class AuthController {
   async getMe(@Req() request: Request): Promise<User> {
     // get cookies in session
     const cookies = request.headers['cookie'] as string;
-    const userAuthentik = await this.authService.getMe(cookies);
-    const user = await this.usersService.getUserByEmail(userAuthentik.email);
+    try {
+      const userAuthentik = await this.authService.getMe(cookies);
+      const user = await this.usersService.getUserByEmail(userAuthentik.email);
 
-    if (!user) {
-      throw new Error('User not found');
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+      return user;
+    } catch (error) {
+      throw new UnauthorizedException(
+        'User not found + ' + (error as Error).message,
+      );
     }
-    return user;
   }
 
   @Post('logout')
