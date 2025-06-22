@@ -230,7 +230,7 @@ export class JobPostingsService {
       return 0;
     });
 
-    // reitrer les job posting sans checkponts
+    // retirer les job postings sans checkpoints
     const dataWithoutCheckpoints = sortedData.filter(
       (jobPosting) => jobPosting.checkpoints.length === 0,
     );
