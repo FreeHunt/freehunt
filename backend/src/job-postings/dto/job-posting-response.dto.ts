@@ -66,4 +66,10 @@ export class JobPostingResponseDto {
     type: [CheckpointResponseDto],
   })
   checkpoints?: CheckpointResponseDto[];
+
+  @ApiProperty({
+    description: 'Whether the job posting is recommended or not',
+    example: false,
+  })
+  recommended?: boolean;
 }

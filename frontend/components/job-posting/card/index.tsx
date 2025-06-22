@@ -38,7 +38,7 @@ function JobPostingCard(jobPosting: JobPosting) {
     skills,
     averageDailyRate,
     seniority,
-    isPromoted,
+    recommended,
   } = jobPosting;
 
   const getCompanyInitials = () => {
@@ -49,7 +49,7 @@ function JobPostingCard(jobPosting: JobPosting) {
 
   return (
     <Card className="w-full max-w-[340px] rounded-[30px] pb-0 shadow-none flex flex-col relative">
-      {isPromoted && (
+      {recommended && (
         <Badge className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 font-semibold z-10 rounded-[30px] p-1">
           <Star size={12} />
         </Badge>

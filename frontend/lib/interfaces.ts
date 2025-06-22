@@ -91,6 +91,7 @@ export interface JobPosting {
   description: string;
   location: JobPostingLocation;
   isPromoted: boolean;
+  recommended?: boolean;
   averageDailyRate: number;
   seniority: number;
   company?: Company;

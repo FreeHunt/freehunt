@@ -8,6 +8,7 @@ import {
   Delete,
   ParseUUIDPipe,
   HttpCode,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
@@ -16,6 +17,9 @@ import { SearchJobPostingDto } from './dto/search-job-posting.dto';
 import { JobPostingResponseDto } from './dto/job-posting-response.dto';
 import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { User } from '@prisma/client';
+import { CurrentUser } from '../common/decorators/currentUsers.decorators';
+import { OptionalAuthInterceptor } from '../common/interceptors/optional-auth.interceptor';
 
 @ApiTags('job-postings')
 @Controller('job-postings')
@@ -138,6 +142,7 @@ export class JobPostingsController {
   }
 
   @Post('search')
+  @UseInterceptors(OptionalAuthInterceptor)
   @ApiOperation({
     summary: 'Search job postings',
     description:
@@ -151,8 +156,9 @@ export class JobPostingsController {
   @HttpCode(200)
   search(
     @Body() searchJobPostingDto: SearchJobPostingDto,
+    @CurrentUser() user?: User,
   ): Promise<JobPostingSearchResult> {
-    return this.jobPostingsService.search(searchJobPostingDto);
+    return this.jobPostingsService.search(searchJobPostingDto, user);
   }
 
   @Get('user/:userId')

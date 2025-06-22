@@ -438,8 +438,8 @@ function SearchPageContent() {
               !jobPostingsLoading &&
               [...jobPostingResults.data]
                 .sort((a, b) => {
-                  if (a.isPromoted && !b.isPromoted) return -1;
-                  if (!a.isPromoted && b.isPromoted) return 1;
+                  if (a.recommended && !b.recommended) return -1;
+                  if (!a.recommended && b.recommended) return 1;
                   return 0;
                 })
                 .map((jobPosting) => (

@@ -1,14 +1,15 @@
 "use client";
 
+import { SearchInput } from "@/components/common/search-input";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { ReactNode } from "react";
+
 import {
   RedPointer,
   RedPointerWithSpiral,
 } from "@/components/common/red-pointer";
-import { SearchInput } from "@/components/common/search-input";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ReactNode } from "react";
 
 function HomeCardColumn({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-3 lg:gap-[34px]">{children}</div>;
