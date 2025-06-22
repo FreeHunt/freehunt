@@ -1,11 +1,14 @@
-import { ReactNode } from "react";
-import { SearchInput } from "@/components/common/search-input";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
+"use client";
+
 import {
   RedPointer,
   RedPointerWithSpiral,
 } from "@/components/common/red-pointer";
+import { SearchInput } from "@/components/common/search-input";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ReactNode } from "react";
 
 function HomeCardColumn({ children }: { children: ReactNode }) {
   return <div className="flex flex-col gap-3 lg:gap-[34px]">{children}</div>;
@@ -34,6 +37,15 @@ function HomeCard({
 }
 
 export default function Home() {
+  const router = useRouter();
+
+  const handleSearch = (formData: FormData) => {
+    const query = formData.get("search") as string;
+    if (query?.trim()) {
+      router.push(`/job-postings/search?title=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
   return (
     <>
       <section className="flex items-center justify-between p-10 lg:p-20 bg-freehunt-beige-dark">
@@ -62,13 +74,13 @@ export default function Home() {
           </h2>
 
           {/* Search Bar */}
-          <form className="w-full">
-            {" "}
+          <form action={handleSearch} className="w-full">
             <SearchInput
               placeholder="Exemple : React, MongoDB..."
               className="px-6 lg:px-12 w-full text-sm lg:text-base bg-white py-0 h-[50px] border-freehunt-grey text-freehunt-grey placeholder:text-freehunt-grey focus-visible:border-freehunt-grey"
               buttonText="Démarrer"
               buttonClassName="right-2 bg-freehunt-black-two"
+              name="search"
             />
           </form>
         </div>
