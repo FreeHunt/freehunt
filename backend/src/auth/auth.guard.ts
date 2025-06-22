@@ -9,6 +9,7 @@ import { catchError, firstValueFrom, mergeMap } from 'rxjs';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UsersService } from '../users/users.service';
 import { EnvironmentService } from '../common/environment/environment.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthentikAuthGuard implements CanActivate {
@@ -18,9 +19,11 @@ export class AuthentikAuthGuard implements CanActivate {
     private readonly environmentService: EnvironmentService,
   ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context
-      .switchToHttp()
-      .getRequest<Request & { cookies?: { authentik_session?: string } }>();
+    const request = context.switchToHttp().getRequest<
+      Request & { cookies?: { authentik_session?: string } } & {
+        user: User;
+      }
+    >();
     const authentikSessionCookie = request.cookies?.authentik_session;
 
     if (!authentikSessionCookie) {
@@ -49,6 +52,7 @@ export class AuthentikAuthGuard implements CanActivate {
               if (!userData || userData.email !== user.user.email) {
                 throw new UnauthorizedException('User not found');
               }
+              request.user = userData;
               return true;
             }),
             catchError((error) => {
