@@ -7,18 +7,10 @@ on:
     branches: ["main"]
   workflow_dispatch:
     inputs:
-      build_push_frontend:
-        description: "Build and push frontend"
-        type: boolean
-        default: false
-      build_push_backend:
-        description: "Build and push backend"
-        type: boolean
-        default: false
       deploy:
         description: "Deploy to production"
         type: boolean
-        default: false
+        default: true
 
 jobs:
   changes:
@@ -104,9 +96,8 @@ jobs:
 
   build-frontend:
     name: Build and push frontend
-    needs: frontend
-    # Run on main branch pushes or manual workflow dispatch
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_push_frontend == 'true')
+    needs: [changes, frontend]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -187,9 +178,8 @@ jobs:
 
   build-backend:
     name: Build and push backend
-    needs: backend
-    # Run on main branch pushes or manual workflow dispatch
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.build_push_backend == 'true')
+    needs: [changes, backend]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -266,12 +256,12 @@ jobs:
           build-args: |
             AUTHENTIK_URL=${{ vars.AUTHENTIK_URL }}
             FRONTEND_URL=${{ vars.FRONTEND_URL }}
-            MINIO_URL=${{ vars.MINIO_URL }}
+            S3_URL=${{ vars.S3_URL }}
 
   deploy:
     name: Deploy to production
     needs: [build-frontend, build-backend]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true')
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
     runs-on: self-hosted
     environment:
       name: production
