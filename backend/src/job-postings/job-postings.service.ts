@@ -206,7 +206,7 @@ export class JobPostingsService {
         freelanceSkillIds.includes(skillId),
       );
       const commonSkillsCount = commonSkills.length;
-      const recommended = commonSkillsCount >= 3;
+      const recommended = commonSkillsCount >= JobPostingsService.RECOMMENDED_THRESHOLD;
 
       return {
         ...jobPosting,
