@@ -8,7 +8,7 @@ import { Button } from "../button";
 
 function SearchInput({
   className,
-  buttonText = "Rechercher",
+  buttonText,
   buttonClassName,
   defaultValue = "",
   value: externalValue,
@@ -50,16 +50,18 @@ function SearchInput({
         name="search"
         {...props}
       />
-      <Button
-        variant="secondary"
-        className={cn(
-          "absolute top-1/2 right-4 -translate-y-1/2  rounded-full font-semibold lg:px-8 lg:py-5",
-          buttonClassName,
-        )}
-      >
-        <Search size={20} className="lg:hidden" />
-        <span className="hidden lg:block">{buttonText}</span>
-      </Button>
+      {buttonText && (
+        <Button
+          variant="secondary"
+          className={cn(
+            "absolute top-1/2 right-4 -translate-y-1/2  rounded-full font-semibold lg:px-8 lg:py-5",
+            buttonClassName,
+          )}
+        >
+          <Search size={20} className="lg:hidden" />
+          <span className="hidden lg:block">{buttonText}</span>
+        </Button>
+      )}
     </div>
   );
 }

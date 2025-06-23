@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateFreelanceDto } from './dto/create-freelance.dto';
-import { UpdateFreelanceDto } from './dto/update-freelance.dto';
-import { PrismaService } from '../common/prisma/prisma.service';
 import { Freelance, Prisma } from '@prisma/client';
-import { SearchFreelanceDto } from './dto/search-freelance.dto';
+import { PrismaService } from '../common/prisma/prisma.service';
+import { CreateFreelanceDto } from './dto/create-freelance.dto';
 import { FreelanceSearchResult } from './dto/freelance-search-result.dto';
+import { SearchFreelanceDto } from './dto/search-freelance.dto';
+import { UpdateFreelanceDto } from './dto/update-freelance.dto';
 
 @Injectable()
 export class FreelancesService {
@@ -130,16 +130,7 @@ export class FreelancesService {
       const skillSearch = {
         skills: {
           some: {
-            OR: [
-              { name: { contains: query, mode: Prisma.QueryMode.insensitive } },
-              {
-                normalizedName: {
-                  contains: query,
-                  mode: Prisma.QueryMode.insensitive,
-                },
-              },
-              { aliases: { hasSome: [query] } },
-            ],
+            name: { contains: query, mode: Prisma.QueryMode.insensitive },
           },
         },
       };
@@ -212,16 +203,6 @@ export class FreelancesService {
       },
       skip,
       take,
-      // Order results by relevance if there's a query
-      ...(query && {
-        orderBy: {
-          _relevance: {
-            fields: ['firstName', 'lastName', 'location', 'jobTitle'],
-            search: query,
-            sort: 'desc',
-          },
-        },
-      }),
     });
 
     return {
