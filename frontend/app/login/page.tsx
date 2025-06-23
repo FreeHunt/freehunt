@@ -23,7 +23,7 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100svh-64px)] bg-gray-50">
       <div className="w-full max-w-md px-6 py-8">
         <div className="flex justify-center mb-8">
           <div className="text-3xl font-bold text-gray-800">
@@ -47,7 +47,7 @@ export default function Login() {
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Adresse email
+                  Adresse mail
                 </label>
                 <input
                   type="email"
@@ -103,15 +103,6 @@ export default function Login() {
               >
                 Se connecter <ArrowRight size={18} />
               </button>
-
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Ou</span>
-                </div>
-              </div>
             </form>
           </div>
         </div>
