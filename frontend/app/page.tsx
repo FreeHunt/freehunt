@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactNode } from "react";
 import { SearchInput } from "@/components/common/search-input";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { ReactNode } from "react";
+
 import {
   RedPointer,
   RedPointerWithSpiral,
@@ -39,11 +40,13 @@ function HomeCard({
 export default function Home() {
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const search = formData.get("search") as string;
-    router.push(`/job-postings/search?title=${search}&page=1`);
+  const handleSearch = (formData: FormData) => {
+    const query = formData.get("search") as string;
+    if (query?.trim()) {
+      router.push(
+        `/job-postings/search?title=${encodeURIComponent(query.trim())}`,
+      );
+    }
   };
 
   return (
@@ -74,13 +77,13 @@ export default function Home() {
           </h2>
 
           {/* Search Bar */}
-          <form className="w-full" onSubmit={handleSubmit}>
-            {" "}
+          <form action={handleSearch} className="w-full">
             <SearchInput
               placeholder="Exemple : React, MongoDB..."
               className="px-6 lg:px-12 w-full text-sm lg:text-base bg-white py-0 h-[50px] border-freehunt-grey text-freehunt-grey placeholder:text-freehunt-grey focus-visible:border-freehunt-grey"
               buttonText="Démarrer"
               buttonClassName="right-2 bg-freehunt-black-two"
+              name="search"
             />
           </form>
         </div>

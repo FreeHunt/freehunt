@@ -179,13 +179,6 @@ function SearchPageContent() {
     }
   }, [searchParams]);
 
-  // Handle search form submission
-  const handleSearch = async (formData: FormData) => {
-    const query = formData.get("search") as string;
-    setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when changing search
-  };
-
   // Handle skill selection with debounce
   const handleSkillToggle = useCallback((skill: Skill) => {
     setSelectedSkills((prev) =>
@@ -341,16 +334,14 @@ function SearchPageContent() {
 
         {/* Main */}
         <main className="flex flex-col gap-5 w-full py-2 lg:py-5">
-          <form action={handleSearch} className="w-full">
-            {/* Search Bar */}
-            <SearchInput
-              placeholder="Intitulé du poste, technologies..."
-              className="w-full text-sm lg:text-base px-6 lg:px-12 mt-2 lg:mt-0"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              name="search"
-            />
-          </form>
+          {/* Search Bar */}
+          <SearchInput
+            placeholder="Intitulé du poste, technologies..."
+            className="w-full text-sm lg:text-base px-6 lg:px-12 mt-2 lg:mt-0"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            name="search"
+          />
 
           {/* Mobile Filter Toggle Button */}
           <FreeHuntButton
@@ -519,7 +510,9 @@ function SearchPageContent() {
 
 function Page() {
   return (
-    <Suspense fallback={<div className="flex justify-center p-10">Chargement...</div>}>
+    <Suspense
+      fallback={<div className="flex justify-center p-10">Chargement...</div>}
+    >
       <SearchPageContent />
     </Suspense>
   );
