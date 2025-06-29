@@ -114,7 +114,7 @@ export default function Login() {
           <p className="text-gray-600">
             Pas encore de compte ?{" "}
             <Link
-              href="/register"
+              href="/register/choice"
               className="font-medium text-pink-600 hover:text-pink-800"
             >
               S&apos;inscrire

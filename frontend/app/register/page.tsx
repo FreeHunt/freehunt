@@ -171,7 +171,10 @@ function RegisterForm() {
           </div>
         </Form>
         <div className="flex flex-row justify-end items-center gap-2.5 self-stretch w-full md:w-[600px] lg:w-[700px]">
-          <Button className="flex p-2 items-center gap-2.5 self-stretch w-28 md:w-36 h-10 rounded-xl border-black border bg-transparent text-gray-500 text-base md:text-xl">
+          <Button
+            className="flex p-2 items-center gap-2.5 self-stretch w-28 md:w-36 h-10 rounded-xl border-black border bg-transparent text-gray-500 text-base md:text-xl"
+            onClick={() => router.back()}
+          >
             Retour
           </Button>
           <Button
