@@ -1,8 +1,12 @@
 services:
   # Overrides
   db:
-    env_file:
-      - ./env/backend.env
+    environment:
+      POSTGRES_USER: freehunt
+      POSTGRES_PASSWORD_FILE: /run/secrets/backend_postgres_password
+      POSTGRES_DB: freehunt
+    secrets:
+      - backend_postgres_password
     deploy:
       replicas: 1
       placement:
@@ -15,8 +19,12 @@ services:
       replicas: 0
 
   authentik-postgresql:
-    env_file:
-      - ./env/authentik.env
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/authentik_postgresql_password
+      POSTGRES_USER: authentik
+      POSTGRES_DB: authentik
+    secrets:
+      - authentik_postgresql_password
     deploy:
       replicas: 1
       placement:
@@ -31,8 +39,12 @@ services:
           - node.role == manager
 
   authentik-server:
-    env_file:
-      - ./env/authentik.env
+    environment:
+      AUTHENTIK_POSTGRESQL__PASSWORD: file:///run/secrets/authentik_postgresql_password
+      AUTHENTIK_SECRET_KEY: file:///run/secrets/authentik_secret_key
+    secrets:
+      - authentik_postgresql_password
+      - authentik_secret_key
     deploy:
       replicas: 1
       placement:
@@ -40,8 +52,12 @@ services:
           - node.role == manager
 
   authentik-worker:
-    env_file:
-      - ./env/authentik.env
+    environment:
+      AUTHENTIK_POSTGRESQL__PASSWORD: file:///run/secrets/authentik_postgresql_password
+      AUTHENTIK_SECRET_KEY: file:///run/secrets/authentik_secret_key
+    secrets:
+      - authentik_postgresql_password
+      - authentik_secret_key
     deploy:
       replicas: 1
       placement:
@@ -49,8 +65,14 @@ services:
           - node.role == manager
 
   matomo-db:
-    env_file:
-      - ./env/matomo.env
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/matomo_mysql_root_password
+      MYSQL_DATABASE: matomo
+      MYSQL_USER: matomo
+      MYSQL_PASSWORD_FILE: /run/secrets/matomo_database_password
+    secrets:
+      - matomo_mysql_root_password
+      - matomo_database_password
     deploy:
       replicas: 1
       placement:
@@ -58,8 +80,12 @@ services:
           - node.role == manager
 
   matomo:
-    env_file:
-      - ./env/matomo.env
+    environment:
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD_FILE: /run/secrets/matomo_database_password
+      MATOMO_DATABASE_DBNAME: matomo
+    secrets:
+      - matomo_database_password
     deploy:
       replicas: 1
       placement:
@@ -79,15 +105,12 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-backend:latest
     ports:
       - "3000:3000"
-    env_file:
-      - ./env/backend.env
     secrets:
+      - database_url
       - s3_access_key
       - s3_secret_key
       - stripe_secret_key
       - stripe_webhook_secret
-      - stripe_public_key
-
     deploy:
       replicas: 3
 
@@ -111,6 +134,25 @@ volumes:
   uptime-kuma-data:
 
 secrets:
+  # Backend secrets
+  database_url:
+    external: true
+  backend_postgres_password:
+    external: true
+  
+  # Authentik secrets
+  authentik_postgresql_password:
+    external: true
+  authentik_secret_key:
+    external: true
+  
+  # Matomo secrets
+  matomo_database_password:
+    external: true
+  matomo_mysql_root_password:
+    external: true
+  
+  # Existing secrets
   s3_access_key:
     external: true
   s3_secret_key:
@@ -118,6 +160,4 @@ secrets:
   stripe_secret_key:
     external: true
   stripe_webhook_secret:
-    external: true
-  stripe_public_key:
     external: true
