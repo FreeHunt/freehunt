@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -97,7 +97,7 @@ export default function FreelanceProfile() {
     avatar: null,
   });
 
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = useCallback(async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/getme`, {
         method: "GET",
@@ -148,12 +148,12 @@ export default function FreelanceProfile() {
           avatar: null,
         });
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
   
 
   const fetchFreelanceAvatar = async (userId: string) => {
@@ -182,14 +182,14 @@ export default function FreelanceProfile() {
           setAvatarUrl(null);
         }
       }
-    } catch (err) {
+    } catch {
       setError("Erreur lors de la récupération de l'avatar");
     }
   };
 
   useEffect(() => {
     fetchCurrentUser();
-  }, []);
+  }, [fetchCurrentUser]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -256,7 +256,6 @@ export default function FreelanceProfile() {
       );
 
       if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
         throw new Error("Erreur lors de l'upload de l'avatar");
       }
 
@@ -352,7 +351,7 @@ export default function FreelanceProfile() {
       setFormData((prev) => ({ ...prev, avatar: null }));
 
       alert("Profil mis à jour avec succès !");
-    } catch (err: any) {
+    } catch {
       alert("Erreur lors de la mise à jour du profil");
     }
   };
@@ -395,7 +394,7 @@ export default function FreelanceProfile() {
         try {
           const errorData = JSON.parse(responseText);
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           errorMessage = responseText || response.statusText;
         }
         
@@ -409,9 +408,7 @@ export default function FreelanceProfile() {
       let accountConnection;
       try {
         accountConnection = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Erreur de parsing JSON:', parseError);
-        console.log('Réponse brute:', responseText);
+      } catch {
         throw new Error('Format de réponse invalide du serveur');
       }
       
@@ -464,10 +461,9 @@ export default function FreelanceProfile() {
         throw new Error("Erreur lors de l'activation de la connexion Stripe");
       }
 
-      const result = await response.json();
       setStripeConnectionStatus("Compte Stripe activé avec succès !");
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erreur activation Stripe:", error);
     }
   };
