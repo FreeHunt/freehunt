@@ -20,6 +20,7 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/", label: "Accueil" },
   { href: "/about", label: "À propos" },
   { href: "/contact", label: "Contact" },
+  { href: "/cgu", label: "CGU" },
 ];
 
 const FREELANCE_LINKS: { href: string; label: string }[] = [

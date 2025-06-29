@@ -1,3 +1,4 @@
+import Footer from "@/components/footer";
 import MatomoScript from "@/components/MatomoScript";
 import NavigationMenu from "@/components/navigation-menu";
 import { Toaster } from "@/components/ui/sonner";
@@ -27,6 +28,7 @@ export default function RootLayout({
         <MatomoScript />
         <NavigationMenu />
         <main>{children}</main>
+        <Footer />
         <Toaster position="bottom-right" />
       </body>
     </html>
