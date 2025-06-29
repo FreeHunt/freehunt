@@ -96,7 +96,7 @@ jobs:
 
   build-frontend:
     name: Build and push frontend
-    needs: [changes, backend, frontend]
+    needs: [changes, frontend]
     if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
@@ -178,7 +178,7 @@ jobs:
 
   build-backend:
     name: Build and push backend
-    needs: [changes, backend, frontend]
+    needs: [changes, backend]
     if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
@@ -261,7 +261,7 @@ jobs:
   sync-secrets:
     name: Sync Docker Swarm secrets
     needs: [build-frontend, build-backend]
-    if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
+    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
     runs-on: self-hosted
     environment:
       name: production
