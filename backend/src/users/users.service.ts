@@ -17,16 +17,16 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ 
+    return this.prisma.user.findUnique({
       where: { id },
-      include: { 
-        company: true, 
+      include: {
+        company: true,
         freelance: {
           include: {
-            skills: true 
-          }
-        }
-      }, 
+            skills: true,
+          },
+        },
+      },
     });
   }
 
@@ -41,13 +41,13 @@ export class UsersService {
   async getUserByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
-      include: { 
-        company: true, 
+      include: {
+        company: true,
         freelance: {
           include: {
-            skills: true
-          }
-        }
+            skills: true,
+          },
+        },
       },
     });
   }

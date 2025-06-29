@@ -37,12 +37,6 @@ const AUTH_LINKS = [
   { href: "/register/choice", label: "S'inscrire", variant: "default" },
 ];
 
-// Authenticated user links
-const USER_LINKS = [
-  { href: "/account", label: "Mon compte", variant: "outline" },
-  { href: "/logout", label: "Déconnexion", variant: "default" },
-];
-
 export default function NavigationMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, isLoading, checkAuth } = useAuth();
@@ -62,13 +56,20 @@ export default function NavigationMenu() {
     return "/";
   };
 
+  const userRole = user?.role === UserRole.FREELANCE ? "freelance" : "company";
+  // Authenticated user links
+  const USER_LINKS = [
+    { href: "/dashboard/" + userRole, label: "Dashboard", variant: "outline" },
+    { href: "/logout", label: "Déconnexion", variant: "default" },
+  ];
+
   const NavLinks = ({ mobile = false, onClick = () => {} }) => {
     const getNavLinks = () => {
       if (!user) return NAV_LINKS;
-      
+
       if (user.role === UserRole.FREELANCE) return FREELANCE_LINKS;
       if (user.role === UserRole.COMPANY) return COMPANY_LINKS;
-      
+
       return NAV_LINKS;
     };
 

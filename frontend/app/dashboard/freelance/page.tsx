@@ -38,7 +38,8 @@ export default function FreelanceDashboard() {
             Bienvenue, {user.username}
           </h1>
           <p className="text-gray-600">
-            Découvrez les dernières opportunités qui correspondent à votre profil
+            Découvrez les dernières opportunités qui correspondent à votre
+            profil
           </p>
         </header>
 
@@ -50,6 +51,16 @@ export default function FreelanceDashboard() {
             </p>
             <Button asChild className="w-full">
               <Link href="/job-postings/search">Voir les jobs</Link>
+            </Button>
+          </div>
+
+          <div className="bg-white rounded-lg border p-6">
+            <h2 className="text-xl font-semibold mb-3">Mes conversations</h2>
+            <p className="text-gray-600 mb-4">
+              Gérez vos conversations avec les entreprises
+            </p>
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/conversations">Voir mes conversations</Link>
             </Button>
           </div>
 

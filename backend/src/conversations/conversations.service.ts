@@ -43,7 +43,7 @@ export class ConversationsService {
   async getConversationsByUser(id: string): Promise<Conversation[]> {
     return this.prisma.conversation.findMany({
       where: {
-        OR: [{ project: { freelanceId: id } }, { project: { companyId: id } }],
+        OR: [{ receiverId: id }, { senderId: id }],
       },
       include: {
         messages: true,

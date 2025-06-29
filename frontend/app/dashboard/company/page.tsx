@@ -44,12 +44,24 @@ export default function CompanyDashboard() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <div className="bg-white rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-3">Rechercher des freelances</h2>
+            <h2 className="text-xl font-semibold mb-3">
+              Rechercher des freelances
+            </h2>
             <p className="text-gray-600 mb-4">
               Découvrez les profils de freelances disponibles
             </p>
             <Button asChild className="w-full">
               <Link href="/freelances/search">Voir les freelances</Link>
+            </Button>
+          </div>
+
+          <div className="bg-white rounded-lg border p-6">
+            <h2 className="text-xl font-semibold mb-3">Mes conversations</h2>
+            <p className="text-gray-600 mb-4">
+              Gérez vos conversations avec les freelances
+            </p>
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/conversations">Voir mes conversations</Link>
             </Button>
           </div>
 

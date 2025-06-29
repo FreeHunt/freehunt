@@ -1,8 +1,12 @@
-import { PutObjectCommand, S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  PutObjectCommand,
+  S3Client,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { EnvironmentService } from '../environment/environment.service';
 import { PrismaService } from '../prisma/prisma.service';
-
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class UploadService {
   constructor(
@@ -45,10 +49,10 @@ export class UploadService {
   }
 
   async getDocuments(userId: string, type?: string) {
-    const whereClause: any = { userId };
-    
+    const whereClause: Prisma.DocumentWhereInput = { userId };
+
     if (type) {
-      whereClause.type = type;
+      whereClause.type = type as Prisma.EnumDocumentTypeFilter;
     }
 
     const documents = await this.prisma.document.findMany({
@@ -63,7 +67,7 @@ export class UploadService {
 
   async updateAvatar(userId: string, file: Express.Multer.File) {
     const bucketName = 'freehunt-avatar';
-    
+
     try {
       // Récupérer l'ancien avatar s'il existe
       const existingAvatar = await this.prisma.document.findFirst({
@@ -90,7 +94,9 @@ export class UploadService {
             await this.s3Client.send(deleteCommand);
           }
         } catch (deleteError) {
-          throw new Error('Erreur lors de la suppression de l\'ancien avatar');
+          throw new Error(
+            "Erreur lors de la suppression de l'ancien avatar" + deleteError,
+          );
         }
 
         // mise à jour de la bdd
@@ -111,7 +117,6 @@ export class UploadService {
           document: updatedDocument,
           message: 'Avatar mis à jour avec succès',
         };
-
       } else {
         const newDocument = await this.prisma.document.create({
           data: {
@@ -130,7 +135,7 @@ export class UploadService {
         };
       }
     } catch (error) {
-      throw new Error('Erreur lors de la mise à jour de l\'avatar');
+      throw new Error("Erreur lors de la mise à jour de l'avatar" + error);
     }
   }
 }

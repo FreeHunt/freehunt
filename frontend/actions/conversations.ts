@@ -1,3 +1,5 @@
+"use client";
+
 import { api } from "@/lib/api";
 import { Message } from "@/lib/interfaces";
 import { io, Socket } from "socket.io-client";
@@ -21,9 +23,17 @@ export const getSocket = () => {
   }
   return socket;
 };
+export const getConversation = async (conversationId: string) => {
+  const response = await api.get(`/conversations/${conversationId}`);
+  return response.data;
+};
 
 export const getConversationByProject = async (projectId: string) => {
   const response = await api.get(`/conversations/project/${projectId}`);
+  return response.data;
+};
+export const getUserConversations = async (userId: string) => {
+  const response = await api.get(`/conversations/user/${userId}`);
   return response.data;
 };
 

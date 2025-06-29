@@ -12,10 +12,10 @@ import CheckpointStats from "@/components/common/card/checkPointsStats";
 import { Project } from "@/lib/interfaces";
 import { getProject } from "@/actions/projects";
 import {
-  getConversationByProject,
   getUserPicture,
   joinConversationRoom,
   identifyUser,
+  getConversation,
 } from "@/actions/conversations";
 import { Document } from "@/lib/interfaces";
 import { SocketProvider } from "@/hooks/useSocket";
@@ -85,7 +85,7 @@ export default function ProjectDetailPage({
       if (project) {
         const checkpoints = await getCheckpoints(project.jobPostingId);
         setCheckpoints(checkpoints);
-        const conversation = await getConversationByProject(projectId);
+        const conversation = await getConversation(project.conversationId);
         setConversation(conversation);
         const senderPicture = await getUserPicture(conversation.senderId);
         const receiverPicture = await getUserPicture(conversation.receiverId);
@@ -110,9 +110,7 @@ export default function ProjectDetailPage({
 
   const handleCheckpointClick = async (checkpoint: Checkpoint) => {
     checkpoint.status = "DONE";
-    console.log("project", project);
     checkpoint.freelanceId = project?.freelanceId;
-    console.log("checkpoint", checkpoint);
     await updateCheckpoint(checkpoint);
 
     const updatedCheckpoints = checkpoints.map((cp) =>

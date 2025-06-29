@@ -47,4 +47,3 @@ export class ProjectResponseDto {
   })
   freelance?: FreelanceResponseDto | null;
 }
-
