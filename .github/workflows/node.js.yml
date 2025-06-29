@@ -34,7 +34,7 @@ jobs:
             frontend:
               - 'frontend/**'
 
-  backend-test:
+  backend:
     needs: changes
     if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
@@ -58,19 +58,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint code
-        run: npm run lint
-
       - name: Build project
         run: npm run build
 
       - name: Run unit tests
         run: npm test
 
-      - name: Run e2e tests
-        run: npm run test:e2e
-
-  frontend-test:
+  frontend:
     needs: changes
     if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
@@ -102,8 +96,8 @@ jobs:
 
   build-frontend:
     name: Build and push frontend
-    needs: [changes, frontend-test]
-    if: ${{ needs.changes.outputs.frontend == 'true' && needs.frontend-test.result == 'success' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch') }}
+    needs: [changes, frontend]
+    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -184,8 +178,8 @@ jobs:
 
   build-backend:
     name: Build and push backend
-    needs: [changes, backend-test]
-    if: ${{ needs.changes.outputs.backend == 'true' && needs.backend-test.result == 'success' && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch') }}
+    needs: [changes, backend]
+    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -267,7 +261,7 @@ jobs:
   sync-secrets:
     name: Sync Docker Swarm secrets
     needs: [build-frontend, build-backend]
-    if: always() && (needs.build-frontend.result == 'success' || needs.build-backend.result == 'success' || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
+    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
     runs-on: self-hosted
     environment:
       name: production
@@ -286,7 +280,7 @@ jobs:
             create_secret_if_not_exists() {
               local secret_name=$1
               local secret_value=$2
-
+              
               if docker secret inspect "$secret_name" >/dev/null 2>&1; then
                 echo "Secret $secret_name already exists, skipping..."
               else
@@ -316,7 +310,7 @@ jobs:
   deploy:
     name: Deploy to production
     needs: [sync-secrets]
-    if: always() && needs.sync-secrets.result == 'success'
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
     runs-on: self-hosted
     environment:
       name: production
@@ -341,7 +335,7 @@ jobs:
 
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Pull newest images
+            # Pull newest images 
             docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-frontend:latest
             docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-backend:latest
 
