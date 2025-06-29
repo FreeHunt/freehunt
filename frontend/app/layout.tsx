@@ -1,3 +1,4 @@
+import CookieConsentBanner from "@/components/CookieConsentBanner";
 import Footer from "@/components/footer";
 import MatomoScript from "@/components/MatomoScript";
 import NavigationMenu from "@/components/navigation-menu";
@@ -29,6 +30,7 @@ export default function RootLayout({
         <NavigationMenu />
         <main>{children}</main>
         <Footer />
+        <CookieConsentBanner />
         <Toaster position="bottom-right" />
       </body>
     </html>

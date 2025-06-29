@@ -1,9 +1,16 @@
 'use client';
 
+import { useCookieConsent } from "@/hooks/useCookieConsent";
 import Script from 'next/script';
 
 export default function MatomoScript() {
-  const matomoUrl = process.env.NEXT_PUBLIC_MATOMO_URL || 'http://localhost:8090/';
+  const { allowsTracking, isLoaded } = useCookieConsent();
+  const matomoUrl =
+    process.env.NEXT_PUBLIC_MATOMO_URL || "http://localhost:8090/";
+
+  if (!isLoaded || !allowsTracking) {
+    return null;
+  }
 
   return (
     <Script id="matomo" strategy="afterInteractive">
