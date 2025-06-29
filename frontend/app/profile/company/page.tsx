@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, TrendingUp, Camera, Upload } from "lucide-react";
+import { MapPin, TrendingUp, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 
