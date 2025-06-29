@@ -96,8 +96,8 @@ jobs:
 
   build-frontend:
     name: Build and push frontend
-    needs: [changes, frontend]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    needs: [changes, backend, frontend]
+    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -178,8 +178,8 @@ jobs:
 
   build-backend:
     name: Build and push backend
-    needs: [changes, backend]
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
+    needs: [changes, backend, frontend]
+    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     environment:
       name: production
