@@ -1,3 +1,5 @@
+import CookieConsentBanner from "@/components/CookieConsentBanner";
+import Footer from "@/components/footer";
 import MatomoScript from "@/components/MatomoScript";
 import NavigationMenu from "@/components/navigation-menu";
 import { Toaster } from "@/components/ui/sonner";
@@ -27,6 +29,8 @@ export default function RootLayout({
         <MatomoScript />
         <NavigationMenu />
         <main>{children}</main>
+        <Footer />
+        <CookieConsentBanner />
         <Toaster position="bottom-right" />
       </body>
     </html>
