@@ -1,3 +1,5 @@
+"use client";
+
 import { api } from "@/lib/api";
 import { Candidate, CreateCandidate } from "@/lib/interfaces";
 
