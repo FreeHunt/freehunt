@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import { useAuth } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,13 +13,21 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useAuth } from "@/actions/auth"; // Utilisez votre hook existant
+import { UserRole } from "@/lib/interfaces";
 
 // Navigation links configuration
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/", label: "Accueil" },
   { href: "/about", label: "À propos" },
   { href: "/contact", label: "Contact" },
+];
+
+const FREELANCE_LINKS: { href: string; label: string }[] = [
+  { href: "/job-postings/search", label: "Jobs" },
+];
+
+const COMPANY_LINKS: { href: string; label: string }[] = [
+  { href: "/freelances/search", label: "Freelances" },
 ];
 
 // Auth links configuration
@@ -43,22 +52,42 @@ export default function NavigationMenu() {
     checkAuth();
   }, [pathname, checkAuth]);
 
-  const NavLinks = ({ mobile = false, onClick = () => {} }) => (
-    <>
-      {NAV_LINKS.map((link, index) => (
-        <Link
-          key={`${link.label}-${index}`}
-          href={link.href}
-          className={`font-medium transition-colors hover:text-primary ${
-            mobile ? "text-lg" : "text-sm"
-          }`}
-          onClick={onClick}
-        >
-          {link.label}
-        </Link>
-      ))}
-    </>
-  );
+  const getHomeUrl = () => {
+    if (!user) return "/";
+
+    if (user.role === UserRole.FREELANCE) return "/dashboard/freelance";
+    if (user.role === UserRole.COMPANY) return "/dashboard/company";
+
+    return "/";
+  };
+
+  const NavLinks = ({ mobile = false, onClick = () => {} }) => {
+    const getNavLinks = () => {
+      if (!user) return NAV_LINKS;
+      
+      if (user.role === UserRole.FREELANCE) return FREELANCE_LINKS;
+      if (user.role === UserRole.COMPANY) return COMPANY_LINKS;
+      
+      return NAV_LINKS;
+    };
+
+    return (
+      <>
+        {getNavLinks().map((link, index) => (
+          <Link
+            key={`${link.label}-${index}`}
+            href={link.href}
+            className={`font-medium transition-colors hover:text-primary ${
+              mobile ? "text-lg" : "text-sm"
+            }`}
+            onClick={onClick}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </>
+    );
+  };
 
   const AuthButtons = ({ mobile = false }) => (
     <>
@@ -115,7 +144,7 @@ export default function NavigationMenu() {
       <header className="sticky top-0 z-50 flex border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-8">
         <div className="flex flex-1 justify-between h-16 items-center">
           <div className="flex items-center gap-10">
-            <Link href="/">
+            <Link href={getHomeUrl()}>
               <span className="text-xl font-bold">FreeHunt</span>
             </Link>
             <nav className="hidden md:flex items-center gap-6">
@@ -135,7 +164,7 @@ export default function NavigationMenu() {
     <header className="sticky top-0 z-50 flex border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-8">
       <div className="flex flex-1 justify-between h-16 items-center">
         <div className="flex items-center gap-10">
-          <Link href="/">
+          <Link href={getHomeUrl()}>
             <span className="text-xl font-bold">FreeHunt</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
@@ -162,7 +191,7 @@ export default function NavigationMenu() {
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between border-b pb-4">
                 <Link
-                  href="/"
+                  href={getHomeUrl()}
                   className="flex items-center"
                   onClick={() => setIsOpen(false)}
                 >
