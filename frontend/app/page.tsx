@@ -3,12 +3,14 @@
 import { SearchInput } from "@/components/common/search-input";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 
+import { useAuth } from "@/actions/auth";
 import {
   RedPointer,
   RedPointerWithSpiral,
 } from "@/components/common/red-pointer";
+import { UserRole } from "@/lib/interfaces";
 import { useRouter } from "next/navigation";
 
 function HomeCardColumn({ children }: { children: ReactNode }) {
@@ -39,6 +41,17 @@ function HomeCard({
 
 export default function Home() {
   const router = useRouter();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      if (user.role === UserRole.FREELANCE) {
+        router.push("/dashboard/freelance");
+      } else if (user.role === UserRole.COMPANY) {
+        router.push("/dashboard/company");
+      }
+    }
+  }, [user, isLoading, router]);
 
   const handleSearch = (formData: FormData) => {
     const query = formData.get("search") as string;
@@ -48,6 +61,14 @@ export default function Home() {
       );
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-xl">Chargement...</div>
+      </div>
+    );
+  }
 
   return (
     <>
