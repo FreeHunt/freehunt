@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, TrendingUp, Camera, Upload } from "lucide-react";
+import { MapPin, TrendingUp, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { z } from "zod";
 
@@ -81,7 +82,39 @@ export default function CompanyProfile() {
     logo: null,
   });
 
-  const fetchCurrentUser = async () => {
+  const fetchCompanyLogo = async (userId: string) => {
+    try {
+      const response = await fetch(
+        `${BACKEND_URL}/upload?userId=${userId}&type=AVATAR`,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const documents: Document[] = await response.json();
+
+        if (documents.length > 0) {
+          const sortedDocuments = documents.sort(
+            (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
+          );
+          const latestDocument = sortedDocuments[0];
+          setLogoUrl(latestDocument.url);
+        } else {
+          setLogoUrl(null);
+        }
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération du logo:", error);
+      setError("Erreur lors de la récupération du logo");
+    }
+  };
+
+  const fetchCurrentUser = useCallback(async () => {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/getme`, {
         method: "GET",
@@ -125,47 +158,20 @@ export default function CompanyProfile() {
           logo: null,
         });
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Une erreur inconnue s'est produite");
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchCompanyLogo = async (userId: string) => {
-    try {
-      const response = await fetch(
-        `${BACKEND_URL}/upload?userId=${userId}&type=AVATAR`,
-        {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (response.ok) {
-        const documents: Document[] = await response.json();
-
-        if (documents.length > 0) {
-          const sortedDocuments = documents.sort(
-            (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
-          );
-          const latestDocument = sortedDocuments[0];
-          setLogoUrl(latestDocument.url);
-        } else {
-          setLogoUrl(null);
-        }
-      }
-    } catch (err) {
-      setError("Erreur lors de la récupération du logo");
-    }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchCurrentUser();
-  }, []);
+  }, [fetchCurrentUser]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -228,7 +234,6 @@ export default function CompanyProfile() {
       );
 
       if (!uploadResponse.ok) {
-        const errorText = await uploadResponse.text();
         throw new Error("Erreur lors de l'upload du logo");
       }
 
@@ -317,7 +322,8 @@ export default function CompanyProfile() {
       setFormData((prev) => ({ ...prev, logo: null }));
 
       alert("Profil mis à jour avec succès !");
-    } catch (err: any) {
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour:", error);
       alert("Erreur lors de la mise à jour du profil");
     }
   };
@@ -363,11 +369,12 @@ export default function CompanyProfile() {
             <Card className="overflow-hidden py-0">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 overflow-hidden">
-                    <img
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 overflow-hidden relative">
+                    <Image
                       src={displayLogo}
                       alt="Company Logo"
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                   <input
@@ -379,7 +386,7 @@ export default function CompanyProfile() {
                   />
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                      {company?.name || formData.name || "Nom de l'entreprise"}
+                      {company?.name || formData.name || "Nom de l&apos;entreprise"}
                     </h3>
                     <Badge
                       className=" text-white"
@@ -529,13 +536,14 @@ export default function CompanyProfile() {
               <CardContent className="p-6 space-y-6">
                 {/* Section Logo */}
                 <div className="space-y-2">
-                  <Label>Logo de l'entreprise</Label>
+                  <Label>Logo de l&apos;entreprise</Label>
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 overflow-hidden">
-                      <img
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 overflow-hidden relative">
+                      <Image
                         src={displayLogo}
                         alt="Company Logo"
-                        className="w-full h-full object-cover"
+                        fill
+                        className="object-cover"
                       />
                     </div>
                     <div className="flex-1">
@@ -563,7 +571,7 @@ export default function CompanyProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="name">Nom de l'entreprise</Label>
+                  <Label htmlFor="name">Nom de l&apos;entreprise</Label>
                   <Input
                     id="name"
                     name="name"
