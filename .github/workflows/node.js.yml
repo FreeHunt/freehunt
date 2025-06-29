@@ -258,9 +258,58 @@ jobs:
             FRONTEND_URL=${{ vars.FRONTEND_URL }}
             S3_URL=${{ vars.S3_URL }}
 
+  sync-secrets:
+    name: Sync Docker Swarm secrets
+    needs: [build-frontend, build-backend]
+    if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
+    runs-on: self-hosted
+    environment:
+      name: production
+      url: https://freehunt.fr
+
+    steps:
+      - name: Sync secrets to Docker Swarm
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Create Docker Swarm secrets (skip if already exists)
+            create_secret_if_not_exists() {
+              local secret_name=$1
+              local secret_value=$2
+              
+              if docker secret inspect "$secret_name" >/dev/null 2>&1; then
+                echo "Secret $secret_name already exists, skipping..."
+              else
+                echo "$secret_value" | docker secret create "$secret_name" -
+                echo "Created secret: $secret_name"
+              fi
+            }
+
+            # Backend secrets
+            create_secret_if_not_exists "database_url" "${{ secrets.DATABASE_URL }}"
+            create_secret_if_not_exists "backend_postgres_password" "${{ secrets.POSTGRES_PASSWORD }}"
+
+            # Authentik secrets
+            create_secret_if_not_exists "authentik_postgresql_password" "${{ secrets.AUTHENTIK_POSTGRESQL_PASSWORD }}"
+            create_secret_if_not_exists "authentik_secret_key" "${{ secrets.AUTHENTIK_SECRET_KEY }}"
+
+            # Matomo secrets
+            create_secret_if_not_exists "matomo_database_password" "${{ secrets.MATOMO_DATABASE_PASSWORD }}"
+            create_secret_if_not_exists "matomo_mysql_root_password" "${{ secrets.MATOMO_MYSQL_ROOT_PASSWORD }}"
+
+            # Existing secrets (for automation)
+            create_secret_if_not_exists "s3_access_key" "${{ secrets.S3_ACCESS_KEY }}"
+            create_secret_if_not_exists "s3_secret_key" "${{ secrets.S3_SECRET_KEY }}"
+            create_secret_if_not_exists "stripe_secret_key" "${{ secrets.STRIPE_SECRET_KEY }}"
+            create_secret_if_not_exists "stripe_webhook_secret" "${{ secrets.STRIPE_WEBHOOK_SECRET }}"
+
   deploy:
     name: Deploy to production
-    needs: [build-frontend, build-backend]
+    needs: [sync-secrets]
     if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
     runs-on: self-hosted
     environment:
