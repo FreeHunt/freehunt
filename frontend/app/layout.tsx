@@ -1,8 +1,9 @@
+import MatomoScript from "@/components/MatomoScript";
+import NavigationMenu from "@/components/navigation-menu";
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
-import NavigationMenu from "@/components/navigation-menu";
-import MatomoScript from "@/components/MatomoScript";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({
         <MatomoScript />
         <NavigationMenu />
         <main>{children}</main>
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );
