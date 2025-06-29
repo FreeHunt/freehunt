@@ -93,7 +93,7 @@ export class UploadService {
           throw new Error('Erreur lors de la suppression de l\'ancien avatar');
         }
 
-        // lise à jour de la bdd
+        // mise à jour de la bdd
         const updatedDocument = await this.prisma.document.update({
           where: {
             id: existingAvatar.id,
