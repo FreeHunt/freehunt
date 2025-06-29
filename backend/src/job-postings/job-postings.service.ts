@@ -192,8 +192,6 @@ export class JobPostingsService {
       } as Prisma.IntFilter;
     }
 
-    const total = await this.prisma.jobPosting.count({ where });
-
     // Récupérer tous les résultats sans pagination d'abord
     const allData = await this.prisma.jobPosting.findMany({
       where,
@@ -206,8 +204,6 @@ export class JobPostingsService {
         },
         checkpoints: true,
       },
-      skip,
-      take,
     });
 
     // Calculer les recommandations et trier
@@ -242,12 +238,15 @@ export class JobPostingsService {
     });
 
     // retirer les job postings sans checkpoints
-    const dataWithoutCheckpoints = sortedData.filter(
-      (jobPosting) => jobPosting.checkpoints.length === 0,
+    const dataWithCheckpoints = sortedData.filter(
+      (jobPosting) => jobPosting.checkpoints.length !== 0,
     );
 
+    // Calculer le total après tous les filtres
+    const total = dataWithCheckpoints.length;
+
     // Appliquer la pagination sur les données triées
-    const paginatedData = dataWithoutCheckpoints
+    const paginatedData = dataWithCheckpoints
       .slice(skip || 0, (skip || 0) + (take || sortedData.length))
       .map(({ ...jobPosting }) => jobPosting); // Retirer la propriété temporaire
 
