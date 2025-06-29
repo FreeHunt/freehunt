@@ -1,25 +1,26 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent } from "react";
-import { AnimatePresence } from "framer-motion";
 import {
-  ProfileFormData,
   BlurStates,
-  SectionTitle as SectionTitleType,
+  ProfileFormData,
   RegisterFreelance,
+  SectionTitle as SectionTitleType,
 } from "@/actions/register";
 import { PreviewCard } from "@/components/common/card/PreviewCard";
-import { SectionIndicator } from "@/components/common/Section/SectionIndicator";
 import { NavigationButtons } from "@/components/common/Navigation/NavigatorButton";
-import { SectionTitle } from "@/components/register/form/SectionTitle";
+import { SectionIndicator } from "@/components/common/Section/SectionIndicator";
+import { AvatarSection } from "@/components/register/form/AvatarSection";
 import { FormSection } from "@/components/register/form/FormSection";
 import { IdentitySection } from "@/components/register/form/IdentitySection";
 import { LocationRateSection } from "@/components/register/form/LocationSection";
+import { SectionTitle } from "@/components/register/form/SectionTitle";
 import { SkillsSection } from "@/components/register/form/SkillSection";
-import { AvatarSection } from "@/components/register/form/AvatarSection";
-import { z } from "zod";
 import { Skill } from "@/lib/interfaces";
+import { showToast } from "@/lib/toast";
+import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useState } from "react";
+import { z } from "zod";
 
 const schemaFirstSection = z.object({
   firstName: z.string().min(1, "Le prénom est obligatoire"),
@@ -209,9 +210,14 @@ function Page() {
 
   // Soumettre le formulaire
   const handleFormSubmit = async () => {
-    await RegisterFreelance(formData);
-    alert("Formulaire soumis avec succès!");
-    router.push("/");
+    try {
+      await RegisterFreelance(formData);
+      showToast.success("Inscription terminée. Bienvenue sur FreeHunt !");
+      router.push("/");
+    } catch (error) {
+      console.error("Error during freelance registration:", error);
+      showToast.error("Une erreur est survenue lors de l'inscription");
+    }
   };
 
   // Mettre à jour les états de floutage en fonction des valeurs

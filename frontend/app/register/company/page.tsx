@@ -1,21 +1,22 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
 import {
   RegisterCompany,
   SectionTitle as SectionTitleType,
 } from "@/actions/register";
 import { CompanyPreviewCard } from "@/components/common/card/CompanyPreviewCard";
-import { FormSection } from "@/components/register/form/FormSection";
-import { CompanyIdentitySection } from "@/components/register/form/company/CompanyIdentitySection";
 import { CompanyAddressSection } from "@/components/register/form/company/CompanyAddressSection";
 import { CompanyDescriptionSection } from "@/components/register/form/company/CompanyDescriptionSection";
+import { CompanyIdentitySection } from "@/components/register/form/company/CompanyIdentitySection";
 import { CompanyLogoSection } from "@/components/register/form/company/CompanyLogoSection";
-import { RegisterPageLayout } from "@/components/register/RegisterPageLayout";
+import { FormSection } from "@/components/register/form/FormSection";
 import { FormContainer } from "@/components/register/FormContainer";
 import { FormNavigator } from "@/components/register/FormNavigator";
-import { useMultiStepForm } from "@/hooks/useMultiStepForm";
+import { RegisterPageLayout } from "@/components/register/RegisterPageLayout";
 import { useCompanyFormData } from "@/hooks/useCompanyFormData";
+import { useMultiStepForm } from "@/hooks/useMultiStepForm";
+import { showToast } from "@/lib/toast";
+import { AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 export default function CompanyRegisterPage() {
@@ -63,10 +64,15 @@ export default function CompanyRegisterPage() {
   ];
 
   const handleFormSubmit = async () => {
-    console.log("Formulaire entreprise soumis", formData);
-    await RegisterCompany(formData);
-    alert("Inscription de l'entreprise soumise avec succès!");
-    router.push("/");
+    try {
+      console.log("Formulaire entreprise soumis", formData);
+      await RegisterCompany(formData);
+      showToast.success("Inscription terminée. Bienvenue sur FreeHunt !");
+      router.push("/");
+    } catch (error) {
+      console.error("Error during company registration:", error);
+      showToast.error("Une erreur est survenue lors de l'inscription");
+    }
   };
 
   const goToNextSection = () => {

@@ -1,25 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { getCurrentUser } from "@/actions/auth";
+import { getCurrentCompany } from "@/actions/company";
+import { submitJobPosting } from "@/actions/jobPostings";
+import { getSkills } from "@/actions/skills";
 import { Button } from "@/components/ui/button";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { MultiSelect } from "../common/multi-select";
-import { ComponentDatePicker } from "../ui/comp-41";
-import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { Label } from "../ui/label";
-import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
-import { z } from "zod";
 import {
   Checkpoint,
   CheckpointStatus,
   JobPostingLocation,
   Skill,
 } from "@/lib/interfaces";
-import { submitJobPosting } from "@/actions/jobPostings";
-import { getCurrentUser } from "@/actions/auth";
-import { getCurrentCompany } from "@/actions/company";
-import { getSkills } from "@/actions/skills";
+import { showToast } from "@/lib/toast";
+import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { MultiSelect } from "../common/multi-select";
+import { ComponentDatePicker } from "../ui/comp-41";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Textarea } from "../ui/textarea";
 
 type Step = {
   id: string;
@@ -644,7 +645,9 @@ export default function MultiStepForm() {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        alert("Le formulaire contient des erreurs. Veuillez les corriger.");
+        showToast.error(
+          "Le formulaire contient des erreurs. Veuillez les corriger.",
+        );
       }
     } finally {
       setIsSubmitting(false);
