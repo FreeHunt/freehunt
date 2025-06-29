@@ -78,6 +78,7 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Also create a room for this conversation
     const roomId = data.conversation.id;
+    this.server.to(roomId).emit('newConversation', data.conversation);
   }
 
   @SubscribeMessage('newMessage')
@@ -92,8 +93,8 @@ export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
     const receiverId = data.message.receiverId;
 
     // Find sockets for these users if they're connected but not in the room
-    const senderSocket = this.connectedUsers.get(senderId);
-    const receiverSocket = this.connectedUsers.get(receiverId);
+    const senderSocket = this.connectedUsers.get(senderId) as string | null;
+    const receiverSocket = this.connectedUsers.get(receiverId) as string | null;
 
     if (senderSocket) {
       this.server.to(senderSocket).emit('newMessage', data.message);
