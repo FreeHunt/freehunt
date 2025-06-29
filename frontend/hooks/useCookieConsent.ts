@@ -9,10 +9,9 @@ export function useCookieConsent() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem(
-      "freehunt_cookie_consent",
-    ) as ConsentValue;
-    setConsent(stored);
+    const stored = localStorage.getItem("freehunt_cookie_consent");
+    const validConsent: ConsentValue = stored === "all" || stored === "essential" ? stored : null;
+    setConsent(validConsent);
     setIsLoaded(true);
   }, []);
 
