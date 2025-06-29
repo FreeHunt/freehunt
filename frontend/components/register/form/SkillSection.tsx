@@ -196,6 +196,7 @@ export function SkillsSection({
         {/* Skill Type Selector - Stacks on mobile */}
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full pb-2">
           <button
+            type="button" 
             onClick={() => setSkillType("TECHNICAL")}
             className={`w-full py-2 px-2 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
               skillType === "TECHNICAL"
@@ -206,6 +207,7 @@ export function SkillsSection({
             Compétences techniques ({technicalSkillsCount}/3)
           </button>
           <button
+            type="button" 
             onClick={() => setSkillType("SOFT")}
             className={`w-full py-2 px-2 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
               skillType === "SOFT"

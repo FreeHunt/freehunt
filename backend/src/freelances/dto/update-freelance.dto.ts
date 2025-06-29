@@ -77,4 +77,13 @@ export class UpdateFreelanceDto {
     required: false,
   })
   skillIds?: string[];
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({
+    description: 'The Stripe account ID associated with the freelance',
+    example: 'acct_1234567890',
+    required: false,
+  })
+  stripeAccountId?: string;
 }
