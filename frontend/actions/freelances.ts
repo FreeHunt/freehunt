@@ -1,4 +1,4 @@
-"use server";
+"use client";
 
 import { api } from "@/lib/api";
 import { Freelance, FreelanceSearchResult, Skill } from "@/lib/interfaces";
