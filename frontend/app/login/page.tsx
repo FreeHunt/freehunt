@@ -14,10 +14,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // api de connexion...
-    // console.log('Login avec:', email, password);
     const response = await login(email, password);
-    // Debugging: Log only non-sensitive information if necessary
     if (response.success) {
       router.push("/");
     } else {

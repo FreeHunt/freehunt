@@ -17,7 +17,10 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.prisma.user.findUnique({ 
+      where: { id },
+      include: { company: true } 
+    });
   }
 
   async update(id: string, data: UpdateUserDto): Promise<User> {
@@ -29,6 +32,9 @@ export class UsersService {
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { email } });
+    return this.prisma.user.findUnique({
+      where: { email },
+      include: { company: true },
+    });
   }
 }
