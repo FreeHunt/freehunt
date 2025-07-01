@@ -32,6 +32,7 @@ export interface Freelance {
   jobTitle: string;
   skills: Skill[];
   averageDailyRate: number;
+  seniority: number;
   description: string;
   user: User;
   userId: string;
@@ -118,6 +119,8 @@ export interface Candidate {
   status: CandidateStatus;
   createdAt: string;
   updatedAt: string;
+  freelance?: Freelance;
+  jobPosting?: JobPosting;
 }
 
 export interface Project {

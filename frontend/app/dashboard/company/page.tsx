@@ -90,8 +90,8 @@ export default function CompanyDashboard() {
             <p className="text-gray-600 mb-4">
               Consultez les candidatures pour vos postes
             </p>
-            <Button variant="outline" className="w-full" disabled>
-              Bientôt disponible
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/dashboard/company/candidates">Voir les candidatures</Link>
             </Button>
           </div>
         </div>

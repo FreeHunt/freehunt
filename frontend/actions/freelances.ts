@@ -40,6 +40,17 @@ export const searchFreelances = async ({
   return response.data;
 };
 
+export const getFreelanceById = async (
+  freelanceId: string,
+): Promise<Freelance> => {
+  try {
+    const response = await api.get(`/freelances/${freelanceId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getFreelanceByUserId = async (
   userId: string,
 ): Promise<Freelance> => {

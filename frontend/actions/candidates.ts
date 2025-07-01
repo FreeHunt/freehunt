@@ -47,6 +47,42 @@ export const createCandidate = async (
   }
 };
 
+export const getCandidatesByCompany = async (
+  companyId: string,
+): Promise<Candidate[]> => {
+  try {
+    const response = await api.get<Candidate[]>(
+      `/candidates/company/${companyId}`,
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching company candidates:", error);
+    throw error;
+  }
+};
+
+export const updateCandidateStatus = async (
+  candidateId: string,
+  status: string,
+): Promise<Candidate> => {
+  try {
+    const response = await api.put<Candidate>(
+      `/candidates/${candidateId}/company`,
+      { status },
+      {
+        withCredentials: true,
+      },
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating candidate status:", error);
+    throw error;
+  }
+};
+
 export const deleteCandidate = async (candidateId: string): Promise<void> => {
   try {
     await api.delete(`/candidates/${candidateId}`);

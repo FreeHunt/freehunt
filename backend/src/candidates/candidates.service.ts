@@ -48,6 +48,56 @@ export class CandidatesService {
       where: {
         jobPostingId,
       },
+      include: {
+        freelance: {
+          include: {
+            user: true,
+            skills: true,
+          },
+        },
+        jobPosting: {
+          include: {
+            company: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getCandidatesByCompanyId(companyId: string, userId: string) {
+    // Vérifier que l'utilisateur appartient bien à cette entreprise
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId, userId },
+    });
+
+    if (!company) {
+      throw new BadRequestException(
+        'Unauthorized: You can only view candidates for your own company',
+      );
+    }
+
+    return await this.prisma.candidate.findMany({
+      where: {
+        jobPosting: {
+          companyId,
+        },
+      },
+      include: {
+        freelance: {
+          include: {
+            user: true,
+            skills: true,
+          },
+        },
+        jobPosting: {
+          include: {
+            company: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
@@ -81,6 +131,13 @@ export class CandidatesService {
     // Fetch the existing candidate by id
     const existingCandidate = await this.prisma.candidate.findUnique({
       where: { id },
+      include: {
+        jobPosting: {
+          include: {
+            company: true,
+          },
+        },
+      },
     });
     if (!existingCandidate) {
       throw new BadRequestException('Candidate not found');
@@ -104,6 +161,19 @@ export class CandidatesService {
       data: {
         status: data.status,
       },
+      include: {
+        freelance: {
+          include: {
+            user: true,
+            skills: true,
+          },
+        },
+        jobPosting: {
+          include: {
+            company: true,
+          },
+        },
+      },
     });
     if (updatedCandidate.status === 'ACCEPTED') {
       console.log(
@@ -117,6 +187,36 @@ export class CandidatesService {
     }
 
     return updatedCandidate;
+  }
+
+  async updateCandidateByCompany(
+    id: string,
+    data: UpdateCandidateDto,
+    userId: string,
+  ) {
+    // Vérifier que l'utilisateur appartient bien à l'entreprise qui a posté l'offre
+    const existingCandidate = await this.prisma.candidate.findUnique({
+      where: { id },
+      include: {
+        jobPosting: {
+          include: {
+            company: true,
+          },
+        },
+      },
+    });
+
+    if (!existingCandidate) {
+      throw new BadRequestException('Candidate not found');
+    }
+
+    if (existingCandidate.jobPosting.company.userId !== userId) {
+      throw new BadRequestException(
+        'Unauthorized: You can only update candidates for your own job postings',
+      );
+    }
+
+    return this.updateCandidate(id, data);
   }
 
   async deleteCandidate(id: string) {
