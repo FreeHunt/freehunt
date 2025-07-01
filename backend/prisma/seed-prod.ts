@@ -4,11 +4,14 @@ import {
   SkillType,
   JobPostingLocation,
   CheckpointStatus,
-  DocumentType,
-  CandidateStatus,
 } from '@prisma/client';
+import fetch from 'node-fetch';
 
 const prisma = new PrismaClient();
+
+const AUTHENTIK_URL = process.env.AUTHENTIK_URL!;
+const AUTHENTIK_TOKEN =
+  'MU5d4YVEgoUivgcLKbuMkWUmlDA6a8B10Q52iJFC711OMA9yHKBLjsktJMjZ';
 
 // Données réalistes en français
 const REALISTIC_DATA = {
@@ -273,6 +276,85 @@ const REALISTIC_DATA = {
   ],
 };
 
+async function createAuthentikUser({ name, username, email, password }) {
+  const res = await fetch(`${AUTHENTIK_URL}/api/v3/core/users/`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${AUTHENTIK_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      name,
+      username,
+      email,
+      password,
+      is_active: true,
+      type: 'external',
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(
+      `Erreur création utilisateur Authentik : ${res.status} ${err}`,
+    );
+  }
+
+  return res.json();
+}
+
+async function deleteAuthentikUser(userId) {
+  const res = await fetch(`${AUTHENTIK_URL}/api/v3/core/users/${userId}/`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${AUTHENTIK_TOKEN}`,
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(
+      `Erreur suppression utilisateur Authentik : ${res.status} ${err}`,
+    );
+  }
+}
+
+type AuthentikUser = {
+  name: string;
+  pk: string;
+  username: string;
+  email: string;
+  type: string;
+};
+export async function fetchAuthentikUsers(): Promise<AuthentikUser[]> {
+  const users: AuthentikUser[] = [];
+  let nextUrl: string | null =
+    `${AUTHENTIK_URL}/api/v3/core/users/?type=external`;
+
+  while (nextUrl) {
+    const res = await fetch(nextUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${AUTHENTIK_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(
+        `Erreur lors du fetch des utilisateurs : ${res.status} ${err}`,
+      );
+    }
+
+    const data = await res.json();
+    users.push(...data.results);
+
+    nextUrl = data.next; // Pagination
+  }
+
+  return users;
+}
 // Fonctions utilitaires
 function getRandomItem<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
@@ -363,6 +445,14 @@ async function main() {
   await prisma.company.deleteMany({});
   await prisma.user.deleteMany({});
 
+  console.log('✅ suppression des utilisateurs Authentik...');
+  const allUsers = await fetchAuthentikUsers();
+  for (const user of allUsers) {
+    if (user.type === 'external') {
+      await deleteAuthentikUser(user.pk);
+    }
+  }
+
   console.log('🎯 Création des compétences...');
 
   // Création des compétences techniques
@@ -407,6 +497,15 @@ async function main() {
     },
   });
 
+  console.log('🔐 Création du compte freelance par défaut...');
+
+  await createAuthentikUser({
+    name: 'freelance_test',
+    username: 'freelance_test',
+    email: 'freelance@test.com',
+    password: 'password123',
+  });
+
   const defaultFreelance = await prisma.freelance.create({
     data: {
       userId: defaultFreelanceUser.id,
@@ -434,6 +533,15 @@ async function main() {
       username: 'company_test',
       role: Role.COMPANY,
     },
+  });
+
+  console.log('🔐 Création du compte entreprise par défaut...');
+
+  await createAuthentikUser({
+    name: 'company_test',
+    username: 'company_test',
+    email: 'company@test.com',
+    password: 'password123',
   });
 
   const defaultCompany = await prisma.company.create({
@@ -476,6 +584,15 @@ async function main() {
       },
     });
 
+    console.log('🔐 Création du compte freelance...');
+
+    await createAuthentikUser({
+      name: user.username,
+      username: user.username,
+      email: user.email,
+      password: 'password123',
+    });
+
     freelanceUsers.push({ user, firstName, lastName });
   }
 
@@ -490,6 +607,15 @@ async function main() {
         username: generateUsername(firstName, lastName),
         role: Role.COMPANY,
       },
+    });
+
+    console.log('🔐 Création du compte entreprise...');
+
+    await createAuthentikUser({
+      name: user.username,
+      username: user.username,
+      email: user.email,
+      password: 'password123',
     });
 
     companyUsers.push({ user, firstName, lastName });
