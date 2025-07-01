@@ -143,17 +143,19 @@ export class CandidatesService {
       throw new BadRequestException('Candidate not found');
     }
 
-    // Use the jobPostingId from the existing candidate for the acceptance check
-    const candidate = await this.prisma.candidate.findFirst({
-      where: {
-        jobPostingId: existingCandidate.jobPostingId,
-        status: {
-          in: ['ACCEPTED', 'REJECTED'],
+    // Vérifier s'il y a déjà une candidature acceptée seulement si on essaie d'accepter cette candidature
+    if (data.status === 'ACCEPTED') {
+      const acceptedCandidate = await this.prisma.candidate.findFirst({
+        where: {
+          jobPostingId: existingCandidate.jobPostingId,
+          status: 'ACCEPTED',
         },
-      },
-    });
-    if (candidate) {
-      throw new BadRequestException('Candidate already accepted');
+      });
+      if (acceptedCandidate) {
+        throw new BadRequestException(
+          'A candidate has already been accepted for this job posting',
+        );
+      }
     }
 
     const updatedCandidate = await this.prisma.candidate.update({
