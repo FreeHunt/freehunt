@@ -846,7 +846,7 @@ async function main() {
       },
     });
 
-    projects.push(project as never);
+    projects.push(project);
   }
 
   console.log(`✅ ${projects.length} projets créés`);
