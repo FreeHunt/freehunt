@@ -4,14 +4,20 @@ import {
   SkillType,
   JobPostingLocation,
   CheckpointStatus,
+  type Skill,
+  type User,
+  type Freelance,
+  type Company,
+  type JobPosting,
+  type Checkpoint,
+  type Project,
 } from '@prisma/client';
 import fetch from 'node-fetch';
 
 const prisma = new PrismaClient();
 
 const AUTHENTIK_URL = process.env.AUTHENTIK_URL!;
-const AUTHENTIK_TOKEN =
-  'MU5d4YVEgoUivgcLKbuMkWUmlDA6a8B10Q52iJFC711OMA9yHKBLjsktJMjZ';
+const AUTHENTIK_TOKEN = process.env.AUTHENTIK_TOKEN!;
 
 // Données réalistes en français
 const REALISTIC_DATA = {
@@ -276,7 +282,28 @@ const REALISTIC_DATA = {
   ],
 };
 
-async function createAuthentikUser({ name, username, email, password }) {
+// Types personnalisés
+type FreelanceWithSkills = Freelance & { skills: Skill[] };
+type JobPostingWithSkills = JobPosting & { skills: Skill[] };
+type UserData = { user: User; firstName: string; lastName: string };
+
+type AuthentikUser = {
+  name: string;
+  pk: string;
+  username: string;
+  email: string;
+  type: string;
+};
+
+async function createAuthentikUser({
+  name,
+  username,
+  email,
+}: {
+  name: string;
+  username: string;
+  email: string;
+}) {
   const res = await fetch(`${AUTHENTIK_URL}/api/v3/core/users/`, {
     method: 'POST',
     headers: {
@@ -284,10 +311,9 @@ async function createAuthentikUser({ name, username, email, password }) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      name,
-      username,
-      email,
-      password,
+      name: name,
+      username: username,
+      email: email,
       is_active: true,
       type: 'external',
     }),
@@ -303,7 +329,30 @@ async function createAuthentikUser({ name, username, email, password }) {
   return res.json();
 }
 
-async function deleteAuthentikUser(userId) {
+async function setPasswordAuthentikUser(userId: string, password: string) {
+  const res = await fetch(
+    `${AUTHENTIK_URL}/api/v3/core/users/${userId}/set_password/`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${AUTHENTIK_TOKEN}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        password,
+      }),
+    },
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(
+      `Erreur lors du changement de mot de passe Authentik : ${res.status} ${err}`,
+    );
+  }
+}
+
+async function deleteAuthentikUser(userId: string) {
   const res = await fetch(`${AUTHENTIK_URL}/api/v3/core/users/${userId}/`, {
     method: 'DELETE',
     headers: {
@@ -319,13 +368,6 @@ async function deleteAuthentikUser(userId) {
   }
 }
 
-type AuthentikUser = {
-  name: string;
-  pk: string;
-  username: string;
-  email: string;
-  type: string;
-};
 export async function fetchAuthentikUsers(): Promise<AuthentikUser[]> {
   const users: AuthentikUser[] = [];
   let nextUrl: string | null =
@@ -347,14 +389,18 @@ export async function fetchAuthentikUsers(): Promise<AuthentikUser[]> {
       );
     }
 
-    const data = await res.json();
+    const data = (await res.json()) as {
+      results: AuthentikUser[];
+      next: string | null;
+    };
     users.push(...data.results);
 
-    nextUrl = data.next; // Pagination
+    nextUrl = data.next || null; // Pagination
   }
 
   return users;
 }
+
 // Fonctions utilitaires
 function getRandomItem<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
@@ -456,7 +502,7 @@ async function main() {
   console.log('🎯 Création des compétences...');
 
   // Création des compétences techniques
-  const technicalSkills = [];
+  const technicalSkills: Skill[] = [];
   for (const skill of REALISTIC_DATA.TECHNICAL_SKILLS) {
     const createdSkill = await prisma.skill.create({
       data: {
@@ -470,7 +516,7 @@ async function main() {
   }
 
   // Création des compétences humaines
-  const softSkills = [];
+  const softSkills: Skill[] = [];
   for (const skill of REALISTIC_DATA.SOFT_SKILLS) {
     const createdSkill = await prisma.skill.create({
       data: {
@@ -499,12 +545,16 @@ async function main() {
 
   console.log('🔐 Création du compte freelance par défaut...');
 
-  await createAuthentikUser({
+  const defaultFreelanceAuthentikUser = (await createAuthentikUser({
     name: 'freelance_test',
     username: 'freelance_test',
     email: 'freelance@test.com',
-    password: 'password123',
-  });
+  })) as AuthentikUser;
+
+  await setPasswordAuthentikUser(
+    defaultFreelanceAuthentikUser.pk,
+    'password123',
+  );
 
   const defaultFreelance = await prisma.freelance.create({
     data: {
@@ -537,12 +587,13 @@ async function main() {
 
   console.log('🔐 Création du compte entreprise par défaut...');
 
-  await createAuthentikUser({
+  const defaultCompanyAuthentikUser = (await createAuthentikUser({
     name: 'company_test',
     username: 'company_test',
     email: 'company@test.com',
-    password: 'password123',
-  });
+  })) as AuthentikUser;
+
+  await setPasswordAuthentikUser(defaultCompanyAuthentikUser.pk, 'password123');
 
   const defaultCompany = await prisma.company.create({
     data: {
@@ -565,8 +616,8 @@ async function main() {
   const freelanceCount = Math.floor(totalUsers * 0.6);
   const companyCount = totalUsers - freelanceCount;
 
-  const freelanceUsers = [];
-  const companyUsers = [
+  const freelanceUsers: UserData[] = [];
+  const companyUsers: UserData[] = [
     { user: defaultCompanyUser, firstName: 'Admin', lastName: 'Company' },
   ];
 
@@ -586,12 +637,16 @@ async function main() {
 
     console.log('🔐 Création du compte freelance...');
 
-    await createAuthentikUser({
+    const defaultFreelanceAuthentikUser = (await createAuthentikUser({
       name: user.username,
       username: user.username,
       email: user.email,
-      password: 'password123',
-    });
+    })) as AuthentikUser;
+
+    await setPasswordAuthentikUser(
+      defaultFreelanceAuthentikUser.pk,
+      'password123',
+    );
 
     freelanceUsers.push({ user, firstName, lastName });
   }
@@ -611,12 +666,13 @@ async function main() {
 
     console.log('🔐 Création du compte entreprise...');
 
-    await createAuthentikUser({
+    const authentikUser = (await createAuthentikUser({
       name: user.username,
       username: user.username,
       email: user.email,
-      password: 'password123',
-    });
+    })) as AuthentikUser;
+
+    await setPasswordAuthentikUser(authentikUser.pk, 'password123');
 
     companyUsers.push({ user, firstName, lastName });
   }
@@ -627,7 +683,7 @@ async function main() {
 
   console.log('💼 Création des profils freelances...');
 
-  const freelances = [defaultFreelance];
+  const freelances: FreelanceWithSkills[] = [defaultFreelance];
   for (const { user, firstName, lastName } of freelanceUsers) {
     const freelanceSkills = getRandomItems(allSkills, 3, 8);
 
@@ -656,7 +712,7 @@ async function main() {
 
   console.log('🏢 Création des entreprises...');
 
-  const companies = [defaultCompany];
+  const companies: Company[] = [defaultCompany];
   for (const { user } of companyUsers.slice(1)) {
     // Skip le premier qui est le compte par défaut
     const companyData = getRandomItem(REALISTIC_DATA.COMPANIES);
@@ -678,7 +734,7 @@ async function main() {
 
   console.log("📋 Création des offres d'emploi...");
 
-  const jobPostings = [];
+  const jobPostings: JobPostingWithSkills[] = [];
   for (const company of companies) {
     const postingsCount = Math.floor(Math.random() * 3) + 1; // 1 à 3 offres par entreprise
 
@@ -716,7 +772,7 @@ async function main() {
 
   console.log('📋 Création des checkpoints...');
 
-  const checkpoints = [];
+  const checkpoints: Checkpoint[] = [];
   const CHECKPOINT_NAMES = [
     'Analyse des besoins',
     'Conception technique',
@@ -765,7 +821,7 @@ async function main() {
 
   console.log('🚀 Création des projets...');
 
-  const projects = [];
+  const projects: Project[] = [];
   for (const jobPosting of jobPostings) {
     const assignedFreelance =
       Math.random() < 0.7 ? getRandomItem(freelances) : null; // 70% des projets ont un freelance assigné
@@ -790,7 +846,7 @@ async function main() {
       },
     });
 
-    projects.push(project);
+    projects.push(project as never);
   }
 
   console.log(`✅ ${projects.length} projets créés`);
