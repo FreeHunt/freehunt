@@ -1,24 +1,25 @@
 "use client";
 
 import { useAuth } from "@/actions/auth";
-import { getCandidatesByCompany, updateCandidateStatus } from "@/actions/candidates";
+import {
+  getCandidatesByCompany,
+  updateCandidateStatus,
+} from "@/actions/candidates";
 import { getCurrentCompany } from "@/actions/company";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/common/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Candidate, CandidateStatus } from "@/lib/interfaces";
 import { showToast } from "@/lib/toast";
-import { 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  User, 
-  MapPin, 
-  DollarSign, 
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  User,
+  MapPin,
+  DollarSign,
   Calendar,
   MessageSquare,
-  Eye
+  Eye,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,17 +30,19 @@ export default function CompanyCandidatesPage() {
   const router = useRouter();
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [updatingCandidate, setUpdatingCandidate] = useState<string | null>(null);
+  const [updatingCandidate, setUpdatingCandidate] = useState<string | null>(
+    null,
+  );
 
   const loadCandidates = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
-      
+
       // Récupérer les informations de l'entreprise
       const companyData = await getCurrentCompany(user.id);
-      
+
       // Récupérer les candidatures
       const candidatesData = await getCandidatesByCompany(companyData.id);
       setCandidates(candidatesData);
@@ -71,14 +74,16 @@ export default function CompanyCandidatesPage() {
     try {
       setUpdatingCandidate(candidateId);
       await updateCandidateStatus(candidateId, newStatus);
-      
+
       // Mettre à jour l'état local
-      setCandidates(candidates.map(candidate => 
-        candidate.id === candidateId 
-          ? { ...candidate, status: newStatus as CandidateStatus }
-          : candidate
-      ));
-      
+      setCandidates(
+        candidates.map((candidate) =>
+          candidate.id === candidateId
+            ? { ...candidate, status: newStatus as CandidateStatus }
+            : candidate,
+        ),
+      );
+
       const statusText = newStatus === "ACCEPTED" ? "acceptée" : "refusée";
       showToast.success(`Candidature ${statusText} avec succès`);
     } catch (error) {
@@ -92,44 +97,54 @@ export default function CompanyCandidatesPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "PENDING":
-        return <Badge variant="secondary" className="flex items-center gap-1">
-          <Clock className="w-3 h-3" />
-          En attente
-        </Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            En attente
+          </Badge>
+        );
       case "ACCEPTED":
-        return <Badge variant="default" className="bg-green-100 text-green-800 flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          Acceptée
-        </Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+            <CheckCircle className="w-3 h-3" />
+            Acceptée
+          </Badge>
+        );
       case "REJECTED":
-        return <Badge variant="destructive" className="flex items-center gap-1">
-          <XCircle className="w-3 h-3" />
-          Refusée  
-        </Badge>;
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1">
+            <XCircle className="w-3 h-3" />
+            Refusée
+          </Badge>
+        );
       default:
-        return <Badge variant="secondary">{status}</Badge>;
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            {status}
+          </Badge>
+        );
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   if (isLoading || loading) {
     return (
-      <div className="container mx-auto p-8">
+      <div className="px-4 lg:px-5 py-6">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
           <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+              <div key={i} className="h-32 bg-gray-200 rounded-[30px]"></div>
             ))}
           </div>
         </div>
@@ -140,49 +155,54 @@ export default function CompanyCandidatesPage() {
   if (!user) return null;
 
   return (
-    <div className="container mx-auto p-8">
+    <div className="px-4 lg:px-5 py-6">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Candidatures reçues</h1>
-            <p className="text-gray-600">
+            <h1 className="text-2xl lg:text-3xl font-bold text-freehunt-black-two mb-2">
+              Candidatures reçues
+            </h1>
+            <p className="text-freehunt-black-two opacity-70">
               Gérez les candidatures pour vos offres d&apos;emploi
             </p>
           </div>
-          <Button variant="outline" asChild>
+          <Button variant="outline" theme="secondary" asChild>
             <Link href="/dashboard/company">Retour au tableau de bord</Link>
           </Button>
         </div>
 
         {candidates.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Aucune candidature
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Vous n&apos;avez pas encore reçu de candidatures pour vos offres d&apos;emploi.
-              </p>
-              <Button asChild>
-                <Link href="/job-postings/create">Publier une offre</Link>
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="bg-white rounded-[30px] border border-freehunt-grey p-12 text-center">
+            <User className="w-12 h-12 text-freehunt-black-two opacity-40 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-freehunt-black-two mb-2">
+              Aucune candidature
+            </h3>
+            <p className="text-freehunt-black-two opacity-70 mb-4">
+              Vous n&apos;avez pas encore reçu de candidatures pour vos offres
+              d&apos;emploi.
+            </p>
+            <Button asChild>
+              <Link href="/job-postings/create">Publier une offre</Link>
+            </Button>
+          </div>
         ) : (
           <div className="space-y-6">
             {candidates.map((candidate) => (
-              <Card key={candidate.id} className="overflow-hidden">
-                <CardHeader>
+              <div
+                key={candidate.id}
+                className="bg-white rounded-[30px] border border-freehunt-grey overflow-hidden"
+              >
+                <div className="bg-gradient-to-r from-freehunt-main/10 to-freehunt-main/5 p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">
+                      <h2 className="text-xl lg:text-2xl font-bold text-freehunt-black-two mb-2">
                         {candidate.freelance?.user?.username || "Freelance"}
-                      </CardTitle>
-                      <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                      </h2>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-freehunt-black-two opacity-70 mb-2">
                         <span className="flex items-center gap-1">
                           <User className="w-4 h-4" />
-                          {candidate.freelance?.firstName} {candidate.freelance?.lastName}
+                          {candidate.freelance?.firstName}{" "}
+                          {candidate.freelance?.lastName}
                         </span>
                         <span className="flex items-center gap-1">
                           <MapPin className="w-4 h-4" />
@@ -197,90 +217,93 @@ export default function CompanyCandidatesPage() {
                           {candidate.freelance?.seniority} ans d&apos;expérience
                         </span>
                       </div>
-                      <p className="text-gray-700 mb-3">
+                      <p className="text-freehunt-black-two opacity-80 mb-2">
                         <strong>Poste :</strong> {candidate.jobPosting?.title}
                       </p>
-                      <p className="text-gray-600 mb-3">
+                      <p className="text-freehunt-black-two opacity-70">
                         {candidate.freelance?.jobTitle}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {getStatusBadge(candidate.status)}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-freehunt-black-two opacity-50">
                         Candidature du {formatDate(candidate.createdAt)}
                       </span>
                     </div>
                   </div>
-                </CardHeader>
-                
-                <CardContent>
+                </div>
+
+                <div className="p-6">
                   {/* Compétences */}
-                  {candidate.freelance?.skills && candidate.freelance.skills.length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-sm font-medium text-gray-900 mb-2">Compétences</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {candidate.freelance.skills.map((skill) => (
-                          <Badge key={skill.id} variant="outline" className="text-xs">
-                            {skill.name}
-                          </Badge>
-                        ))}
+                  {candidate.freelance?.skills &&
+                    candidate.freelance.skills.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-lg font-bold text-freehunt-black-two mb-3">
+                          Compétences
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {candidate.freelance.skills.map((skill) => (
+                            <Badge
+                              key={skill.id}
+                              className="bg-freehunt-main/10 text-freehunt-black-two border-freehunt-main/20"
+                            >
+                              {skill.name}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  
-                  <Separator className="my-4" />
-                  
+                    )}
+
                   {/* Actions */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
+                  <div className="pt-6 border-t border-freehunt-grey flex items-center justify-between">
+                    <div className="flex gap-3">
+                      <Button variant="outline" theme="secondary" asChild>
                         <Link href={`/freelances/${candidate.freelance?.id}`}>
                           <Eye className="w-4 h-4 mr-1" />
                           Voir le profil
                         </Link>
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                      >
-                        <Link href={`/messages?freelanceId=${candidate.freelance?.id}`}>
+                      <Button variant="outline" theme="secondary" asChild>
+                        <Link
+                          href={`/messages?freelanceId=${candidate.freelance?.id}`}
+                        >
                           <MessageSquare className="w-4 h-4 mr-1" />
                           Contacter
                         </Link>
                       </Button>
                     </div>
-                    
+
                     {candidate.status === "PENDING" && (
-                      <div className="flex gap-2">
+                      <div className="flex gap-3">
                         <Button
-                          size="sm"
                           variant="outline"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => handleStatusUpdate(candidate.id, "REJECTED")}
+                          theme="secondary"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                          onClick={() =>
+                            handleStatusUpdate(candidate.id, "REJECTED")
+                          }
                           disabled={updatingCandidate === candidate.id}
                         >
                           <XCircle className="w-4 h-4 mr-1" />
                           Refuser
                         </Button>
                         <Button
-                          size="sm"
                           className="bg-green-600 hover:bg-green-700"
-                          onClick={() => handleStatusUpdate(candidate.id, "ACCEPTED")}
+                          onClick={() =>
+                            handleStatusUpdate(candidate.id, "ACCEPTED")
+                          }
                           disabled={updatingCandidate === candidate.id}
                         >
                           <CheckCircle className="w-4 h-4 mr-1" />
-                          {updatingCandidate === candidate.id ? "..." : "Accepter"}
+                          {updatingCandidate === candidate.id
+                            ? "..."
+                            : "Accepter"}
                         </Button>
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
         )}
