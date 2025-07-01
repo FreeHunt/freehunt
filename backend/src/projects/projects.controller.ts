@@ -6,12 +6,17 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { ProjectsService } from '@/src/projects/projects.service';
 import { CreateProjectDto } from '@/src/projects/dto/create-project.dto';
 import { UpdateProjectDto } from '@/src/projects/dto/update-project.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { ProjectResponseDto } from '@/src/projects/dto/project-response.dto';
+import { AuthentikAuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../common/decorators/currentUsers.decorators';
+import { User } from '@prisma/client';
 
 @ApiTags('projects')
 @Controller('projects')
@@ -135,5 +140,65 @@ export class ProjectController {
   })
   remove(@Param('id') id: string): Promise<ProjectResponseDto> {
     return this.projectsService.remove(id);
+  }
+
+  @Get('company/:companyId')
+  @UseGuards(AuthentikAuthGuard)
+  @ApiOperation({
+    summary: 'Find projects by company ID',
+    description: 'Retrieve all projects for a specific company',
+  })
+  @ApiParam({
+    name: 'companyId',
+    description: 'The ID of the company (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of projects for the company',
+    type: [ProjectResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Company not found or no projects found',
+  })
+  findByCompanyId(
+    @Param('companyId', ParseUUIDPipe) companyId: string,
+    @CurrentUser() user: User,
+  ): Promise<ProjectResponseDto[]> {
+    return this.projectsService.findByCompanyId(companyId, user.id);
+  }
+
+  @Get('freelance/:freelanceId')
+  @UseGuards(AuthentikAuthGuard)
+  @ApiOperation({
+    summary: 'Find projects by freelance ID',
+    description: 'Retrieve all projects for a specific freelance',
+  })
+  @ApiParam({
+    name: 'freelanceId',
+    description: 'The ID of the freelance (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'List of projects for the freelance',
+    type: [ProjectResponseDto],
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Freelance not found or no projects found',
+  })
+  findByFreelanceId(
+    @Param('freelanceId', ParseUUIDPipe) freelanceId: string,
+    @CurrentUser() user: User,
+  ): Promise<ProjectResponseDto[]> {
+    return this.projectsService.findByFreelanceId(freelanceId, user.id);
   }
 }

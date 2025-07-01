@@ -1,13 +1,46 @@
 import { Test } from '@nestjs/testing';
 import { ProjectsService } from '@/src/projects/projects.service';
 import { PrismaService } from '@/src/common/prisma/prisma.service';
-import { JobPostingLocation } from '@prisma/client';
+import { JobPostingLocation, Role } from '@prisma/client';
 import { PrismaServiceMock } from '@/test/mocks/prisma.mock';
 import { CreateProjectDto } from '@/src/projects/dto/create-project.dto';
 import { ProjectController } from '@/src/projects/projects.controller';
+import { AuthentikAuthGuard } from '../auth/auth.guard';
+import { HttpService } from '@nestjs/axios';
+import { UsersService } from '../users/users.service';
+import { EnvironmentService } from '../common/environment/environment.service';
+
 describe('ProjectController', () => {
   let projectController: ProjectController;
   let projectsService: ProjectsService;
+
+  // Mock du guard pour les tests
+  const mockAuthGuard = {
+    canActivate: jest.fn(() => true),
+  };
+
+  // Mocks des services pour les dépendances du guard
+  const mockHttpService = {
+    get: jest.fn(),
+  };
+
+  const mockUsersService = {
+    findByEmail: jest.fn(),
+    create: jest.fn(),
+  };
+
+  const mockEnvironmentService = {
+    get: jest.fn(),
+  };
+
+  const mockUser = {
+    id: 'user-id',
+    email: 'test@example.com',
+    username: 'testuser',
+    role: 'USER' as Role,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -18,8 +51,23 @@ describe('ProjectController', () => {
           provide: PrismaService,
           useValue: PrismaServiceMock,
         },
+        {
+          provide: HttpService,
+          useValue: mockHttpService,
+        },
+        {
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: EnvironmentService,
+          useValue: mockEnvironmentService,
+        },
       ],
-    }).compile();
+    })
+      .overrideGuard(AuthentikAuthGuard)
+      .useValue(mockAuthGuard)
+      .compile();
 
     projectController = moduleRef.get<ProjectController>(ProjectController);
     projectsService = moduleRef.get<ProjectsService>(ProjectsService);
@@ -36,7 +84,7 @@ describe('ProjectController', () => {
     amount: 1000,
   };
 
-  const projectWithRelationsMock = {
+  const simpleProjectMock = {
     id: 'project-id',
     name: 'Project Title',
     description: 'Project Description',
@@ -67,7 +115,7 @@ describe('ProjectController', () => {
   };
 
   const updatedProjectWithRelations = {
-    ...projectWithRelationsMock,
+    ...simpleProjectMock,
     name: 'Updated Project Title',
   };
 
@@ -75,9 +123,9 @@ describe('ProjectController', () => {
     it('should create a project', async () => {
       jest
         .spyOn(projectsService, 'create')
-        .mockResolvedValue(projectWithRelationsMock);
+        .mockResolvedValue(simpleProjectMock as any);
       expect(await projectController.create(createProjectDto)).toEqual(
-        projectWithRelationsMock,
+        simpleProjectMock,
       );
     });
   });
@@ -86,10 +134,8 @@ describe('ProjectController', () => {
     it('should return an array of projects', async () => {
       jest
         .spyOn(projectsService, 'findAll')
-        .mockResolvedValue([projectWithRelationsMock]);
-      expect(await projectController.findAll()).toEqual([
-        projectWithRelationsMock,
-      ]);
+        .mockResolvedValue([simpleProjectMock as any]);
+      expect(await projectController.findAll()).toEqual([simpleProjectMock]);
     });
   });
 
@@ -97,10 +143,10 @@ describe('ProjectController', () => {
     it('should return a project', async () => {
       jest
         .spyOn(projectsService, 'findOne')
-        .mockResolvedValue(projectWithRelationsMock);
-      expect(
-        await projectController.findOne(projectWithRelationsMock.id),
-      ).toEqual(projectWithRelationsMock);
+        .mockResolvedValue(simpleProjectMock as any);
+      expect(await projectController.findOne(simpleProjectMock.id)).toEqual(
+        simpleProjectMock,
+      );
     });
   });
 
@@ -108,9 +154,9 @@ describe('ProjectController', () => {
     it('should update a project', async () => {
       jest
         .spyOn(projectsService, 'update')
-        .mockResolvedValue(updatedProjectWithRelations);
+        .mockResolvedValue(updatedProjectWithRelations as any);
       expect(
-        await projectController.update(projectWithRelationsMock.id, {
+        await projectController.update(simpleProjectMock.id, {
           name: 'Updated Project Title',
         }),
       ).toEqual(updatedProjectWithRelations);
@@ -121,10 +167,34 @@ describe('ProjectController', () => {
     it('should remove a project', async () => {
       jest
         .spyOn(projectsService, 'remove')
-        .mockResolvedValue(projectWithRelationsMock);
+        .mockResolvedValue(simpleProjectMock as any);
+      expect(await projectController.remove(simpleProjectMock.id)).toEqual(
+        simpleProjectMock,
+      );
+    });
+  });
+
+  describe('findByCompanyId', () => {
+    it('should return projects for a company', async () => {
+      jest
+        .spyOn(projectsService, 'findByCompanyId')
+        .mockResolvedValue([simpleProjectMock] as any);
+
       expect(
-        await projectController.remove(projectWithRelationsMock.id),
-      ).toEqual(projectWithRelationsMock);
+        await projectController.findByCompanyId('company-id', mockUser),
+      ).toEqual([simpleProjectMock]);
+    });
+  });
+
+  describe('findByFreelanceId', () => {
+    it('should return projects for a freelance', async () => {
+      jest
+        .spyOn(projectsService, 'findByFreelanceId')
+        .mockResolvedValue([simpleProjectMock] as any);
+
+      expect(
+        await projectController.findByFreelanceId('freelance-id', mockUser),
+      ).toEqual([simpleProjectMock]);
     });
   });
 });
