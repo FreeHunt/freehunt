@@ -5,7 +5,6 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { PrismaClientExceptionFilter } from './common/error/prisma.exception';
 import * as express from 'express';
-import { EnvironmentService } from './common/environment/environment.service';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -18,13 +17,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, documentFactory);
 
   // Enable CORS
-
-  const envService = app.get(EnvironmentService);
-  process.env.DATABASE_URL = envService.get('DATABASE_URL');
-  process.env.AUTHENTIK_URL = envService.get('AUTHENTIK_URL');
-  process.env.AUTHENTIK_TOKEN = envService.get('AUTHENTIK_TOKEN');
   app.enableCors({
-    origin: envService.get('FRONTEND_URL') || '',
+    origin: process.env.FRONTEND_URL || '',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
