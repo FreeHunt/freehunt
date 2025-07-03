@@ -32,6 +32,7 @@ export interface Freelance {
   jobTitle: string;
   skills: Skill[];
   averageDailyRate: number;
+  seniority: number;
   description: string;
   user: User;
   userId: string;
@@ -118,19 +119,28 @@ export interface Candidate {
   status: CandidateStatus;
   createdAt: string;
   updatedAt: string;
+  freelance?: Freelance;
+  jobPosting?: JobPosting;
+  projectId?: string; // ID du projet créé quand le candidat est accepté
 }
 
 export interface Project {
   id: string;
   name: string;
   description: string;
+  startDate: string;
   endDate: string;
   freelanceId: string;
   companyId: string;
   conversationId: string;
   jobPostingId: string;
+  amount: number;
   createdAt: string;
   updatedAt: string;
+  freelance?: Freelance;
+  company?: Company;
+  jobPosting?: JobPosting;
+  conversation?: Conversation;
 }
 
 export interface CheckpointCreate {

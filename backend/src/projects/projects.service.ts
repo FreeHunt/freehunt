@@ -2,12 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from '@/src/projects/dto/create-project.dto';
 import { UpdateProjectDto } from '@/src/projects/dto/update-project.dto';
 import { PrismaService } from '@/src/common/prisma/prisma.service';
-import { OnEvent } from '@nestjs/event-emitter';
+import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { CandidateAcceptedEvent } from '../job-postings/dto/candidate-accepted-event.dto';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @OnEvent('candidate.accepted')
   async handleCandidateAcceptedEvent(payload: CandidateAcceptedEvent) {
@@ -20,7 +23,7 @@ export class ProjectsService {
       );
     }
 
-    await this.create({
+    const project = await this.create({
       freelanceId: payload.freelancerId,
       jobPostingId: payload.jobPostingId,
       companyId: jobPosting.companyId,
@@ -30,6 +33,8 @@ export class ProjectsService {
       endDate: new Date(),
       amount: jobPosting.averageDailyRate,
     });
+
+    return project;
   }
 
   // Create a new project
@@ -93,5 +98,88 @@ export class ProjectsService {
         jobPosting: true,
       },
     });
+  }
+
+  // Find projects by company ID (for companies to view their projects)
+  async findByCompanyId(companyId: string, userId: string) {
+    // Vérifier que l'utilisateur appartient bien à cette entreprise
+    const company = await this.prismaService.company.findUnique({
+      where: { id: companyId, userId },
+    });
+
+    if (!company) {
+      throw new NotFoundException(
+        'Unauthorized: You can only view projects for your own company',
+      );
+    }
+
+    return this.prismaService.project.findMany({
+      where: { companyId },
+      include: {
+        freelance: {
+          include: {
+            user: true,
+            skills: true,
+          },
+        },
+        jobPosting: {
+          include: {
+            company: true,
+            skills: true,
+          },
+        },
+        conversation: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  // Find projects by freelance ID (for freelances to view their projects)
+  async findByFreelanceId(freelanceId: string, userId: string) {
+    // Vérifier que l'utilisateur est bien le propriétaire de ce profil freelance
+    const freelance = await this.prismaService.freelance.findUnique({
+      where: { id: freelanceId, userId },
+    });
+
+    if (!freelance) {
+      throw new NotFoundException(
+        'Unauthorized: You can only view your own projects',
+      );
+    }
+
+    return this.prismaService.project.findMany({
+      where: { freelanceId },
+      include: {
+        freelance: {
+          include: {
+            user: true,
+            skills: true,
+          },
+        },
+        jobPosting: {
+          include: {
+            company: true,
+            skills: true,
+          },
+        },
+        conversation: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+  }
+
+  async checkProjectExistsForJobPosting(
+    jobPostingId: string,
+  ): Promise<boolean> {
+    const project = await this.prismaService.project.findFirst({
+      where: {
+        jobPostingId,
+      },
+    });
+    return !!project;
   }
 }

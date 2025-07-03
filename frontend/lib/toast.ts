@@ -11,4 +11,18 @@ export const showToast = {
       duration: Infinity,
     });
   },
+
+  successWithAction: (
+    message: string,
+    actionLabel: string,
+    action: () => void,
+  ) => {
+    toast.success(message, {
+      action: {
+        label: actionLabel,
+        onClick: action,
+      },
+      duration: 8000,
+    });
+  },
 };

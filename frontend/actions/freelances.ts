@@ -40,6 +40,17 @@ export const searchFreelances = async ({
   return response.data;
 };
 
+export const getFreelanceById = async (
+  freelanceId: string,
+): Promise<Freelance> => {
+  try {
+    const response = await api.get(`/freelances/${freelanceId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getFreelanceByUserId = async (
   userId: string,
 ): Promise<Freelance> => {
@@ -47,6 +58,20 @@ export const getFreelanceByUserId = async (
     const response = await api.get(`/freelances/user/${userId}`);
     return response.data;
   } catch (error) {
+    throw error;
+  }
+};
+
+export const getCurrentFreelance = async (
+  userId: string,
+): Promise<Freelance> => {
+  try {
+    const response = await api.get(`/freelances/user/${userId}`, {
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching current freelance:", error);
     throw error;
   }
 };
