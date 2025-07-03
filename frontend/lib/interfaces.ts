@@ -129,10 +129,10 @@ export interface Project {
   name: string;
   description: string;
   startDate: string;
-  endDate: string | null;
-  freelanceId: string | null;
+  endDate: string;
+  freelanceId: string;
   companyId: string;
-  conversationId: string | null;
+  conversationId: string;
   jobPostingId: string;
   amount: number;
   createdAt: string;
