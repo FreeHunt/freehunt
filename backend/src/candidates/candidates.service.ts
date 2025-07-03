@@ -194,6 +194,20 @@ export class CandidatesService {
     let projectId: string | undefined;
 
     if (updatedCandidate.status === 'ACCEPTED') {
+      // Refuser automatiquement toutes les autres candidatures en attente pour cette offre
+      await this.prisma.candidate.updateMany({
+        where: {
+          jobPostingId: existingCandidate.jobPostingId,
+          status: 'PENDING',
+          id: {
+            not: updatedCandidate.id, // Exclure la candidature qui vient d'être acceptée
+          },
+        },
+        data: {
+          status: 'REJECTED',
+        },
+      });
+
       // Émettre l'événement pour créer le projet
       this.eventEmitter.emit('candidate.accepted', {
         candidateId: updatedCandidate.id,

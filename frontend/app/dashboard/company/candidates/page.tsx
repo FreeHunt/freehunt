@@ -76,22 +76,36 @@ export default function CompanyCandidatesPage() {
       const result = await updateCandidateStatus(candidateId, newStatus);
 
       // Mettre à jour l'état local
-      setCandidates(
-        candidates.map((candidate) =>
-          candidate.id === candidateId
-            ? {
-                ...candidate,
-                status: newStatus as CandidateStatus,
-                projectId: result.projectId,
-              }
-            : candidate,
-        ),
-      );
+      if (newStatus === "ACCEPTED") {
+        // Quand on accepte une candidature, toutes les autres en attente sont refusées
+        setCandidates(
+          candidates.map((candidate) =>
+            candidate.id === candidateId
+              ? {
+                  ...candidate,
+                  status: newStatus as CandidateStatus,
+                  projectId: result.projectId,
+                }
+              : candidate.status === "PENDING"
+              ? { ...candidate, status: "REJECTED" as CandidateStatus }
+              : candidate,
+          ),
+        );
+      } else {
+        // Pour les autres statuts, juste mettre à jour la candidature concernée
+        setCandidates(
+          candidates.map((candidate) =>
+            candidate.id === candidateId
+              ? { ...candidate, status: newStatus as CandidateStatus }
+              : candidate,
+          ),
+        );
+      }
 
       if (newStatus === "ACCEPTED") {
         if (result.projectId) {
           showToast.successWithAction(
-            "Candidature acceptée avec succès ! Un projet a été créé.",
+            "Candidature acceptée ! Un projet a été créé et les autres candidatures ont été refusées.",
             "Voir le projet",
             () => router.push(`/dashboard/company/projects`),
           );
