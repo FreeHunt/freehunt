@@ -128,13 +128,19 @@ export interface Project {
   id: string;
   name: string;
   description: string;
-  endDate: string;
-  freelanceId: string;
+  startDate: string;
+  endDate: string | null;
+  freelanceId: string | null;
   companyId: string;
-  conversationId: string;
+  conversationId: string | null;
   jobPostingId: string;
+  amount: number;
   createdAt: string;
   updatedAt: string;
+  freelance?: Freelance;
+  company?: Company;
+  jobPosting?: JobPosting;
+  conversation?: Conversation;
 }
 
 export interface CheckpointCreate {
