@@ -6,37 +6,10 @@ on:
   pull_request:
     branches: ["main"]
   workflow_dispatch:
-    inputs:
-      deploy:
-        description: "Deploy to production"
-        type: boolean
-        default: true
 
 jobs:
-  changes:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check for file changes
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'backend/**'
-            frontend:
-              - 'frontend/**'
-
-  backend:
-    needs: changes
-    if: ${{ needs.changes.outputs.backend == 'true' }}
+  test-backend:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     name: Run backend tests
 
@@ -64,9 +37,8 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-  frontend:
-    needs: changes
-    if: ${{ needs.changes.outputs.frontend == 'true' }}
+  test-frontend:
+    if: github.event_name == 'pull_request' || github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     name: Run frontend tests
 
@@ -96,8 +68,8 @@ jobs:
 
   build-frontend:
     name: Build and push frontend
-    needs: [changes, frontend]
-    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    needs: [test-frontend]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -178,8 +150,8 @@ jobs:
 
   build-backend:
     name: Build and push backend
-    needs: [changes, backend]
-    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch')
+    needs: [test-backend]
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -261,7 +233,7 @@ jobs:
   sync-secrets:
     name: Sync Docker Swarm secrets
     needs: [build-frontend, build-backend]
-    if: always() && !contains(needs.*.result, 'failure') && ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: self-hosted
     environment:
       name: production
@@ -310,7 +282,7 @@ jobs:
   deploy:
     name: Deploy to production
     needs: [sync-secrets]
-    if: ((github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy == 'true'))
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     runs-on: self-hosted
     environment:
       name: production
