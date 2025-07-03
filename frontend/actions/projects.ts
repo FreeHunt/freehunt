@@ -39,3 +39,15 @@ export const getProjectsByFreelance = async (
     throw error;
   }
 };
+
+export const checkProjectExistsForJobPosting = async (
+  jobPostingId: string,
+): Promise<boolean> => {
+  try {
+    const response = await api.get<boolean>(`/projects/exists/job-posting/${jobPostingId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error checking if project exists for job posting:", error);
+    return false;
+  }
+};

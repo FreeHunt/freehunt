@@ -171,4 +171,15 @@ export class ProjectsService {
       },
     });
   }
+
+  async checkProjectExistsForJobPosting(
+    jobPostingId: string,
+  ): Promise<boolean> {
+    const project = await this.prismaService.project.findFirst({
+      where: {
+        jobPostingId,
+      },
+    });
+    return !!project;
+  }
 }

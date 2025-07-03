@@ -40,6 +40,8 @@ import {
   getCandidateByFreelanceIdAndJobPostingId,
 } from "@/actions/candidates";
 import { getFreelanceByUserId } from "@/actions/freelances";
+import { checkProjectExistsForJobPosting } from "@/actions/projects";
+import { showToast } from "@/lib/toast";
 
 const getLocationLabel = (location: string) => {
   switch (location) {
@@ -99,6 +101,7 @@ export default function JobPostingDetail() {
   const [freelance, setFreelance] = useState<Freelance | null>(null);
   const [candidate, setCandidate] = useState<Candidate | null>(null); // Si une candidature est créé pour l'utilisateur connecté
   const [isApplying, setIsApplying] = useState(false);
+  const [projectExists, setProjectExists] = useState(false);
 
   const displayedTechnicalSkills = showAllSkills
     ? technicalSkills
@@ -174,6 +177,17 @@ export default function JobPostingDetail() {
     fetchApplicationForUser();
   }, [user, jobPosting, freelance]);
 
+  // Vérifier si un projet existe déjà pour cette offre
+  useEffect(() => {
+    const checkProject = async () => {
+      if (!jobPosting) return;
+      const exists = await checkProjectExistsForJobPosting(jobPosting.id);
+      setProjectExists(exists);
+    };
+
+    checkProject();
+  }, [jobPosting]);
+
   // Permet de postuler une candidature ou de la supprimer si elle existe déjà
   const handleApply = async () => {
     if (!user || !jobPosting || !freelance) return;
@@ -183,8 +197,10 @@ export default function JobPostingDetail() {
       try {
         await deleteCandidate(candidate.id);
         setCandidate(null);
+        showToast.success("Candidature retirée avec succès");
       } catch (error) {
         console.error(error);
+        showToast.error("Erreur lors du retrait de la candidature");
       }
     } else {
       try {
@@ -194,8 +210,19 @@ export default function JobPostingDetail() {
           status: CandidateStatus.PENDING,
         });
         setCandidate(createdCandidate);
-      } catch (error) {
+        showToast.success("Candidature envoyée avec succès");
+      } catch (error: unknown) {
         console.error(error);
+        if (error && typeof error === 'object' && 'response' in error) {
+          const apiError = error as { response?: { data?: { message?: string } } };
+          if (apiError?.response?.data?.message?.includes('has already been selected')) {
+            showToast.error("Impossible de candidater : un freelance a déjà été sélectionné pour cette offre");
+          } else {
+            showToast.error("Erreur lors de l'envoi de la candidature");
+          }
+        } else {
+          showToast.error("Erreur lors de l'envoi de la candidature");
+        }
         setCandidate(null);
       }
     }
@@ -459,18 +486,32 @@ export default function JobPostingDetail() {
                   <FreeHuntButton
                     className="w-full"
                     onClick={handleApply}
-                    disabled={isApplying}
+                    disabled={isApplying || (projectExists && !candidate)}
                   >
                     {isApplying ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        {candidate
-                          ? "Annuler ma candidature"
-                          : "Postuler à cette offre"}
+                        {projectExists && !candidate ? (
+                          "Offre pourvue"
+                        ) : candidate ? (
+                          "Annuler ma candidature"
+                        ) : (
+                          "Postuler à cette offre"
+                        )}
                       </>
                     )}
                   </FreeHuntButton>
+                  {projectExists && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+                      <p className="text-amber-800 text-sm font-medium">
+                        ⚠️ Cette offre a déjà été pourvue
+                      </p>
+                      <p className="text-amber-700 text-xs mt-1">
+                        Un freelance a déjà été sélectionné pour cette mission
+                      </p>
+                    </div>
+                  )}
                   <FreeHuntButton
                     variant="outline"
                     theme="secondary"

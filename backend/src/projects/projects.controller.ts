@@ -201,4 +201,25 @@ export class ProjectController {
   ): Promise<ProjectResponseDto[]> {
     return this.projectsService.findByFreelanceId(freelanceId, user.id);
   }
+
+  @Get('exists/job-posting/:jobPostingId')
+  @ApiOperation({
+    summary: 'Check if project exists for job posting',
+    description:
+      'Check if a project has already been created for a specific job posting',
+  })
+  @ApiParam({
+    name: 'jobPostingId',
+    description: 'The ID of the job posting (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Boolean indicating if project exists',
+    schema: { type: 'boolean' },
+  })
+  checkProjectExistsForJobPosting(
+    @Param('jobPostingId', ParseUUIDPipe) jobPostingId: string,
+  ): Promise<boolean> {
+    return this.projectsService.checkProjectExistsForJobPosting(jobPostingId);
+  }
 }

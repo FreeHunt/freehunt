@@ -23,6 +23,19 @@ export class CandidatesService {
     if (!checkPoint) {
       throw new BadRequestException('Job posting does not have a checkpoint');
     }
+
+    // Vérifier qu'aucun projet n'existe déjà pour ce job posting
+    const existingProject = await this.prisma.project.findFirst({
+      where: {
+        jobPostingId: data.jobPostingId,
+      },
+    });
+    if (existingProject) {
+      throw new BadRequestException(
+        'Cannot apply: A freelance has already been selected for this job posting',
+      );
+    }
+
     const checkCandidate = await this.prisma.candidate.findFirst({
       where: {
         jobPostingId: data.jobPostingId,
