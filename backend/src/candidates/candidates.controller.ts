@@ -14,6 +14,7 @@ import { CandidatesService } from './candidates.service';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
 import { CandidateResponseDto } from './dto/candidate-response.dto';
+import { CandidateAcceptedResponseDto } from './dto/candidate-accepted-response.dto';
 import { AuthentikAuthGuard } from '../auth/auth.guard';
 import { CurrentUser } from '../common/decorators/currentUsers.decorators';
 import { User } from '@prisma/client';
@@ -97,13 +98,13 @@ export class CandidatesController {
   @ApiResponse({
     status: 200,
     description: 'The updated candidate with details',
-    type: CandidateResponseDto,
+    type: CandidateAcceptedResponseDto,
   })
   async updateCandidateByCompany(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateCandidateDto: UpdateCandidateDto,
     @CurrentUser() user: User,
-  ) {
+  ): Promise<CandidateAcceptedResponseDto> {
     return this.candidatesService.updateCandidateByCompany(
       id,
       updateCandidateDto,

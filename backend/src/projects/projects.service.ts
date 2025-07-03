@@ -2,12 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from '@/src/projects/dto/create-project.dto';
 import { UpdateProjectDto } from '@/src/projects/dto/update-project.dto';
 import { PrismaService } from '@/src/common/prisma/prisma.service';
-import { OnEvent } from '@nestjs/event-emitter';
+import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { CandidateAcceptedEvent } from '../job-postings/dto/candidate-accepted-event.dto';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   @OnEvent('candidate.accepted')
   async handleCandidateAcceptedEvent(payload: CandidateAcceptedEvent) {
@@ -20,7 +23,7 @@ export class ProjectsService {
       );
     }
 
-    await this.create({
+    const project = await this.create({
       freelanceId: payload.freelancerId,
       jobPostingId: payload.jobPostingId,
       companyId: jobPosting.companyId,
@@ -30,6 +33,8 @@ export class ProjectsService {
       endDate: new Date(),
       amount: jobPosting.averageDailyRate,
     });
+
+    return project;
   }
 
   // Create a new project

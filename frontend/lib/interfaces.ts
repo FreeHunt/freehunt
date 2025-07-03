@@ -121,6 +121,7 @@ export interface Candidate {
   updatedAt: string;
   freelance?: Freelance;
   jobPosting?: JobPosting;
+  projectId?: string; // ID du projet créé quand le candidat est accepté
 }
 
 export interface Project {

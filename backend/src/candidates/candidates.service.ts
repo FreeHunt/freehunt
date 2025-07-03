@@ -177,16 +177,34 @@ export class CandidatesService {
         },
       },
     });
+
+    let projectId: string | undefined;
+
     if (updatedCandidate.status === 'ACCEPTED') {
-      console.log(
-        this.eventEmitter.emit('candidate.accepted', {
-          candidateId: updatedCandidate.id,
+      // Émettre l'événement pour créer le projet
+      this.eventEmitter.emit('candidate.accepted', {
+        candidateId: updatedCandidate.id,
+        jobPostingId: existingCandidate.jobPostingId,
+        freelancerId: existingCandidate.freelanceId,
+        status: updatedCandidate.status,
+      });
+
+      // Attendre un peu pour que le projet soit créé, puis le récupérer
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      const project = await this.prisma.project.findFirst({
+        where: {
           jobPostingId: existingCandidate.jobPostingId,
-          freelancerId: existingCandidate.freelanceId,
-          status: updatedCandidate.status,
-        }),
-      );
+          freelanceId: existingCandidate.freelanceId,
+        },
+      });
+
+      if (project) {
+        projectId = project.id;
+      }
     }
+
+    return { ...updatedCandidate, projectId };
 
     return updatedCandidate;
   }

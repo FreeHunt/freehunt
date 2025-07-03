@@ -73,19 +73,34 @@ export default function CompanyCandidatesPage() {
   const handleStatusUpdate = async (candidateId: string, newStatus: string) => {
     try {
       setUpdatingCandidate(candidateId);
-      await updateCandidateStatus(candidateId, newStatus);
+      const result = await updateCandidateStatus(candidateId, newStatus);
 
       // Mettre à jour l'état local
       setCandidates(
         candidates.map((candidate) =>
           candidate.id === candidateId
-            ? { ...candidate, status: newStatus as CandidateStatus }
+            ? {
+                ...candidate,
+                status: newStatus as CandidateStatus,
+                projectId: result.projectId,
+              }
             : candidate,
         ),
       );
 
-      const statusText = newStatus === "ACCEPTED" ? "acceptée" : "refusée";
-      showToast.success(`Candidature ${statusText} avec succès`);
+      if (newStatus === "ACCEPTED") {
+        if (result.projectId) {
+          showToast.successWithAction(
+            "Candidature acceptée avec succès ! Un projet a été créé.",
+            "Voir le projet",
+            () => router.push(`/dashboard/company/projects`),
+          );
+        } else {
+          showToast.success("Candidature acceptée avec succès");
+        }
+      } else {
+        showToast.success("Candidature refusée avec succès");
+      }
     } catch (error) {
       console.error("Error updating candidate status:", error);
       showToast.error("Erreur lors de la mise à jour du statut");

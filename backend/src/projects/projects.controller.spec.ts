@@ -9,6 +9,7 @@ import { AuthentikAuthGuard } from '../auth/auth.guard';
 import { HttpService } from '@nestjs/axios';
 import { UsersService } from '../users/users.service';
 import { EnvironmentService } from '../common/environment/environment.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 describe('ProjectController', () => {
   let projectController: ProjectController;
@@ -31,6 +32,12 @@ describe('ProjectController', () => {
 
   const mockEnvironmentService = {
     get: jest.fn(),
+  };
+
+  const mockEventEmitter = {
+    emit: jest.fn(),
+    on: jest.fn(),
+    removeListener: jest.fn(),
   };
 
   const mockUser = {
@@ -62,6 +69,10 @@ describe('ProjectController', () => {
         {
           provide: EnvironmentService,
           useValue: mockEnvironmentService,
+        },
+        {
+          provide: EventEmitter2,
+          useValue: mockEventEmitter,
         },
       ],
     })
