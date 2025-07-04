@@ -84,6 +84,7 @@ export interface JobPostingsCreate {
   companyId: string;
   skillIds: string[];
   checkpointIds?: string[];
+  totalAmount?: number;
 }
 
 export interface JobPosting {
@@ -97,6 +98,7 @@ export interface JobPosting {
   seniority: number;
   company?: Company;
   skills?: Skill[];
+  totalAmount?: number;
   createdAt: string;
   updatedAt: string;
 }

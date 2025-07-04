@@ -18,32 +18,50 @@ interface DatePickerProps {
   setDate: (date: Date | undefined) => void;
   className?: string;
 }
+
 export function ComponentDatePicker({
   date,
   setDate,
   className,
 }: DatePickerProps) {
+  // Fonction pour formater la date en ISO string sécurisée
+  const formatDateToISO = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Conversion sécurisée de Date vers CalendarDate
   const dateValue = date
-    ? parseDate(
-        `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-          2,
-          "0",
-        )}-${String(date.getDate()).padStart(2, "0")}`,
-      )
+    ? (() => {
+        try {
+          const isoString = formatDateToISO(date);
+          return parseDate(isoString);
+        } catch (error) {
+          console.warn("Erreur lors de la conversion de la date:", error);
+          return null;
+        }
+      })()
     : null;
 
   const handleDateChange = (value: CalendarDate | null) => {
     if (value) {
-      // Créer une date en utilisant l'heure locale pour éviter les problèmes de timezone
-      const newDate = new Date(
-        value.year,
-        value.month - 1,
-        value.day,
-        12,
-        0,
-        0,
-      );
-      setDate(newDate);
+      try {
+        // Créer une date en utilisant l'heure locale pour éviter les problèmes de timezone
+        const newDate = new Date(
+          value.year,
+          value.month - 1,
+          value.day,
+          12,
+          0,
+          0,
+        );
+        setDate(newDate);
+      } catch (error) {
+        console.warn("Erreur lors de la création de la date:", error);
+        setDate(undefined);
+      }
     } else {
       setDate(undefined);
     }

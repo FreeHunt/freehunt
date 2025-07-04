@@ -51,9 +51,9 @@ model Skill {
 }
 
 model Freelance {
-  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user             User       @relation(fields: [userId], references: [id])
-  userId           String     @unique @db.Uuid
+  id               String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user             User        @relation(fields: [userId], references: [id])
+  userId           String      @unique @db.Uuid
   firstName        String
   lastName         String
   ///FAKE:faker.person.jobTitle()
@@ -69,8 +69,8 @@ model Freelance {
   projects         Project[]
   candidates       Candidate[]
   stripeAccountId  String?
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @default(now()) @updatedAt
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @default(now()) @updatedAt
 }
 
 model Company {
@@ -108,6 +108,7 @@ model JobPosting {
   averageDailyRate Float // TJM
   ///FAKE:faker.number.int({ min: 0, max: 10 })
   seniority        Int
+  totalAmount      Float? // Montant total de la mission (TJM × nombre de jours)
   skills           Skill[]
   checkpoints      Checkpoint[]
   project          Project?
@@ -137,17 +138,17 @@ model Project {
 }
 
 model Checkpoint {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   description  String
-  amount       Float      @default(1)
+  amount       Float            @default(1)
   date         DateTime
   status       CheckpointStatus @default(TODO)
-  jobPosting   JobPosting @relation(fields: [jobPostingId], references: [id])
-  jobPostingId String     @db.Uuid
+  jobPosting   JobPosting       @relation(fields: [jobPostingId], references: [id])
+  jobPostingId String           @db.Uuid
   quote        Quote?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @default(now()) @updatedAt
 }
 
 enum CheckpointStatus {
@@ -158,32 +159,32 @@ enum CheckpointStatus {
 
 // Devis
 model Quote {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  checkpoint   Checkpoint @relation(fields: [checkpointId], references: [id])
-  checkpointId String     @unique @db.Uuid
-  amount       Float?
-  stripeSessionId String @unique @db.Uuid
-  devisLink    String?
-  document     Document?
-  invoice      Invoice?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  checkpoint      Checkpoint @relation(fields: [checkpointId], references: [id])
+  checkpointId    String     @unique @db.Uuid
+  amount          Float?
+  stripeSessionId String     @unique @db.Uuid
+  devisLink       String?
+  document        Document?
+  invoice         Invoice?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @default(now()) @updatedAt
 }
 
 model Invoice {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  quote         Quote     @relation(fields: [quoteId], references: [id])
-  quoteId       String    @unique @db.Uuid
-  amount        Float?
-  valueAddedTax Float?
-  stripeSessionId String @unique @db.Uuid
-  invoiceLink String
-  document      Document?
-  documentId    String    @db.Uuid
-  project       Project?  @relation(fields: [projectId], references: [id])
-  projectId     String?   @unique @db.Uuid
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  quote           Quote     @relation(fields: [quoteId], references: [id])
+  quoteId         String    @unique @db.Uuid
+  amount          Float?
+  valueAddedTax   Float?
+  stripeSessionId String    @unique @db.Uuid
+  invoiceLink     String
+  document        Document?
+  documentId      String    @db.Uuid
+  project         Project?  @relation(fields: [projectId], references: [id])
+  projectId       String?   @unique @db.Uuid
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
 }
 
 enum DocumentType {
@@ -249,14 +250,14 @@ model Message {
 }
 
 model Candidate {
-  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id])
-  jobPostingId String @db.Uuid
-  freelance Freelance @relation(fields: [freelanceId], references: [id])
-  freelanceId String @db.Uuid
-  status CandidateStatus @default(PENDING)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jobPosting   JobPosting      @relation(fields: [jobPostingId], references: [id])
+  jobPostingId String          @db.Uuid
+  freelance    Freelance       @relation(fields: [freelanceId], references: [id])
+  freelanceId  String          @db.Uuid
+  status       CandidateStatus @default(PENDING)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @default(now()) @updatedAt
 }
 
 enum CandidateStatus {
