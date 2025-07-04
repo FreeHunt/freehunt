@@ -58,11 +58,13 @@ describe('JobPostingsController', () => {
     averageDailyRate: 500,
     seniority: 5,
     companyId: '3246540a-3ecd-4912-a909-953c881816fc',
+    totalAmount: 5000, // Ajout du champ totalAmount
   };
 
   const jobPosting: JobPosting = {
     ...createJobPostingDto,
     id: '3246540a-3ecd-4912-a909-953c881816fc',
+    totalAmount: 5000,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -121,7 +123,10 @@ describe('JobPostingsController', () => {
         .spyOn(jobPostingsService, 'update')
         .mockResolvedValue(updatedJobPosting);
       expect(
-        await jobPostingsController.update(jobPosting.id, updatedJobPosting),
+        await jobPostingsController.update(jobPosting.id, {
+          ...updatedJobPosting,
+          totalAmount: updatedJobPosting.totalAmount || undefined,
+        }),
       ).toEqual(updatedJobPosting);
     });
   });
@@ -147,6 +152,7 @@ describe('JobPostingsController', () => {
         averageDailyRate: 600,
         seniority: 3,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
+        totalAmount: 12000,
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -160,6 +166,7 @@ describe('JobPostingsController', () => {
         averageDailyRate: 650,
         seniority: 4,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
+        totalAmount: 13000,
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -176,6 +183,7 @@ describe('JobPostingsController', () => {
       averageDailyRate: 700,
       seniority: 5,
       companyId: '3246540a-3ecd-4912-a909-953c881816fc',
+      totalAmount: 14000,
       createdAt: new Date(),
       updatedAt: new Date(),
       recommended: true,

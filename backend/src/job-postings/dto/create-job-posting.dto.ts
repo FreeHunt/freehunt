@@ -90,4 +90,15 @@ export class CreateJobPostingDto {
     required: false,
   })
   checkpointIds?: string[];
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description:
+      'The total amount for the job posting (calculated as TJM × working days)',
+    example: 5000,
+    required: false,
+  })
+  totalAmount?: number;
 }

@@ -94,6 +94,7 @@ export function fakeJobPosting() {
     isPromoted: faker.datatype.boolean(),
     averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
+    totalAmount: undefined,
   };
 }
 export function fakeJobPostingComplete() {
@@ -106,6 +107,7 @@ export function fakeJobPostingComplete() {
     isPromoted: faker.datatype.boolean(),
     averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
+    totalAmount: undefined,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

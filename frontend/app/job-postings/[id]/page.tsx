@@ -110,10 +110,16 @@ export default function JobPostingDetail() {
     ? softSkills
     : softSkills.slice(0, 3);
 
-  const totalBudget = checkpoints.reduce(
-    (sum, checkpoint) => sum + checkpoint.amount,
-    0,
-  );
+  // Calculer le budget total : utiliser totalAmount du jobPosting si disponible, sinon sommer les checkpoints
+  const totalBudget =
+    jobPosting?.totalAmount ??
+    checkpoints.reduce((sum, checkpoint) => sum + checkpoint.amount, 0);
+
+  // Calculer le nombre total de jours basé sur le budget total et le TJM
+  const totalDays =
+    jobPosting?.averageDailyRate && jobPosting.averageDailyRate > 0
+      ? Math.round(totalBudget / jobPosting.averageDailyRate)
+      : 0;
 
   useEffect(() => {
     const fetchJobPosting = async () => {
@@ -213,10 +219,18 @@ export default function JobPostingDetail() {
         showToast.success("Candidature envoyée avec succès");
       } catch (error: unknown) {
         console.error(error);
-        if (error && typeof error === 'object' && 'response' in error) {
-          const apiError = error as { response?: { data?: { message?: string } } };
-          if (apiError?.response?.data?.message?.includes('has already been selected')) {
-            showToast.error("Impossible de candidater : un freelance a déjà été sélectionné pour cette offre");
+        if (error && typeof error === "object" && "response" in error) {
+          const apiError = error as {
+            response?: { data?: { message?: string } };
+          };
+          if (
+            apiError?.response?.data?.message?.includes(
+              "has already been selected",
+            )
+          ) {
+            showToast.error(
+              "Impossible de candidater : un freelance a déjà été sélectionné pour cette offre",
+            );
           } else {
             showToast.error("Erreur lors de l'envoi de la candidature");
           }
@@ -406,14 +420,21 @@ export default function JobPostingDetail() {
                             </div>
                             <div className="text-right">
                               <div className="font-semibold text-freehunt-main">
-                                {formatNumberToEuros(
-                                  checkpoint.amount *
-                                    (jobPosting?.averageDailyRate ?? 0),
-                                )}
+                                {formatNumberToEuros(checkpoint.amount)}
                               </div>
                               <div className="text-sm text-gray-500">
-                                {checkpoint.amount} jour
-                                {checkpoint.amount > 1 ? "s" : ""}
+                                {jobPosting?.averageDailyRate &&
+                                jobPosting.averageDailyRate > 0
+                                  ? (() => {
+                                      const days = Math.round(
+                                        checkpoint.amount /
+                                          jobPosting.averageDailyRate,
+                                      );
+                                      return `${days} jour${
+                                        days > 1 ? "s" : ""
+                                      }`;
+                                    })()
+                                  : "Montant fixe"}
                               </div>
                             </div>
                           </div>
@@ -427,13 +448,11 @@ export default function JobPostingDetail() {
                         Budget total estimé:
                       </span>
                       <span className="font-bold text-xl text-freehunt-main">
-                        {formatNumberToEuros(
-                          totalBudget * (jobPosting?.averageDailyRate ?? 0),
-                        )}
+                        {formatNumberToEuros(totalBudget)}
                       </span>
                     </div>
                     <div className="text-sm text-gray-500 text-right">
-                      {totalBudget} jour{totalBudget > 1 ? "s" : ""} à{" "}
+                      {totalDays} jour{totalDays > 1 ? "s" : ""} à{" "}
                       {formatNumberToEuros(jobPosting?.averageDailyRate ?? 0)}{" "}
                       /jour
                     </div>
@@ -492,13 +511,11 @@ export default function JobPostingDetail() {
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                       <>
-                        {projectExists && !candidate ? (
-                          "Offre pourvue"
-                        ) : candidate ? (
-                          "Annuler ma candidature"
-                        ) : (
-                          "Postuler à cette offre"
-                        )}
+                        {projectExists && !candidate
+                          ? "Offre pourvue"
+                          : candidate
+                          ? "Annuler ma candidature"
+                          : "Postuler à cette offre"}
                       </>
                     )}
                   </FreeHuntButton>
@@ -544,7 +561,9 @@ export default function JobPostingDetail() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Durée:</span>
-                  <span className="font-medium">{totalBudget} jours</span>
+                  <span className="font-medium">
+                    {totalDays} jour{totalDays > 1 ? "s" : ""}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Taux journalier:</span>

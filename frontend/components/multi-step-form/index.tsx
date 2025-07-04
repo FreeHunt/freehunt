@@ -13,7 +13,7 @@ import {
 } from "@/lib/interfaces";
 import { showToast } from "@/lib/toast";
 import { AlertCircle, CheckCircle2, Loader2, Plus, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { z } from "zod";
 import { MultiSelect } from "../common/multi-select";
 import { ComponentDatePicker } from "../ui/comp-41";
@@ -63,20 +63,6 @@ const profileSchema = z.object({
     .string()
     .min(1, "Le tarif journalier est requis")
     .regex(/^\d+$/, "Le tarif doit être un nombre valide"),
-  dateOfStart: z
-    .string()
-    .min(1, "La date de début est requise")
-    .refine(
-      (date) => {
-        return (
-          new Date(date).setHours(0, 0, 0, 0) >= new Date().setHours(0, 0, 0, 0)
-        );
-      },
-      {
-        message: "La date de début ne peut pas être dans le passé",
-      },
-    ),
-  dateOfEnd: z.string().optional(),
   typePresence: z
     .string()
     .refine((val) => validPresenceForZod.includes(val), {
@@ -119,17 +105,50 @@ const checkpointSchema = z.object({
 });
 
 // Schéma complet du formulaire
-const formSchema = z.object({
-  jobTitle: jobSchema.shape.jobTitle,
-  jobDescription: jobSchema.shape.jobDescription,
-  skills: profileSchema.shape.skills,
-  tjm: profileSchema.shape.tjm,
-  dateOfStart: profileSchema.shape.dateOfStart,
-  dateOfEnd: profileSchema.shape.dateOfEnd,
-  typePresence: profileSchema.shape.typePresence,
-  seniority: profileSchema.shape.seniority,
-  checkpoints: z.array(checkpointSchema),
-});
+const formSchema = z
+  .object({
+    jobTitle: jobSchema.shape.jobTitle,
+    jobDescription: jobSchema.shape.jobDescription,
+    skills: profileSchema.shape.skills,
+    tjm: profileSchema.shape.tjm,
+    typePresence: profileSchema.shape.typePresence,
+    seniority: profileSchema.shape.seniority,
+    checkpoints: z.array(checkpointSchema),
+  })
+  .refine(
+    (data) => {
+      // Validation personnalisée : la somme des montants des checkpoints doit égaler le montant total
+      if (data.checkpoints.length === 0) return true;
+
+      // Calculer le nombre de jours à partir des checkpoints
+      const latestDate = data.checkpoints.reduce((latest, checkpoint) => {
+        if (!checkpoint.date) return latest;
+        const checkpointDate = new Date(checkpoint.date);
+        return !latest || checkpointDate > latest ? checkpointDate : latest;
+      }, null as Date | null);
+
+      if (!latestDate) return true; // Pas de date définie
+
+      const today = new Date();
+      const diffTime = latestDate.getTime() - today.getTime();
+      const workingDays = Math.max(
+        1,
+        Math.ceil(diffTime / (1000 * 60 * 60 * 24)),
+      );
+
+      const totalAmount = parseInt(data.tjm) * workingDays;
+      const checkpointsTotal = data.checkpoints.reduce((sum, checkpoint) => {
+        return sum + (parseInt(checkpoint.amount) || 0);
+      }, 0);
+
+      return checkpointsTotal === totalAmount;
+    },
+    {
+      message:
+        "La somme des montants des checkpoints doit être égale au montant total de la mission",
+      path: ["checkpoints"], // L'erreur sera associée au champ checkpoints
+    },
+  );
 
 // Type inféré à partir du schéma Zod
 export type FormData = Omit<
@@ -154,18 +173,11 @@ export default function MultiStepForm() {
     jobDescription: "",
     skills: [],
     tjm: "",
-    dateOfStart: "",
-    dateOfEnd: "",
     typePresence: "",
     seniority: "",
     checkpoints: [],
   });
-  const [selectedDateStart, setSelectedDateStart] = useState<Date | undefined>(
-    new Date(),
-  );
-  const [selectedDateEnd, setSelectedDateEnd] = useState<Date | undefined>(
-    undefined,
-  );
+
   const [skills, setSkills] = useState<Skill[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<Skill[]>([]);
 
@@ -204,113 +216,7 @@ export default function MultiStepForm() {
       ...prev,
       skills: selectedSkills,
     }));
-
-    // Marquer le champ comme touché
-    // setTouchedFields((prev) => {
-    //   const newTouched = new Set(prev);
-    //   newTouched.add("skills");
-    //   return newTouched;
-    // });
   }, [selectedSkills]);
-
-  // Mettre à jour formData.dateOfStart lorsque selectedDate change
-  useEffect(() => {
-    if (selectedDateStart) {
-      setFormData((prev) => ({
-        ...prev,
-        // dateOfStart: format(selectedDateStart, "dd-MM-yyyy"),
-        dateOfStart: selectedDateStart.toISOString(),
-      }));
-
-      // Marquer le champ comme touché
-      setTouchedFields((prev) => {
-        const newTouched = new Set(prev);
-        newTouched.add("dateOfStart");
-        return newTouched;
-      });
-    }
-  }, [selectedDateStart]);
-
-  // Mettre à jour formData.dateOfEnd lorsque selectedDateEnd change
-  useEffect(() => {
-    if (selectedDateEnd) {
-      setFormData((prev) => ({
-        ...prev,
-        dateOfEnd: selectedDateEnd.toISOString(),
-      }));
-
-      // Marquer le champ comme touché
-      setTouchedFields((prev) => {
-        const newTouched = new Set(prev);
-        newTouched.add("dateOfEnd");
-        return newTouched;
-      });
-    }
-  }, [selectedDateEnd]);
-
-  // Mettre à jour formData.dateOfEnd lorsque selectedDate (et qu'elle est postérieure à la date de fin) change
-  useEffect(() => {
-    if (selectedDateStart && selectedDateEnd) {
-      if (selectedDateStart > selectedDateEnd) {
-        // Réinitialiser la date de fin ou l'aligner sur la date de début
-        setSelectedDateEnd(selectedDateStart);
-
-        setFormData((prev) => ({
-          ...prev,
-          dateOfEnd: selectedDateStart.toISOString(),
-        }));
-
-        // Marquer le champ comme touché
-        setTouchedFields((prev) => {
-          const newTouched = new Set(prev);
-          newTouched.add("dateOfEnd");
-          return newTouched;
-        });
-      }
-    }
-  }, [selectedDateStart]);
-
-  // Fonction centralisée pour valider les dates
-  const validateDates = (
-    startDate?: string | Date,
-    endDate?: string | Date,
-  ) => {
-    // Si la date de fin n'est pas définie, pas d'erreur
-    if (!endDate) return null;
-    if (!startDate) return null;
-
-    // Convertir les dates en objets Date si ce sont des chaînes
-    const start =
-      typeof startDate === "string" ? new Date(startDate) : startDate;
-    const end = typeof endDate === "string" ? new Date(endDate) : endDate;
-
-    // Vérifier que la date de fin n'est pas antérieure à la date de début
-    if (end < start) {
-      return "La date de fin ne peut pas être antérieure à la date de début";
-    }
-
-    return null; // Pas d'erreur
-  };
-
-  const handleEndDateChange = (date: Date | undefined) => {
-    setSelectedDateEnd(date);
-
-    const dateError = validateDates(selectedDateStart, date);
-
-    if (dateError) {
-      setErrors((prev) => ({
-        ...prev,
-        dateOfEnd: dateError,
-      }));
-    } else {
-      // Supprimer l'erreur
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors.dateOfEnd;
-        return newErrors;
-      });
-    }
-  };
 
   // Mettre à jour les dates des checkpoints
   useEffect(() => {
@@ -333,7 +239,91 @@ export default function MultiStepForm() {
         checkpoints: updatedCheckpoints,
       }));
     }
-  }, [checkpointDatesOfEnd]);
+  }, [checkpointDatesOfEnd, formData.checkpoints]);
+
+  // Fonction pour calculer le nombre de jours depuis aujourd'hui jusqu'à une date
+  const calculateDaysFromToday = useCallback((targetDate: string | Date) => {
+    if (!targetDate) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    const target = new Date(targetDate);
+    target.setHours(0, 0, 0, 0); // Reset time to start of day
+    const diffTime = target.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include the end date
+    return Math.max(1, diffDays); // Au minimum 1 jour
+  }, []);
+
+  // Fonction pour calculer le nombre de jours travaillés basé sur les checkpoints
+  const getCalculatedWorkingDays = useCallback(() => {
+    if (formData.checkpoints.length === 0) return 0;
+
+    // Trouver la date de fin la plus tardive parmi tous les checkpoints
+    const latestDate = formData.checkpoints.reduce((latest, checkpoint) => {
+      if (!checkpoint.date) return latest;
+      const checkpointDate = new Date(checkpoint.date);
+      return !latest || checkpointDate > latest ? checkpointDate : latest;
+    }, null as Date | null);
+
+    return latestDate ? calculateDaysFromToday(latestDate) : 0;
+  }, [formData.checkpoints, calculateDaysFromToday]);
+
+  // Fonction pour calculer le montant total de la mission (TJM × Jours travaillés)
+  const getTotalMissionAmount = useCallback(() => {
+    const tjm = parseInt(formData.tjm) || 0;
+    const workingDays = getCalculatedWorkingDays();
+    return tjm * workingDays;
+  }, [formData.tjm, getCalculatedWorkingDays]);
+
+  // Fonction pour répartir automatiquement le montant total
+  const distributeAmountAutomatically = useCallback(() => {
+    const totalAmount = getTotalMissionAmount();
+    if (totalAmount <= 0 || formData.checkpoints.length === 0) return;
+
+    if (formData.checkpoints.length === 1) {
+      // Une seule tâche : prend tout le montant automatiquement
+      const checkpoint = formData.checkpoints[0];
+      if (parseInt(checkpoint.amount.toString()) !== totalAmount) {
+        const updatedCheckpoints = formData.checkpoints.map((cp) => ({
+          ...cp,
+          amount: totalAmount,
+        }));
+
+        setFormData((prev) => ({
+          ...prev,
+          checkpoints: updatedCheckpoints,
+        }));
+      }
+    }
+    // Si plusieurs tâches, laisser la répartition manuelle
+  }, [formData.checkpoints, getTotalMissionAmount]);
+
+  // Vérifier si tous les montants sont alloués
+  const isAmountFullyAllocated = useCallback(() => {
+    const totalAmount = getTotalMissionAmount();
+    const allocatedAmount = formData.checkpoints.reduce((sum, checkpoint) => {
+      return sum + (parseInt(checkpoint.amount.toString()) || 0);
+    }, 0);
+    return totalAmount > 0 && allocatedAmount === totalAmount;
+  }, [formData.checkpoints, getTotalMissionAmount]);
+
+  // Fonction pour calculer le montant restant disponible
+  const getRemainingAmount = () => {
+    const totalAmount = getTotalMissionAmount();
+    const usedAmount = formData.checkpoints.reduce((sum, checkpoint) => {
+      return sum + (parseInt(checkpoint.amount.toString()) || 0);
+    }, 0);
+    return totalAmount - usedAmount;
+  };
+
+  // Fonction pour calculer le montant maximum pour un checkpoint
+  const getMaxAmountForCheckpoint = (checkpointId: string) => {
+    const totalAmount = getTotalMissionAmount();
+    const usedAmount = formData.checkpoints.reduce((sum, checkpoint) => {
+      if (checkpoint.id === checkpointId) return sum; // Exclure le checkpoint actuel
+      return sum + (parseInt(checkpoint.amount.toString()) || 0);
+    }, 0);
+    return totalAmount - usedAmount;
+  };
 
   const addCheckpoint = () => {
     const newCheckpointId = `checkpoint-${Date.now()}`;
@@ -372,6 +362,28 @@ export default function MultiStepForm() {
     field: keyof Omit<Checkpoint, "id">,
     value: string,
   ) => {
+    // Si on modifie le montant, vérifier qu'il ne dépasse pas le montant restant
+    if (field === "amount") {
+      const maxAmount = getMaxAmountForCheckpoint(id);
+      const newAmount = parseInt(value) || 0;
+
+      if (newAmount > maxAmount) {
+        // Afficher une erreur ou limiter la valeur
+        setErrors((prev) => ({
+          ...prev,
+          [`checkpoints.${id}.amount`]: `Le montant ne peut pas dépasser ${maxAmount}€ (montant restant disponible)`,
+        }));
+        return;
+      } else {
+        // Supprimer l'erreur si elle existe
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[`checkpoints.${id}.amount`];
+          return newErrors;
+        });
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       checkpoints: prev.checkpoints.map((checkpoint) =>
@@ -404,12 +416,13 @@ export default function MultiStepForm() {
     }
   };
 
-  // useEffect(() => {
-  //   console.log(errors);
-  // }, [errors]);
+  // Distribuer automatiquement le montant quand il y a un seul checkpoint
+  useEffect(() => {
+    distributeAmountAutomatically();
+  }, [distributeAmountAutomatically]);
 
   // Validation avec Zod selon l'étape actuelle
-  const validateCurrentStep = () => {
+  const validateCurrentStep = useCallback(() => {
     try {
       switch (currentStep) {
         case 0:
@@ -424,34 +437,32 @@ export default function MultiStepForm() {
           profileSchema.parse({
             skills: formData.skills,
             tjm: formData.tjm,
-            dateOfStart: formData.dateOfStart,
-            dateOfEnd: formData.dateOfEnd,
             typePresence: formData.typePresence,
             seniority: formData.seniority,
           });
 
-          // Validation des dates
-          const errors: Record<string, string> = {};
-          const dateError = validateDates(
-            formData.dateOfStart,
-            formData.dateOfEnd,
-          );
+          // Validation additionnelle pour l'étape profil
+          const profileErrors: Record<string, string> = {};
 
-          if (dateError) {
-            errors.dateOfEnd = dateError;
+          return profileErrors;
+
+        case 2:
+          // Valider le montant total et les checkpoints
+          const stepErrors: Record<string, string> = {};
+
+          // Valider que TJM est renseigné pour calculer le total
+          if (!formData.tjm || parseInt(formData.tjm) <= 0) {
+            stepErrors.tjm = "Le TJM est requis pour calculer le montant total";
           }
 
-          return errors;
-        case 2:
-          // Vérifier si au moins un checkpoint est défini
-          // if (formData.checkpoints.length === 0) {
-          //   return {
-          //     checkpoints: "Au moins un checkpoint du projet est requis",
-          //   };
-          // }
+          // Valider qu'il y a au moins un checkpoint avec une date
+          const workingDays = getCalculatedWorkingDays();
+          if (workingDays <= 0) {
+            stepErrors.checkpoints =
+              "Au moins un checkpoint avec une date de fin est requis pour calculer le nombre de jours";
+          }
 
           // Valider chaque checkpoint du projet
-          const checkpointErrors: Record<string, string> = {};
           formData.checkpoints.forEach((checkpoint) => {
             try {
               checkpointSchema.parse(checkpoint);
@@ -460,14 +471,37 @@ export default function MultiStepForm() {
                 error.errors.forEach((err) => {
                   if (err.path.length > 0) {
                     const field = err.path[0] as string;
-                    checkpointErrors[`checkpoints.${checkpoint.id}.${field}`] =
+                    stepErrors[`checkpoints.${checkpoint.id}.${field}`] =
                       err.message;
                   }
                 });
               }
             }
           });
-          return checkpointErrors;
+
+          // Vérifier la répartition du montant total
+          const totalCheckpointsAmount = formData.checkpoints.reduce(
+            (sum, checkpoint) => {
+              return sum + (parseInt(checkpoint.amount.toString()) || 0);
+            },
+            0,
+          );
+
+          const totalAmount = getTotalMissionAmount();
+
+          if (totalAmount > 0 && formData.checkpoints.length > 0) {
+            if (!isAmountFullyAllocated()) {
+              if (totalCheckpointsAmount > totalAmount) {
+                stepErrors.checkpointsTotal = `La somme des checkpoints (${totalCheckpointsAmount}€) dépasse le montant total de la mission (${totalAmount}€)`;
+              } else {
+                stepErrors.checkpointsTotal = `Le montant total doit être entièrement réparti. Manquant: ${
+                  totalAmount - totalCheckpointsAmount
+                }€`;
+              }
+            }
+          }
+
+          return stepErrors;
         default:
           return {};
       }
@@ -481,20 +515,17 @@ export default function MultiStepForm() {
           }
         });
 
-        // Validation des dates
-        const dateError = validateDates(
-          formData.dateOfStart,
-          formData.dateOfEnd,
-        );
-        if (dateError) {
-          fieldErrors.dateOfEnd = dateError;
-        }
-
         return fieldErrors;
       }
       return {};
     }
-  };
+  }, [
+    currentStep,
+    formData,
+    getTotalMissionAmount,
+    getCalculatedWorkingDays,
+    isAmountFullyAllocated,
+  ]);
 
   // Handle input changes
   const handleChange = (
@@ -553,7 +584,7 @@ export default function MultiStepForm() {
 
       return newErrors;
     });
-  }, [formData, touchedFields, currentStep]);
+  }, [formData, touchedFields, currentStep, validateCurrentStep]);
 
   const goToNextStep = () => {
     const currentErrors = validateCurrentStep();
@@ -566,10 +597,9 @@ export default function MultiStepForm() {
     } else if (currentStep === 1) {
       fieldsToTouch.add("skills");
       fieldsToTouch.add("tjm");
-      fieldsToTouch.add("dateOfStart");
-      fieldsToTouch.add("dateOfEnd");
       fieldsToTouch.add("typePresence");
       fieldsToTouch.add("seniority");
+      fieldsToTouch.add("workingDays");
     } else if (currentStep === 2) {
       // Marquer tous les champs des checkpoints comme touchés
       formData.checkpoints.forEach((checkpoint) => {
@@ -608,6 +638,23 @@ export default function MultiStepForm() {
   const handleSubmitForm = async () => {
     // Valider le formulaire complet avec Zod
     try {
+      // Vérification additionnelle : le montant doit être entièrement attribué
+      if (!isAmountFullyAllocated()) {
+        const totalAmount = getTotalMissionAmount();
+        const allocatedAmount = formData.checkpoints.reduce(
+          (sum, checkpoint) => {
+            return sum + (parseInt(checkpoint.amount.toString()) || 0);
+          },
+          0,
+        );
+        showToast.error(
+          `Le montant total (${totalAmount}€) doit être entièrement réparti entre les tâches. Montant manquant : ${
+            totalAmount - allocatedAmount
+          }€`,
+        );
+        return;
+      }
+
       const auth = await getCurrentUser();
       const currentCompany = await getCurrentCompany(auth.id);
 
@@ -625,6 +672,7 @@ export default function MultiStepForm() {
           seniority: +validatedData.seniority,
           companyId: currentCompany.id,
           skillIds: validatedData.skills.map((skill) => skill.id),
+          totalAmount: getTotalMissionAmount(), // Utiliser la fonction de calcul
           // dateOfStart: validatedData.dateOfStart,
           // dateOfEnd: validatedData.dateOfEnd,
         },
@@ -821,58 +869,6 @@ export default function MultiStepForm() {
               )}
             </div>
 
-            <div className="flex gap-x-24 gap-y-8 flex-wrap">
-              {/* Input Date de Début */}
-              <div className="flex flex-col gap-3 flex-1 min-w-[250px]">
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-xl font-bold text-freehunt-main">
-                    Date de début
-                  </h2>
-                  <p className="text-gray-400">
-                    Sélectionnez une date de début de mission.
-                  </p>
-                </div>
-                <ComponentDatePicker
-                  date={selectedDateStart}
-                  setDate={setSelectedDateStart}
-                  className={`text-freehunt-black-two rounded-full ${
-                    errors.dateOfStart ? "border-red-500" : ""
-                  }`}
-                />
-                {errors.dateOfStart && (
-                  <p className="mt-1 text-sm text-red-500 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    {errors.dateOfStart}
-                  </p>
-                )}
-              </div>
-
-              {/* Input Date de Fin */}
-              <div className="flex flex-col gap-3 flex-1 min-w-[250px]">
-                <div className="flex flex-col gap-1">
-                  <h2 className="text-xl font-bold text-freehunt-main">
-                    Date de fin (optionnelle)
-                  </h2>
-                  <p className="text-gray-400">
-                    Sélectionnez une date de fin de mission.
-                  </p>
-                </div>
-                <ComponentDatePicker
-                  date={selectedDateEnd}
-                  setDate={handleEndDateChange}
-                  className={`text-freehunt-black-two rounded-full ${
-                    errors.dateOfEnd ? "border-red-500" : ""
-                  }`}
-                />
-                {errors.dateOfEnd && (
-                  <p className="mt-1 text-sm text-red-500 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-1" />
-                    {errors.dateOfEnd}
-                  </p>
-                )}
-              </div>
-            </div>
-
             {/* Input Type de Présence */}
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1">
@@ -971,12 +967,121 @@ export default function MultiStepForm() {
         {/* Step Three */}
         {currentStep === 2 && (
           <div className="flex flex-col gap-8">
-            {formData.checkpoints.length === 0 ? (
-              <div className="text-center py-8 border border-dashed rounded-md bg-gray-50">
-                <p className="text-gray-500">
-                  Aucun checkpoint défini. Cliquez sur &quot;Ajouter une
-                  étape&quot; pour commencer.
+            {/* Affichage informatif du calcul automatique */}
+            {formData.tjm && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h3 className="text-lg font-bold text-blue-900 mb-2">
+                  Calcul automatique du montant
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-800">
+                      TJM (Tarif Journalier Moyen)
+                    </span>
+                    <span className="font-bold text-blue-900">
+                      {formData.tjm}€/jour
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-blue-800">
+                      Nombre de jours (calculé automatiquement)
+                    </span>
+                    <span className="font-bold text-blue-900">
+                      {getCalculatedWorkingDays()} jours
+                    </span>
+                  </div>
+                  {getCalculatedWorkingDays() > 0 && (
+                    <div className="pt-2 border-t border-blue-200">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-blue-800">
+                          Calcul: {formData.tjm}€/jour ×{" "}
+                          {getCalculatedWorkingDays()} jours
+                        </span>
+                        <span className="text-lg font-bold text-blue-900">
+                          Montant total: {getTotalMissionAmount()}€
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {getCalculatedWorkingDays() > 0 && (
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm font-medium text-blue-800">
+                      Montant restant à attribuer: {getRemainingAmount()}€
+                    </span>
+                    {formData.checkpoints.length > 0 && (
+                      <span className="text-sm text-blue-600">
+                        Montant alloué:{" "}
+                        {getTotalMissionAmount() - getRemainingAmount()}€
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Message si TJM manquant */}
+            {!formData.tjm && (
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <p className="text-yellow-800 text-sm flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  Renseignez le TJM dans l&apos;étape précédente pour calculer
+                  le montant total
                 </p>
+              </div>
+            )}
+
+            {/* Erreur globale pour la somme des checkpoints */}
+            {errors.checkpointsTotal && (
+              <div className="bg-red-50 p-4 rounded-lg">
+                <p className="text-red-500 text-sm flex items-center">
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  {errors.checkpointsTotal}
+                </p>
+              </div>
+            )}
+
+            {/* Message informatif sur la répartition */}
+            {formData.checkpoints.length > 0 && (
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-2">
+                  💡 Répartition du montant
+                </h4>
+                {formData.checkpoints.length === 1 ? (
+                  <p className="text-blue-800 text-sm">
+                    Une seule tâche détectée : le montant total (
+                    {getTotalMissionAmount()}€) est automatiquement attribué à
+                    cette tâche.
+                  </p>
+                ) : (
+                  <p className="text-blue-800 text-sm">
+                    Plusieurs tâches détectées : répartissez manuellement le
+                    montant total de {getTotalMissionAmount()}€ entre les{" "}
+                    {formData.checkpoints.length} tâches. La somme des montants
+                    doit être exactement égale au montant total.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {formData.checkpoints.length === 0 ? (
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 mb-4">
+                  Aucune étape définie pour l&apos;instant
+                </p>
+                <Button
+                  type="button"
+                  onClick={addCheckpoint}
+                  disabled={!formData.tjm}
+                  className="bg-freehunt-main text-white"
+                >
+                  Ajouter une étape
+                </Button>
+                {!formData.tjm && (
+                  <p className="text-sm text-gray-400 mt-2">
+                    Définissez d&apos;abord le TJM dans l&apos;étape précédente
+                  </p>
+                )}
               </div>
             ) : (
               <div className="flex flex-col gap-4">
@@ -1152,10 +1257,16 @@ export default function MultiStepForm() {
                     {/* Input Amount Checkpoint */}
                     <div className="flex flex-col gap-1">
                       <h2 className="text-xl font-bold text-freehunt-main">
-                        Montant
+                        {formData.checkpoints.length === 1
+                          ? `Montant total : ${getTotalMissionAmount()}€ (automatique)`
+                          : `Montant - Max: ${getMaxAmountForCheckpoint(
+                              checkpoint.id,
+                            )}€`}
                       </h2>
                       <p className="text-gray-400">
-                        Montant versé lors de la réalisation de cette étape.
+                        {formData.checkpoints.length === 1
+                          ? "Le montant total de la mission est automatiquement attribué à cette unique tâche."
+                          : "Montant versé lors de la réalisation de cette étape."}
                       </p>
                       <Input
                         type="number"
@@ -1174,8 +1285,16 @@ export default function MultiStepForm() {
                           errors[`checkpoints.${checkpoint.id}.amount`]
                             ? "border-red-500"
                             : ""
+                        } ${
+                          formData.checkpoints.length === 1
+                            ? "bg-gray-100 cursor-not-allowed"
+                            : ""
                         }`}
                         placeholder="Exemple : 1000 €"
+                        min="0"
+                        max={getMaxAmountForCheckpoint(checkpoint.id)}
+                        disabled={formData.checkpoints.length === 1}
+                        readOnly={formData.checkpoints.length === 1}
                       />
                       {errors[`checkpoints.${checkpoint.id}.amount`] && (
                         <p className="mt-1 text-sm text-red-500 flex items-center">
@@ -1286,38 +1405,52 @@ export default function MultiStepForm() {
                     {!formData.typePresence && "Non spécifié"}
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Budget de la mission */}
+            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+              <h3 className="text-xl font-bold text-freehunt-main mb-4">
+                Budget de la mission
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <p className="text-gray-500 text-sm">Date de début</p>
-                  <p className="font-medium">
-                    {formData.dateOfStart
-                      ? new Date(formData.dateOfStart).toLocaleDateString(
-                          "fr-FR",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          },
-                        )
-                      : "Non spécifiée"}
+                  <p className="text-gray-500 text-sm">TJM</p>
+                  <p className="font-medium text-lg">
+                    {formData.tjm ? `${formData.tjm} €/jour` : "Non spécifié"}
                   </p>
                 </div>
                 <div>
                   <p className="text-gray-500 text-sm">
-                    Date de fin (optionnelle)
+                    Nombre de jours (calculé automatiquement)
                   </p>
-                  <p className="font-medium">
-                    {formData.dateOfEnd
-                      ? new Date(formData.dateOfEnd).toLocaleDateString(
-                          "fr-FR",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          },
-                        )
-                      : "Non spécifiée"}
+                  <p className="font-medium text-lg">
+                    {getCalculatedWorkingDays() > 0
+                      ? `${getCalculatedWorkingDays()} jours`
+                      : "Non calculé (aucune date de fin définie)"}
                   </p>
                 </div>
+                <div>
+                  <p className="text-gray-500 text-sm">Montant total</p>
+                  <p className="font-medium text-lg text-freehunt-main">
+                    {formData.tjm && getCalculatedWorkingDays() > 0
+                      ? `${getTotalMissionAmount()} €`
+                      : "Non calculé"}
+                  </p>
+                </div>
+                {formData.checkpoints && formData.checkpoints.length > 0 && (
+                  <div>
+                    <p className="text-gray-500 text-sm">Montant réparti</p>
+                    <p className="font-medium text-lg">
+                      {formData.checkpoints.reduce((sum, checkpoint) => {
+                        return (
+                          sum + (parseInt(checkpoint.amount.toString()) || 0)
+                        );
+                      }, 0)}{" "}
+                      €
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1333,25 +1466,33 @@ export default function MultiStepForm() {
                       key={checkpoint.id}
                       className="border-l-4 border-freehunt-main pl-4 py-2"
                     >
-                      <p className="font-medium text-lg">
-                        {checkpoint.name || `Étape ${index + 1}`}
-                      </p>
+                      <div className="flex justify-between items-start mb-2">
+                        <p className="font-medium text-lg">
+                          {checkpoint.name || `Étape ${index + 1}`}
+                        </p>
+                        <span className="bg-freehunt-main text-white px-3 py-1 rounded-full text-sm font-medium">
+                          {checkpoint.amount || 0} €
+                        </span>
+                      </div>
                       <p className="text-gray-600 mt-1 whitespace-pre-wrap">
                         {checkpoint.description || "Aucune description"}
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Date de fin:{" "}
-                        {checkpoint.date
-                          ? new Date(checkpoint.date).toLocaleDateString(
-                              "fr-FR",
-                              {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                              },
-                            )
-                          : "Non spécifiée"}
-                      </p>
+                      <div className="flex gap-4 mt-2 text-sm text-gray-500">
+                        <span>
+                          Date de fin:{" "}
+                          {checkpoint.date
+                            ? new Date(checkpoint.date).toLocaleDateString(
+                                "fr-FR",
+                                {
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                },
+                              )
+                            : "Non spécifiée"}
+                        </span>
+                        <span>Statut: {checkpoint.status}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
