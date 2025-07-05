@@ -457,4 +457,12 @@ export class JobPostingsService {
 
     return !acceptedCandidate;
   }
+
+  async getProjectByJobPosting(jobPostingId: string) {
+    return this.prisma.project.findUnique({
+      where: {
+        jobPostingId: jobPostingId,
+      },
+    });
+  }
 }

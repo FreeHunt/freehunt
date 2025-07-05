@@ -21,7 +21,10 @@ export class StripeService {
     );
   }
 
-  async handleWebhook(body: Buffer, signature: string) {
+  async handleWebhook(
+    body: Buffer,
+    signature: string,
+  ): Promise<{ received: boolean; projectId?: string | null }> {
     let event: Stripe.Event;
 
     try {
@@ -37,10 +40,17 @@ export class StripeService {
       );
     }
 
+    const result: { received: boolean; projectId?: string | null } = {
+      received: true,
+    };
+
     switch (event.type) {
       case 'checkout.session.completed': {
         const checkoutSessionCompleted = event.data.object;
-        await this.handlePaymentSuccess(checkoutSessionCompleted);
+        const projectId = await this.handlePaymentSuccess(
+          checkoutSessionCompleted,
+        );
+        result.projectId = projectId;
         break;
       }
       case 'checkout.session.expired': {
@@ -57,42 +67,93 @@ export class StripeService {
         console.log(`Unhandled event type ${event.type}`);
     }
 
-    return { received: true };
+    return result;
   }
 
-  private async handlePaymentSuccess(session: Stripe.Checkout.Session) {
+  private async handlePaymentSuccess(
+    session: Stripe.Checkout.Session,
+  ): Promise<string | null> {
     try {
       const { metadata } = session;
 
       if (metadata?.type === 'job_posting_payment' && metadata?.jobPostingId) {
-        // Mettre à jour le statut du job posting à PAID puis PUBLISHED
-        await this.prismaService.jobPosting.update({
+        // Récupérer le job posting avec toutes ses informations
+        const jobPosting = await this.prismaService.jobPosting.findUnique({
           where: { id: metadata.jobPostingId },
-          data: {
-            status: 'PUBLISHED',
-          },
           include: {
             company: {
               include: {
                 user: true,
               },
             },
+            skills: true,
+            checkpoints: true,
+          },
+        });
+
+        if (!jobPosting) {
+          throw new Error(`Job posting ${metadata.jobPostingId} not found`);
+        }
+
+        // Mettre à jour le statut du job posting à PUBLISHED
+        await this.prismaService.jobPosting.update({
+          where: { id: metadata.jobPostingId },
+          data: {
+            status: 'PUBLISHED',
+          },
+        });
+
+        // Calculer les dates du projet basées sur les checkpoints
+        const checkpointDates = jobPosting.checkpoints.map(
+          (cp) => new Date(cp.date),
+        );
+        const startDate =
+          checkpointDates.length > 0
+            ? new Date(Math.min(...checkpointDates.map((d) => d.getTime())))
+            : new Date();
+        const endDate =
+          checkpointDates.length > 0
+            ? new Date(Math.max(...checkpointDates.map((d) => d.getTime())))
+            : null;
+
+        // Calculer le montant total du projet
+        const totalAmount = jobPosting.checkpoints.reduce(
+          (sum, cp) => sum + cp.amount,
+          0,
+        );
+
+        // Créer automatiquement un projet basé sur le job posting
+        const project = await this.prismaService.project.create({
+          data: {
+            name: jobPosting.title,
+            description: jobPosting.description,
+            amount: totalAmount,
+            startDate: startDate,
+            endDate: endDate,
+            jobPostingId: jobPosting.id,
+            companyId: jobPosting.companyId,
           },
         });
 
         console.log(
           `Job posting ${metadata.jobPostingId} payment successful - status updated to PUBLISHED`,
         );
-
-        // Stocker l'ID de session Stripe dans les métadonnées pour référence
-        // On peut l'utiliser plus tard pour lier le paiement au projet si nécessaire
         console.log(
-          `Stripe session ${session.id} processed for job posting ${metadata.jobPostingId}`,
+          `Project ${project.id} created automatically for job posting ${metadata.jobPostingId}`,
         );
+
+        // Stocker l'ID de session Stripe et du projet dans les métadonnées
+        console.log(
+          `Stripe session ${session.id} processed for job posting ${metadata.jobPostingId}, project ${project.id} created`,
+        );
+
+        return project.id;
       }
     } catch (error) {
       console.error('Error handling payment success:', error);
     }
+    
+    return null;
   }
 
   private handlePaymentExpired(session: Stripe.Checkout.Session) {

@@ -237,3 +237,20 @@ export async function createJobPostingPayment(
     throw error;
   }
 }
+
+/**
+ * Récupérer l'ID du projet associé à une annonce
+ */
+export async function getJobPostingProject(
+  jobPostingId: string,
+): Promise<string | null> {
+  try {
+    const response = await api.get<{ projectId: string | null }>(
+      `/job-postings/${jobPostingId}/project`,
+    );
+    return response.data.projectId;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du projet:", error);
+    return null;
+  }
+}

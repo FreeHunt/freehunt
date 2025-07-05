@@ -366,4 +366,30 @@ export class JobPostingsController {
       sessionId: checkoutSession.id,
     };
   }
+
+  @Get(':id/project')
+  @ApiOperation({
+    summary: 'Get project associated with a job posting',
+    description: 'Retrieve the project ID associated with a job posting if it exists',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the job posting (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the project ID if associated',
+    schema: {
+      type: 'object',
+      properties: {
+        projectId: { type: 'string', nullable: true },
+      },
+    },
+  })
+  async getProjectByJobPosting(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ projectId: string | null }> {
+    const project = await this.jobPostingsService.getProjectByJobPosting(id);
+    return { projectId: project?.id || null };
+  }
 }
