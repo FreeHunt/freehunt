@@ -122,17 +122,28 @@ export async function submitJobPosting(
 }
 
 /**
- * Traiter le paiement d'une annonce
+ * Traiter le paiement d'une annonce en redirigeant vers Stripe
  */
 export async function processJobPostingPayment(
   jobPostingId: string,
-  paymentData?: Record<string, unknown>,
-): Promise<JobPosting> {
-  const response = await api.post<JobPosting>(
-    `/job-postings/${jobPostingId}/payment`,
-    paymentData || {},
-  );
-  return response.data;
+  customerEmail: string,
+): Promise<void> {
+  try {
+    const paymentSession = await createJobPostingPayment(
+      jobPostingId,
+      customerEmail,
+    );
+
+    // Rediriger vers Stripe Checkout
+    if (paymentSession.url) {
+      window.location.href = paymentSession.url;
+    } else {
+      throw new Error("URL de paiement non disponible");
+    }
+  } catch (error) {
+    console.error("Erreur lors du processus de paiement:", error);
+    throw error;
+  }
 }
 
 /**
@@ -195,5 +206,34 @@ export async function canJobPostingBeCancelled(
   } catch (error) {
     console.error("Erreur lors de la vérification:", error);
     return false;
+  }
+}
+
+/**
+ * Créer une session de paiement Stripe pour une annonce
+ */
+export async function createJobPostingPayment(
+  jobPostingId: string,
+  customerEmail: string,
+): Promise<{ url: string; sessionId: string }> {
+  try {
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000";
+
+    const response = await api.post<{ url: string; sessionId: string }>(
+      `/job-postings/${jobPostingId}/create-payment`,
+      {
+        successUrl: `${baseUrl}/project/payment-success?session_id={CHECKOUT_SESSION_ID}&job_posting_id=${jobPostingId}`,
+        cancelUrl: `${baseUrl}/dashboard/job-postings?payment=cancelled`,
+        customerEmail,
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création du paiement:", error);
+    throw error;
   }
 }

@@ -99,50 +99,15 @@ const checkpointSchema = z.object({
 });
 
 // Schéma complet du formulaire
-const formSchema = z
-  .object({
-    jobTitle: jobSchema.shape.jobTitle,
-    jobDescription: jobSchema.shape.jobDescription,
-    skills: profileSchema.shape.skills,
-    tjm: profileSchema.shape.tjm,
-    typePresence: profileSchema.shape.typePresence,
-    seniority: profileSchema.shape.seniority,
-    checkpoints: z.array(checkpointSchema),
-  })
-  .refine(
-    (data) => {
-      // Validation personnalisée : la somme des montants des checkpoints doit égaler le montant total
-      if (data.checkpoints.length === 0) return true;
-
-      // Calculer le nombre de jours à partir des checkpoints
-      const latestDate = data.checkpoints.reduce((latest, checkpoint) => {
-        if (!checkpoint.date) return latest;
-        const checkpointDate = new Date(checkpoint.date);
-        return !latest || checkpointDate > latest ? checkpointDate : latest;
-      }, null as Date | null);
-
-      if (!latestDate) return true; // Pas de date définie
-
-      const today = new Date();
-      const diffTime = latestDate.getTime() - today.getTime();
-      const workingDays = Math.max(
-        1,
-        Math.ceil(diffTime / (1000 * 60 * 60 * 24)),
-      );
-
-      const totalAmount = data.tjm * workingDays;
-      const checkpointsTotal = data.checkpoints.reduce((sum, checkpoint) => {
-        return sum + (checkpoint.amount || 0);
-      }, 0);
-
-      return checkpointsTotal === totalAmount;
-    },
-    {
-      message:
-        "La somme des montants des checkpoints doit être égale au montant total de la mission",
-      path: ["checkpoints"], // L'erreur sera associée au champ checkpoints
-    },
-  );
+const formSchema = z.object({
+  jobTitle: jobSchema.shape.jobTitle,
+  jobDescription: jobSchema.shape.jobDescription,
+  skills: profileSchema.shape.skills,
+  tjm: profileSchema.shape.tjm,
+  typePresence: profileSchema.shape.typePresence,
+  seniority: profileSchema.shape.seniority,
+  checkpoints: z.array(checkpointSchema),
+});
 
 // Type inféré à partir du schéma Zod
 export type FormData = Omit<
@@ -166,8 +131,8 @@ export default function MultiStepForm() {
     jobTitle: "",
     jobDescription: "",
     skills: [],
-    tjm: 0,
-    typePresence: "",
+    tjm: 1, // Set minimum valid value instead of 0
+    typePresence: "REMOTE", // Set default valid value instead of empty string
     seniority: 0,
     checkpoints: [],
   });
@@ -664,8 +629,14 @@ export default function MultiStepForm() {
       const auth = await getCurrentUser();
       const currentCompany = await getCurrentCompany(auth.id);
 
+      // Logs de debug pour comprendre le problème
+      console.log("Données du formulaire avant validation:", {
+        formData: JSON.stringify(formData, null, 2),
+        totalAmount: getTotalMissionAmount(),
+      });
+
       const validatedData = formSchema.parse(formData);
-      // console.log("Données validées:", validatedData);
+      console.log("Données validées:", validatedData);
       setSubmitResult(null);
       setIsSubmitting(true);
       const result = await submitJobPosting(
@@ -699,9 +670,31 @@ export default function MultiStepForm() {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        showToast.error(
-          "Le formulaire contient des erreurs. Veuillez les corriger.",
-        );
+        // Logs détaillés des erreurs de validation
+        console.error("Erreurs de validation Zod:", error.errors);
+
+        // Afficher les erreurs détaillées
+        const fieldErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path && err.path.length > 0) {
+            fieldErrors[err.path.join(".")] = err.message;
+          }
+        });
+
+        setErrors(fieldErrors);
+
+        // Afficher le premier message d'erreur trouvé
+        const firstError = error.errors[0];
+        if (firstError) {
+          showToast.error(firstError.message);
+        } else {
+          showToast.error(
+            "Le formulaire contient des erreurs. Veuillez les corriger.",
+          );
+        }
+      } else {
+        console.error("Erreur lors de la soumission:", error);
+        showToast.error("Une erreur inattendue s'est produite.");
       }
     } finally {
       setIsSubmitting(false);

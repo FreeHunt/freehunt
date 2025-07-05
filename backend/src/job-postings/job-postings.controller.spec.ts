@@ -13,6 +13,7 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from '../auth/auth.service';
 import { EnvironmentService } from '../common/environment/environment.service';
 import { AuthentikService } from '../common/authentik/authentik.service';
+import { StripeService } from '../common/stripe/stripe.service';
 import { HttpModule } from '@nestjs/axios';
 
 // Interface pour les job postings avec recommandation
@@ -40,6 +41,15 @@ describe('JobPostingsController', () => {
         AuthService,
         EnvironmentService,
         AuthentikService,
+        {
+          provide: StripeService,
+          useValue: {
+            createCheckoutSession: jest.fn().mockResolvedValue({
+              id: 'cs_test_123',
+              url: 'https://checkout.stripe.com/test',
+            }),
+          },
+        },
       ],
     }).compile();
 

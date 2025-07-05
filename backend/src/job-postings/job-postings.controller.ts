@@ -20,11 +20,15 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/currentUsers.decorators';
 import { OptionalAuthInterceptor } from '../common/interceptors/optional-auth.interceptor';
+import { StripeService } from '../common/stripe/stripe.service';
 
 @ApiTags('job-postings')
 @Controller('job-postings')
 export class JobPostingsController {
-  constructor(private readonly jobPostingsService: JobPostingsService) {}
+  constructor(
+    private readonly jobPostingsService: JobPostingsService,
+    private readonly stripeService: StripeService,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -295,5 +299,71 @@ export class JobPostingsController {
   ): Promise<{ canBeCancelled: boolean }> {
     const canBeCancelled = await this.jobPostingsService.canBeCancelled(id);
     return { canBeCancelled };
+  }
+
+  @Post(':id/create-payment')
+  @ApiOperation({
+    summary: 'Create payment session for a job posting',
+    description:
+      'Create a Stripe checkout session to pay for job posting publication',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the job posting (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Payment session created successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'Stripe checkout URL' },
+        sessionId: { type: 'string', description: 'Stripe session ID' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job posting not found',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Job posting already paid or invalid state',
+  })
+  async createPayment(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body()
+    paymentData: {
+      successUrl: string;
+      cancelUrl: string;
+      customerEmail: string;
+    },
+  ) {
+    const jobPosting = await this.jobPostingsService.findOne(id);
+
+    if (!jobPosting) {
+      throw new Error('Job posting not found');
+    }
+
+    if (jobPosting.status !== 'PENDING_PAYMENT') {
+      throw new Error('Job posting is not in PENDING_PAYMENT state');
+    }
+
+    const checkoutSession = await this.stripeService.createCheckoutSession({
+      price: jobPosting.totalAmount || jobPosting.averageDailyRate,
+      successUrl: paymentData.successUrl,
+      cancelUrl: paymentData.cancelUrl,
+      customerId: '', // Sera généré par Stripe si nécessaire
+      customerEmail: paymentData.customerEmail,
+      companyId: jobPosting.companyId,
+      jobPostingId: jobPosting.id,
+      productName: `Publication d'annonce: ${jobPosting.title}`,
+      productDescription: `Publication de l'offre de mission: ${jobPosting.title}`,
+    });
+
+    return {
+      url: checkoutSession.url,
+      sessionId: checkoutSession.id,
+    };
   }
 }

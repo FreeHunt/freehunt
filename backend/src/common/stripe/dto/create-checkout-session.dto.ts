@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, IsOptional } from 'class-validator';
 
 import { IsNotEmpty } from 'class-validator';
 
@@ -26,4 +26,16 @@ export class CreateCheckoutSessionDto {
   @IsNotEmpty()
   @IsString()
   companyId: string;
+
+  @IsOptional()
+  @IsString()
+  jobPostingId?: string;
+
+  @IsOptional()
+  @IsString()
+  productName?: string;
+
+  @IsOptional()
+  @IsString()
+  productDescription?: string;
 }

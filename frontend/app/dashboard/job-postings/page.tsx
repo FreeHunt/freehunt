@@ -194,10 +194,15 @@ export default function CompanyJobPostingsDashboard() {
     try {
       switch (action) {
         case "pay":
-          // Ici, on simule le paiement. Dans une vraie application,
-          // on intégrerait Stripe, PayPal, etc.
-          await processJobPostingPayment(jobPostingId);
-          showToast.success("Paiement traité avec succès!");
+          // Rediriger vers Stripe pour le paiement
+          if (!user?.email) {
+            showToast.error(
+              "Email utilisateur non disponible pour le paiement",
+            );
+            return;
+          }
+          await processJobPostingPayment(jobPostingId, user.email);
+          // Pas besoin de showToast ici car l'utilisateur est redirigé vers Stripe
           break;
 
         case "publish":

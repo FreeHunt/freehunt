@@ -6,18 +6,22 @@ import { ActivateCustomerConnectionDto } from './dto/activate-customer-connectio
 import { CreateQuoteStripeDto } from './dto/create-quote-stripe.dto';
 import { CreateProductStripeDto } from './dto/create-product-stripe.dto';
 import { EnvironmentService } from '../environment/environment.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
 
-  constructor(private readonly environmentService: EnvironmentService) {
+  constructor(
+    private readonly environmentService: EnvironmentService,
+    private readonly prismaService: PrismaService,
+  ) {
     this.stripe = new Stripe(
       this.environmentService.get('STRIPE_SECRET_KEY', ''),
     );
   }
 
-  handleWebhook(body: Buffer, signature: string) {
+  async handleWebhook(body: Buffer, signature: string) {
     let event: Stripe.Event;
 
     try {
@@ -35,12 +39,18 @@ export class StripeService {
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        //const checkoutSessionCompleted = event.data.object;
-
+        const checkoutSessionCompleted = event.data.object;
+        await this.handlePaymentSuccess(checkoutSessionCompleted);
         break;
       }
       case 'checkout.session.expired': {
-        //const checkoutSessionCancelled = event.data.object;
+        const checkoutSessionExpired = event.data.object;
+        this.handlePaymentExpired(checkoutSessionExpired);
+        break;
+      }
+      case 'payment_intent.payment_failed': {
+        const paymentIntentFailed = event.data.object;
+        this.handlePaymentFailed(paymentIntentFailed);
         break;
       }
       default:
@@ -50,7 +60,73 @@ export class StripeService {
     return { received: true };
   }
 
+  private async handlePaymentSuccess(session: Stripe.Checkout.Session) {
+    try {
+      const { metadata } = session;
+
+      if (metadata?.type === 'job_posting_payment' && metadata?.jobPostingId) {
+        // Mettre à jour le statut du job posting à PAID puis PUBLISHED
+        await this.prismaService.jobPosting.update({
+          where: { id: metadata.jobPostingId },
+          data: {
+            status: 'PUBLISHED',
+          },
+          include: {
+            company: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        });
+
+        console.log(
+          `Job posting ${metadata.jobPostingId} payment successful - status updated to PUBLISHED`,
+        );
+
+        // Stocker l'ID de session Stripe dans les métadonnées pour référence
+        // On peut l'utiliser plus tard pour lier le paiement au projet si nécessaire
+        console.log(
+          `Stripe session ${session.id} processed for job posting ${metadata.jobPostingId}`,
+        );
+      }
+    } catch (error) {
+      console.error('Error handling payment success:', error);
+    }
+  }
+
+  private handlePaymentExpired(session: Stripe.Checkout.Session) {
+    try {
+      const { metadata } = session;
+
+      if (metadata?.type === 'job_posting_payment' && metadata?.jobPostingId) {
+        console.log(`Payment expired for job posting ${metadata.jobPostingId}`);
+        // Optionnel : marquer comme expiré ou envoyer une notification
+      }
+    } catch (error) {
+      console.error('Error handling payment expiration:', error);
+    }
+  }
+
+  private handlePaymentFailed(paymentIntent: Stripe.PaymentIntent) {
+    try {
+      console.log(`Payment failed for payment intent ${paymentIntent.id}`);
+      // Optionnel : gérer les échecs de paiement
+    } catch (error) {
+      console.error('Error handling payment failure:', error);
+    }
+  }
+
   async createCheckoutSession(body: CreateCheckoutSessionDto) {
+    // Only specify one of customer or customer_email, not both
+    const customerParam: { customer?: string; customer_email?: string } = {};
+
+    if (body.customerId && body.customerId.trim() !== '') {
+      customerParam.customer = body.customerId;
+    } else if (body.customerEmail) {
+      customerParam.customer_email = body.customerEmail;
+    }
+
     const checkoutSession = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
@@ -58,6 +134,12 @@ export class StripeService {
           price_data: {
             currency: 'eur',
             unit_amount: body.price * 100,
+            product_data: {
+              name: body.productName || "Publication d'annonce",
+              description:
+                body.productDescription ||
+                "Publication d'une offre de mission freelance",
+            },
           },
           quantity: 1,
         },
@@ -71,10 +153,11 @@ export class StripeService {
       mode: 'payment',
       success_url: body.successUrl,
       cancel_url: body.cancelUrl,
-      customer: body.customerId,
-      customer_email: body.customerEmail,
+      ...customerParam, // Spread the customer parameter (either customer or customer_email)
       metadata: {
         companyId: body.companyId,
+        jobPostingId: body.jobPostingId || '',
+        type: 'job_posting_payment',
       },
     });
     return checkoutSession;
