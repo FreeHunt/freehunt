@@ -298,12 +298,40 @@ export default function CompanyJobPostingsDashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-freehunt-black-two mb-2">
-            Mes annonces de mission
-          </h1>
-          <p className="text-gray-600">
-            Gérez vos annonces, effectuez les paiements et publiez vos offres.
-          </p>
+          <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-2 border-orange-200 p-6 mb-6">
+            <h1 className="text-3xl font-bold text-orange-800 mb-2">
+              📋 Gestion de mes annonces
+            </h1>
+            <p className="text-orange-700 mb-2">
+              <strong>Centre de gestion complet</strong> : Paiements,
+              publications, modifications et annulations de vos annonces.
+            </p>
+            <p className="text-orange-600 text-sm">
+              💡{" "}
+              <em>
+                Pour consulter uniquement vos annonces publiées et visibles par
+                les freelances, utilisez le bouton &quot;Mes annonces
+                publiées&quot; depuis le dashboard principal.
+              </em>
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800">
+                État de vos annonces
+              </h2>
+              <p className="text-gray-600 text-sm">
+                Toutes vos annonces (payées, non payées, publiées, etc.)
+              </p>
+            </div>
+            <Button
+              onClick={() => (window.location.href = "/job-postings/new")}
+              className="bg-freehunt-main hover:bg-freehunt-main/90"
+            >
+              Créer une nouvelle annonce
+            </Button>
+          </div>
         </div>
 
         {/* Statistiques */}

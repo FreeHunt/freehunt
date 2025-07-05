@@ -38,60 +38,112 @@ export default function FreelanceDashboard() {
             Bienvenue, {user.username}
           </h1>
           <p className="text-gray-600">
-            Découvrez les dernières opportunités qui correspondent à votre
-            profil
+            Découvrez les dernières opportunités et gérez votre activité
+            freelance
           </p>
         </header>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="bg-white rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-3">Rechercher des jobs</h2>
-            <p className="text-gray-600 mb-4">
-              Explorez les offres d&apos;emploi disponibles
-            </p>
-            <Button asChild className="w-full">
-              <Link href="/job-postings/search">Voir les jobs</Link>
-            </Button>
+        <div className="space-y-8">
+          {/* Section: Recherche & Candidatures - Priority actions */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              🔍 Recherche & Candidatures
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border-2 border-blue-200 p-6">
+                <h3 className="text-lg font-semibold mb-3 text-blue-800">
+                  🎯 Rechercher des jobs
+                </h3>
+                <p className="text-blue-700 mb-4 text-sm">
+                  Explorez les offres d&apos;emploi disponibles
+                </p>
+                <Button
+                  asChild
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  <Link href="/job-postings/search">Voir les jobs</Link>
+                </Button>
+              </div>
+
+              <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-2 border-orange-200 p-6">
+                <h3 className="text-lg font-semibold mb-3 text-orange-800">
+                  📋 Mes candidatures
+                </h3>
+                <p className="text-orange-700 mb-4 text-sm">
+                  Suivez l&apos;état de vos candidatures
+                </p>
+                <Button
+                  asChild
+                  className="w-full bg-orange-600 hover:bg-orange-700"
+                  disabled
+                >
+                  Bientôt disponible
+                </Button>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-3">Mes conversations</h2>
-            <p className="text-gray-600 mb-4">
-              Gérez vos conversations avec les entreprises
-            </p>
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/conversations">Voir mes conversations</Link>
-            </Button>
+          {/* Section: Projets & Activité */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              🚀 Projets & Activité
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg border-2 border-green-200 p-6">
+                <h3 className="text-lg font-semibold mb-3 text-green-800">
+                  💼 Mes projets
+                </h3>
+                <p className="text-green-700 mb-4 text-sm">
+                  Consultez vos projets en cours et terminés
+                </p>
+                <Button
+                  asChild
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  <Link href="/dashboard/freelance/projects">
+                    Voir mes projets
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-3">Mes candidatures</h2>
-            <p className="text-gray-600 mb-4">
-              Suivez l&apos;état de vos candidatures
-            </p>
-            <Button variant="outline" className="w-full" disabled>
-              Bientôt disponible
-            </Button>
-          </div>
+          {/* Section: Communication & Profil */}
+          <div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              💬 Communication & Profil
+            </h2>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg border-2 border-purple-200 p-6">
+                <h3 className="text-lg font-semibold mb-3 text-purple-800">
+                  💬 Mes conversations
+                </h3>
+                <p className="text-purple-700 mb-4 text-sm">
+                  Gérez vos conversations avec les entreprises
+                </p>
+                <Button
+                  asChild
+                  className="w-full bg-purple-600 hover:bg-purple-700"
+                >
+                  <Link href="/conversations">Voir mes conversations</Link>
+                </Button>
+              </div>
 
-          <div className="bg-white rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-3">Mon profil</h2>
-            <p className="text-gray-600 mb-4">
-              Gérez vos informations personnelles
-            </p>
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/profile/freelance">Voir mon profil</Link>
-            </Button>
-          </div>
-
-          <div className="bg-white rounded-lg border p-6">
-            <h2 className="text-xl font-semibold mb-3">Mes projets</h2>
-            <p className="text-gray-600 mb-4">
-              Consultez vos projets en cours et terminés
-            </p>
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/dashboard/freelance/projects">Voir mes projets</Link>
-            </Button>
+              <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 rounded-lg border-2 border-indigo-200 p-6">
+                <h3 className="text-lg font-semibold mb-3 text-indigo-800">
+                  ⚙️ Mon profil
+                </h3>
+                <p className="text-indigo-700 mb-4 text-sm">
+                  Gérez vos informations personnelles
+                </p>
+                <Button
+                  asChild
+                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                >
+                  <Link href="/profile/freelance">Voir mon profil</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
