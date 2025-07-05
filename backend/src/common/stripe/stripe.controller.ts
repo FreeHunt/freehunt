@@ -21,14 +21,14 @@ export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 
   @Post('webhook')
-  handleWebhook(
+  async handleWebhook(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
     @Headers('stripe-signature') signature: string,
   ) {
     try {
       console.log('Webhook received');
-      this.stripeService.handleWebhook(req.body as Buffer, signature);
+      await this.stripeService.handleWebhook(req.body as Buffer, signature);
       res.status(200).send({ message: 'Webhook received' });
     } catch (error) {
       console.error(
@@ -50,15 +50,28 @@ export class StripeController {
 
   @Post('create-account-connection')
   async createAccountConnection(@Body() body: CreateAccountConnectionDto) {
-    const existingAccount = await this.stripeService.getAccountConnection(
-      body.freelanceId,
+    return this.stripeService.createAccountConnection(body);
+  }
+
+  @Post('confirm-account-activation')
+  async confirmAccountActivation(
+    @Body() body: { freelanceId: string; accountId: string },
+  ) {
+    console.log(
+      'Stripe controller - confirm account activation called with:',
+      body,
     );
-    if (existingAccount) {
-      return existingAccount;
+    try {
+      const result = await this.stripeService.confirmAccountActivation(
+        body.freelanceId,
+        body.accountId,
+      );
+      console.log('Stripe controller - activation result:', result);
+      return result;
+    } catch (error) {
+      console.error('Stripe controller - activation error:', error);
+      throw error;
     }
-    const accountConnection =
-      await this.stripeService.createAccountConnection(body);
-    return accountConnection;
   }
 
   @Post('activate-account-connection')

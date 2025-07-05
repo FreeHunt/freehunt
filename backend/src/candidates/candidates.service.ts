@@ -15,6 +15,22 @@ export class CandidatesService {
   ) {}
 
   async createCandidate(data: CreateCandidateDto) {
+    // Vérifier que le freelance a un compte Stripe connecté
+    const freelance = await this.prisma.freelance.findUnique({
+      where: { id: data.freelanceId },
+      select: { id: true, stripeAccountId: true },
+    });
+
+    if (!freelance) {
+      throw new NotFoundException('Freelance not found');
+    }
+
+    if (!freelance.stripeAccountId) {
+      throw new BadRequestException(
+        'You must connect your Stripe account before applying to job postings. Please complete your profile setup.',
+      );
+    }
+
     const checkPoint = await this.prisma.checkpoint.findFirst({
       where: {
         jobPostingId: data.jobPostingId,

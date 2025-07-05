@@ -197,6 +197,15 @@ export default function JobPostingDetail() {
   // Permet de postuler une candidature ou de la supprimer si elle existe déjà
   const handleApply = async () => {
     if (!user || !jobPosting || !freelance) return;
+
+    // Vérifier que le freelance a un compte Stripe connecté avant de postuler
+    if (!candidate && !freelance.stripeAccountId) {
+      showToast.error(
+        "Vous devez connecter votre compte Stripe avant de pouvoir candidater. Veuillez compléter votre profil.",
+      );
+      return;
+    }
+
     setIsApplying(true);
 
     if (candidate) {
@@ -231,6 +240,14 @@ export default function JobPostingDetail() {
             showToast.error(
               "Impossible de candidater : un freelance a déjà été sélectionné pour cette offre",
             );
+          } else if (
+            apiError?.response?.data?.message?.includes(
+              "must connect your Stripe account",
+            )
+          ) {
+            showToast.error(
+              "Vous devez connecter votre compte Stripe avant de pouvoir candidater. Veuillez compléter votre profil.",
+            );
           } else {
             showToast.error("Erreur lors de l'envoi de la candidature");
           }
@@ -243,6 +260,10 @@ export default function JobPostingDetail() {
 
     setIsApplying(false);
   };
+
+  // Variables booléennes calculées pour éviter les erreurs TypeScript
+  const hasStripeAccount = freelance?.stripeAccountId !== null && freelance?.stripeAccountId !== undefined && freelance?.stripeAccountId !== "";
+  const showStripeConnectButton = freelance && !hasStripeAccount;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -502,10 +523,34 @@ export default function JobPostingDetail() {
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-3">
+                  {/* Avertissement Stripe */}
+                  {showStripeConnectButton && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center space-y-2">
+                      <p className="text-red-800 text-sm font-medium">
+                        ⚠️ Compte Stripe requis
+                      </p>
+                      <p className="text-red-700 text-xs">
+                        Vous devez connecter votre compte Stripe pour candidater
+                      </p>
+                      <FreeHuntButton
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push("/profile/freelance")}
+                        className="w-full mt-2"
+                      >
+                        Configurer mon compte Stripe
+                      </FreeHuntButton>
+                    </div>
+                  )}
+
                   <FreeHuntButton
                     className="w-full"
                     onClick={handleApply}
-                    disabled={isApplying || (projectExists && !candidate)}
+                    disabled={
+                      isApplying || 
+                      (projectExists && !candidate) || 
+                      (!candidate && !!freelance && (!freelance.stripeAccountId))
+                    }
                   >
                     {isApplying ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -515,6 +560,8 @@ export default function JobPostingDetail() {
                           ? "Offre pourvue"
                           : candidate
                           ? "Annuler ma candidature"
+                          : showStripeConnectButton
+                          ? "Connecter Stripe pour postuler"
                           : "Postuler à cette offre"}
                       </>
                     )}

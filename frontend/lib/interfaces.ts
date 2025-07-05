@@ -36,6 +36,7 @@ export interface Freelance {
   description: string;
   user: User;
   userId: string;
+  stripeAccountId?: string;
 }
 
 export interface FreelanceSearchResult {
