@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { JobPosting, Prisma, Role, Skill, User } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { FreelancesService } from '../freelances/freelances.service';
@@ -21,9 +21,11 @@ export class JobPostingsService {
   async create(data: CreateJobPostingDto): Promise<JobPosting> {
     const { skillIds, ...jobPostingData } = data;
 
+    // Créer le job posting avec le statut PENDING_PAYMENT par défaut
     return this.prisma.jobPosting.create({
       data: {
         ...jobPostingData,
+        status: 'PENDING_PAYMENT', // Statut par défaut nécessitant un paiement
         skills: skillIds?.length
           ? {
               connect: skillIds.map((id) => ({ id })),
@@ -44,6 +46,9 @@ export class JobPostingsService {
 
   async findAll(): Promise<JobPosting[]> {
     return this.prisma.jobPosting.findMany({
+      where: {
+        status: 'PUBLISHED', // Ne retourner que les annonces publiées
+      },
       include: {
         skills: true,
         company: {
@@ -142,7 +147,9 @@ export class JobPostingsService {
       take,
     } = searchParams;
 
-    const where: Prisma.JobPostingWhereInput = {};
+    const where: Prisma.JobPostingWhereInput = {
+      status: 'PUBLISHED', // Ne rechercher que dans les annonces publiées
+    };
     const andConditions: Prisma.JobPostingWhereInput[] = [];
 
     if (title) {
@@ -259,6 +266,139 @@ export class JobPostingsService {
   async getJobPostingsByUserId(userId: string): Promise<JobPosting[]> {
     return this.prisma.jobPosting.findMany({
       where: { company: { userId } },
+      include: {
+        skills: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        checkpoints: true,
+      },
+    });
+  }
+
+  /**
+   * Méthode pour traiter le paiement d'une annonce
+   * @param jobPostingId - ID de l'annonce
+   * @param paymentData - Données de paiement (à adapter selon le système de paiement choisi)
+   */
+  async processPayment(
+    jobPostingId: string,
+    paymentData?: any,
+  ): Promise<JobPosting> {
+    // Vérifier que l'annonce existe et est en attente de paiement
+    const jobPosting = await this.prisma.jobPosting.findUnique({
+      where: { id: jobPostingId },
+    });
+
+    if (!jobPosting) {
+      throw new BadRequestException('Annonce introuvable');
+    }
+
+    if (jobPosting.status !== 'PENDING_PAYMENT') {
+      throw new BadRequestException(
+        "Cette annonce n'est pas en attente de paiement",
+      );
+    }
+
+    // TODO: Ici, intégrer la logique de paiement (Stripe, PayPal, etc.)
+    // For now, we'll simulate a successful payment
+    // En attendant, on ignore paymentData
+    console.log('Payment data:', paymentData);
+
+    // Marquer l'annonce comme payée
+    return this.prisma.jobPosting.update({
+      where: { id: jobPostingId },
+      data: {
+        status: 'PAID',
+      },
+      include: {
+        skills: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        checkpoints: true,
+      },
+    });
+  }
+
+  /**
+   * Publier une annonce après paiement
+   * @param jobPostingId - ID de l'annonce
+   */
+  async publishJobPosting(jobPostingId: string): Promise<JobPosting> {
+    // Vérifier que l'annonce existe et est payée
+    const jobPosting = await this.prisma.jobPosting.findUnique({
+      where: { id: jobPostingId },
+    });
+
+    if (!jobPosting) {
+      throw new BadRequestException('Annonce introuvable');
+    }
+
+    if (jobPosting.status !== 'PAID') {
+      throw new BadRequestException(
+        "Cette annonce doit être payée avant d'être publiée",
+      );
+    }
+
+    // Publier l'annonce
+    return this.prisma.jobPosting.update({
+      where: { id: jobPostingId },
+      data: {
+        status: 'PUBLISHED',
+      },
+      include: {
+        skills: true,
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        checkpoints: true,
+      },
+    });
+  }
+
+  /**
+   * Récupérer les annonces par statut pour une entreprise
+   * @param userId - ID de l'utilisateur (entreprise)
+   * @param status - Statut des annonces à récupérer (optionnel)
+   */
+  async getJobPostingsByUserIdAndStatus(
+    userId: string,
+    status?: string,
+  ): Promise<JobPosting[]> {
+    const where: Prisma.JobPostingWhereInput = {
+      company: { userId },
+    };
+
+    if (status) {
+      // Type-safe status assignment
+      const validStatuses = [
+        'PENDING_PAYMENT',
+        'PAID',
+        'PUBLISHED',
+        'DRAFT',
+        'EXPIRED',
+        'REJECTED',
+      ];
+      if (validStatuses.includes(status)) {
+        where.status = status as
+          | 'PENDING_PAYMENT'
+          | 'PAID'
+          | 'PUBLISHED'
+          | 'DRAFT'
+          | 'EXPIRED'
+          | 'REJECTED';
+      }
+    }
+
+    return this.prisma.jobPosting.findMany({
+      where,
       include: {
         skills: true,
         company: {

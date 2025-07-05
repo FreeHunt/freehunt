@@ -53,7 +53,7 @@ describe('JobPostingsController', () => {
     title: 'SEO Optimization Specialist',
     description:
       'We are looking for a SEO Optimization Specialist to join our team.',
-    location: 'ONSITE',
+    location: JobPostingLocation.ONSITE,
     isPromoted: false,
     averageDailyRate: 500,
     seniority: 5,
@@ -65,6 +65,7 @@ describe('JobPostingsController', () => {
     ...createJobPostingDto,
     id: '3246540a-3ecd-4912-a909-953c881816fc',
     totalAmount: 5000,
+    status: 'PENDING_PAYMENT', // Ajout du champ status
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -153,6 +154,7 @@ describe('JobPostingsController', () => {
         seniority: 3,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         totalAmount: 12000,
+        status: 'PUBLISHED',
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -167,6 +169,7 @@ describe('JobPostingsController', () => {
         seniority: 4,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         totalAmount: 13000,
+        status: 'PUBLISHED',
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -184,6 +187,7 @@ describe('JobPostingsController', () => {
       seniority: 5,
       companyId: '3246540a-3ecd-4912-a909-953c881816fc',
       totalAmount: 14000,
+      status: 'PUBLISHED',
       createdAt: new Date(),
       updatedAt: new Date(),
       recommended: true,

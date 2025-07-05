@@ -19,6 +19,10 @@ describe('JobPostingsController (e2e)', () => {
     description: 'We are looking for a Frontend Developer to join our team.',
     location: JobPostingLocation.REMOTE,
     isPromoted: true,
+    averageDailyRate: 600,
+    seniority: 3,
+    totalAmount: 12000,
+    status: 'PUBLISHED',
     company: {
       id: '550e8400-e29b-41d4-a716-446655440001',
       name: 'Tech Company',

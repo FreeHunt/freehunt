@@ -80,8 +80,8 @@ export default function CompanyDashboard() {
             <p className="text-gray-600 mb-4">
               Gérez vos offres d&apos;emploi publiées
             </p>
-            <Button variant="outline" className="w-full" disabled>
-              Bientôt disponible
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/job-postings">Voir mes annonces</Link>
             </Button>
           </div>
 

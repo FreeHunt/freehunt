@@ -96,6 +96,15 @@ enum JobPostingLocation {
   REMOTE
 }
 
+enum JobPostingStatus {
+  PENDING_PAYMENT
+  PAID
+  PUBLISHED
+  DRAFT
+  EXPIRED
+  REJECTED
+}
+
 model JobPosting {
   id               String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   company          Company            @relation(fields: [companyId], references: [id])
@@ -109,6 +118,7 @@ model JobPosting {
   ///FAKE:faker.number.int({ min: 0, max: 10 })
   seniority        Int
   totalAmount      Float? // Montant total de la mission (TJM × nombre de jours)
+  status           JobPostingStatus   @default(PENDING_PAYMENT) // Nouveau champ pour gérer le statut
   skills           Skill[]
   checkpoints      Checkpoint[]
   project          Project?

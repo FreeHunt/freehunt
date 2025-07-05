@@ -51,6 +51,15 @@ export enum JobPostingLocation {
   HYBRID = "HYBRID",
 }
 
+export enum JobPostingStatus {
+  PENDING_PAYMENT = "PENDING_PAYMENT",
+  PAID = "PAID",
+  PUBLISHED = "PUBLISHED",
+  DRAFT = "DRAFT",
+  EXPIRED = "EXPIRED",
+  REJECTED = "REJECTED",
+}
+
 export enum CheckpointStatus {
   TODO = "TODO",
   IN_PROGRESS = "IN_PROGRESS",
@@ -96,6 +105,7 @@ export interface JobPosting {
   recommended?: boolean;
   averageDailyRate: number;
   seniority: number;
+  status: JobPostingStatus;
   company?: Company;
   skills?: Skill[];
   totalAmount?: number;

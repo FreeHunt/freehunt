@@ -108,7 +108,8 @@ export async function submitJobPosting(
     return {
       success: true,
       data: response.data,
-      message: "Formulaire soumis avec succès!",
+      message:
+        "Annonce créée avec succès! Un paiement est requis pour la publier.",
     };
   } catch (error) {
     console.error("Erreur lors de la soumission du formulaire:", error);
@@ -118,4 +119,43 @@ export async function submitJobPosting(
       message: "Une erreur est survenue. Veuillez réessayer plus tard.",
     };
   }
+}
+
+/**
+ * Traiter le paiement d'une annonce
+ */
+export async function processJobPostingPayment(
+  jobPostingId: string,
+  paymentData?: Record<string, unknown>,
+): Promise<JobPosting> {
+  const response = await api.post<JobPosting>(
+    `/job-postings/${jobPostingId}/payment`,
+    paymentData || {},
+  );
+  return response.data;
+}
+
+/**
+ * Publier une annonce après paiement
+ */
+export async function publishJobPosting(
+  jobPostingId: string,
+): Promise<JobPosting> {
+  const response = await api.post<JobPosting>(
+    `/job-postings/${jobPostingId}/publish`,
+  );
+  return response.data;
+}
+
+/**
+ * Récupérer les annonces par statut pour un utilisateur
+ */
+export async function getJobPostingsByUserIdAndStatus(
+  userId: string,
+  status: string,
+): Promise<JobPosting[]> {
+  const response = await api.get<JobPosting[]>(
+    `/job-postings/user/${userId}/status/${status}`,
+  );
+  return response.data;
 }
