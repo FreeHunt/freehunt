@@ -39,6 +39,25 @@ export class MessagesService {
   async getMessagesByConversationId(conversationId: string) {
     return await this.prisma.message.findMany({
       where: { conversationId },
+      orderBy: {
+        createdAt: 'asc', // Tri par date de création croissante (plus ancien en premier)
+      },
+      include: {
+        sender: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+          },
+        },
+        receiver: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+          },
+        },
+      },
     });
   }
 }
