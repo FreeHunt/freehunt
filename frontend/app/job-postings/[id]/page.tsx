@@ -262,7 +262,10 @@ export default function JobPostingDetail() {
   };
 
   // Variables booléennes calculées pour éviter les erreurs TypeScript
-  const hasStripeAccount = freelance?.stripeAccountId !== null && freelance?.stripeAccountId !== undefined && freelance?.stripeAccountId !== "";
+  const hasStripeAccount =
+    freelance?.stripeAccountId !== null &&
+    freelance?.stripeAccountId !== undefined &&
+    freelance?.stripeAccountId !== "";
   const showStripeConnectButton = freelance && !hasStripeAccount;
 
   return (
@@ -520,79 +523,84 @@ export default function JobPostingDetail() {
             </Card>
 
             {/* Actions */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-3">
-                  {/* Avertissement Stripe */}
-                  {showStripeConnectButton && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center space-y-2">
-                      <p className="text-red-800 text-sm font-medium">
-                        ⚠️ Compte Stripe requis
-                      </p>
-                      <p className="text-red-700 text-xs">
-                        Vous devez connecter votre compte Stripe pour candidater
-                      </p>
-                      <FreeHuntButton
-                        variant="outline"
-                        size="sm"
-                        onClick={() => router.push("/profile/freelance")}
-                        className="w-full mt-2"
-                      >
-                        Configurer mon compte Stripe
-                      </FreeHuntButton>
-                    </div>
-                  )}
-
-                  <FreeHuntButton
-                    className="w-full"
-                    onClick={handleApply}
-                    disabled={
-                      isApplying || 
-                      (projectExists && !candidate) || 
-                      (!candidate && !!freelance && (!freelance.stripeAccountId))
-                    }
-                  >
-                    {isApplying ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <>
-                        {projectExists && !candidate
-                          ? "Offre pourvue"
-                          : candidate
-                          ? "Annuler ma candidature"
-                          : showStripeConnectButton
-                          ? "Connecter Stripe pour postuler"
-                          : "Postuler à cette offre"}
-                      </>
+            {user?.role !== UserRole.COMPANY && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-3">
+                    {/* Avertissement Stripe */}
+                    {showStripeConnectButton && (
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center space-y-2">
+                        <p className="text-red-800 text-sm font-medium">
+                          ⚠️ Compte Stripe requis
+                        </p>
+                        <p className="text-red-700 text-xs">
+                          Vous devez connecter votre compte Stripe pour
+                          candidater
+                        </p>
+                        <FreeHuntButton
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push("/profile/freelance")}
+                          className="w-full mt-2"
+                        >
+                          Configurer mon compte Stripe
+                        </FreeHuntButton>
+                      </div>
                     )}
-                  </FreeHuntButton>
-                  {projectExists && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
-                      <p className="text-amber-800 text-sm font-medium">
-                        ⚠️ Cette offre a déjà été pourvue
-                      </p>
-                      <p className="text-amber-700 text-xs mt-1">
-                        Un freelance a déjà été sélectionné pour cette mission
-                      </p>
-                    </div>
-                  )}
-                  <FreeHuntButton
-                    variant="outline"
-                    theme="secondary"
-                    className="w-full"
-                  >
-                    Ajouter aux favoris
-                  </FreeHuntButton>
-                  <FreeHuntButton
-                    variant="outline"
-                    theme="secondary"
-                    className="w-full"
-                  >
-                    Contacter l&apos;entreprise
-                  </FreeHuntButton>
-                </div>
-              </CardContent>
-            </Card>
+
+                    <FreeHuntButton
+                      className="w-full"
+                      onClick={handleApply}
+                      disabled={
+                        isApplying ||
+                        (projectExists && !candidate) ||
+                        (!candidate &&
+                          !!freelance &&
+                          !freelance.stripeAccountId)
+                      }
+                    >
+                      {isApplying ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <>
+                          {projectExists && !candidate
+                            ? "Offre pourvue"
+                            : candidate
+                            ? "Annuler ma candidature"
+                            : showStripeConnectButton
+                            ? "Connecter Stripe pour postuler"
+                            : "Postuler à cette offre"}
+                        </>
+                      )}
+                    </FreeHuntButton>
+                    {projectExists && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-center">
+                        <p className="text-amber-800 text-sm font-medium">
+                          ⚠️ Cette offre a déjà été pourvue
+                        </p>
+                        <p className="text-amber-700 text-xs mt-1">
+                          Un freelance a déjà été sélectionné pour cette mission
+                        </p>
+                      </div>
+                    )}
+                    <FreeHuntButton
+                      variant="outline"
+                      theme="secondary"
+                      className="w-full"
+                    >
+                      Ajouter aux favoris
+                    </FreeHuntButton>
+                    <FreeHuntButton
+                      variant="outline"
+                      theme="secondary"
+                      className="w-full"
+                    >
+                      Contacter l&apos;entreprise
+                    </FreeHuntButton>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Informations supplémentaires */}
             <Card>
