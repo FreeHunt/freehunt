@@ -4,18 +4,28 @@ import { UpdateProjectDto } from '@/src/projects/dto/update-project.dto';
 import { PrismaService } from '@/src/common/prisma/prisma.service';
 import { OnEvent, EventEmitter2 } from '@nestjs/event-emitter';
 import { CandidateAcceptedEvent } from '../job-postings/dto/candidate-accepted-event.dto';
+import { ConversationsService } from '../conversations/conversations.service';
 
 @Injectable()
 export class ProjectsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly conversationsService: ConversationsService,
   ) {}
 
   @OnEvent('candidate.accepted')
   async handleCandidateAcceptedEvent(payload: CandidateAcceptedEvent) {
     const jobPosting = await this.prismaService.jobPosting.findUnique({
       where: { id: payload.jobPostingId },
+      include: {
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        checkpoints: true,
+      },
     });
     if (!jobPosting) {
       throw new NotFoundException(
@@ -23,16 +33,76 @@ export class ProjectsService {
       );
     }
 
+    // Récupérer les informations du freelance
+    const freelance = await this.prismaService.freelance.findUnique({
+      where: { id: payload.freelancerId },
+      include: {
+        user: true,
+      },
+    });
+    if (!freelance) {
+      throw new NotFoundException(
+        `Freelance with id ${payload.freelancerId} does not exist`,
+      );
+    }
+
+    // Calculer les dates du projet basées sur les checkpoints
+    const checkpointDates = jobPosting.checkpoints.map(
+      (cp) => new Date(cp.date),
+    );
+    const startDate =
+      checkpointDates.length > 0
+        ? new Date(Math.min(...checkpointDates.map((d) => d.getTime())))
+        : new Date();
+    const endDate =
+      checkpointDates.length > 0
+        ? new Date(Math.max(...checkpointDates.map((d) => d.getTime())))
+        : null;
+
+    // Calculer le montant total du projet
+    const totalAmount = jobPosting.checkpoints.reduce(
+      (sum, cp) => sum + cp.amount,
+      0,
+    );
+
+    // Créer la conversation entre l'entreprise et le freelance
+    const conversation = await this.conversationsService.createConversation({
+      senderId: jobPosting.company.user.id,
+      receiverId: freelance.user.id,
+      projectId: undefined, // Pas de projectId dans le modèle Conversation
+    });
+
+    // Créer le projet avec la conversation
     const project = await this.create({
       freelanceId: payload.freelancerId,
       jobPostingId: payload.jobPostingId,
       companyId: jobPosting.companyId,
       name: jobPosting.title,
       description: jobPosting.description,
-      startDate: new Date(),
-      endDate: new Date(),
-      amount: jobPosting.averageDailyRate,
+      startDate: startDate,
+      endDate: endDate,
+      amount: totalAmount,
+      conversationId: conversation.id,
     });
+
+    // Pas besoin de mettre à jour la conversation car la relation se fait via le projet
+
+    // Créer un message de bienvenue automatique
+    await this.prismaService.message.create({
+      data: {
+        conversationId: conversation.id,
+        senderId: jobPosting.company.user.id,
+        receiverId: freelance.user.id,
+        content: `🎉 Félicitations ! Votre candidature pour le projet "${jobPosting.title}" a été acceptée. Cette conversation vous permettra de communiquer avec l'équipe tout au long du projet.`,
+      },
+    });
+
+    console.log(
+      `Project ${project.id} created for accepted candidate ${payload.candidateId}`,
+    );
+    console.log(
+      `Conversation ${conversation.id} created between company ${jobPosting.company.user.id} and freelance ${freelance.user.id}`,
+    );
 
     return project;
   }

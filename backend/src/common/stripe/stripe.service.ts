@@ -24,7 +24,7 @@ export class StripeService {
   async handleWebhook(
     body: Buffer,
     signature: string,
-  ): Promise<{ received: boolean; projectId?: string | null }> {
+  ): Promise<{ received: boolean; jobPostingId?: string | null }> {
     let event: Stripe.Event;
 
     try {
@@ -40,17 +40,17 @@ export class StripeService {
       );
     }
 
-    const result: { received: boolean; projectId?: string | null } = {
+    const result: { received: boolean; jobPostingId?: string | null } = {
       received: true,
     };
 
     switch (event.type) {
       case 'checkout.session.completed': {
         const checkoutSessionCompleted = event.data.object;
-        const projectId = await this.handlePaymentSuccess(
+        const jobPostingId = await this.handlePaymentSuccess(
           checkoutSessionCompleted,
         );
-        result.projectId = projectId;
+        result.jobPostingId = jobPostingId;
         break;
       }
       case 'checkout.session.expired': {
@@ -77,18 +77,9 @@ export class StripeService {
       const { metadata } = session;
 
       if (metadata?.type === 'job_posting_payment' && metadata?.jobPostingId) {
-        // Récupérer le job posting avec toutes ses informations
+        // Récupérer le job posting
         const jobPosting = await this.prismaService.jobPosting.findUnique({
           where: { id: metadata.jobPostingId },
-          include: {
-            company: {
-              include: {
-                user: true,
-              },
-            },
-            skills: true,
-            checkpoints: true,
-          },
         });
 
         if (!jobPosting) {
@@ -103,51 +94,17 @@ export class StripeService {
           },
         });
 
-        // Calculer les dates du projet basées sur les checkpoints
-        const checkpointDates = jobPosting.checkpoints.map(
-          (cp) => new Date(cp.date),
-        );
-        const startDate =
-          checkpointDates.length > 0
-            ? new Date(Math.min(...checkpointDates.map((d) => d.getTime())))
-            : new Date();
-        const endDate =
-          checkpointDates.length > 0
-            ? new Date(Math.max(...checkpointDates.map((d) => d.getTime())))
-            : null;
-
-        // Calculer le montant total du projet
-        const totalAmount = jobPosting.checkpoints.reduce(
-          (sum, cp) => sum + cp.amount,
-          0,
-        );
-
-        // Créer automatiquement un projet basé sur le job posting
-        const project = await this.prismaService.project.create({
-          data: {
-            name: jobPosting.title,
-            description: jobPosting.description,
-            amount: totalAmount,
-            startDate: startDate,
-            endDate: endDate,
-            jobPostingId: jobPosting.id,
-            companyId: jobPosting.companyId,
-          },
-        });
-
         console.log(
           `Job posting ${metadata.jobPostingId} payment successful - status updated to PUBLISHED`,
         );
+
+        // Stocker l'ID de session Stripe dans les métadonnées
         console.log(
-          `Project ${project.id} created automatically for job posting ${metadata.jobPostingId}`,
+          `Stripe session ${session.id} processed for job posting ${metadata.jobPostingId}`,
         );
 
-        // Stocker l'ID de session Stripe et du projet dans les métadonnées
-        console.log(
-          `Stripe session ${session.id} processed for job posting ${metadata.jobPostingId}, project ${project.id} created`,
-        );
-
-        return project.id;
+        // Retourner l'ID du job posting (pas de projet créé à ce stade)
+        return metadata.jobPostingId;
       }
     } catch (error) {
       console.error('Error handling payment success:', error);

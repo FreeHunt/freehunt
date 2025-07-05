@@ -5,7 +5,7 @@ export class CreateConversationDto {
   @IsOptional()
   @IsUUID()
   @ApiProperty()
-  projectId: string;
+  projectId?: string | null;
 
   @IsUUID()
   @ApiProperty()

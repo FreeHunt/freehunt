@@ -8,16 +8,26 @@ export class ConversationsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createConversation(data: CreateConversationDto): Promise<Conversation> {
-    return this.prisma.conversation.create({
-      data: {
-        receiverId: data.receiverId,
-        senderId: data.senderId,
-        project: {
-          connect: {
-            id: data.projectId,
-          },
+    const conversationData: {
+      receiverId: string;
+      senderId: string;
+      project?: { connect: { id: string } };
+    } = {
+      receiverId: data.receiverId,
+      senderId: data.senderId,
+    };
+
+    // Connecter le projet seulement si projectId est fourni
+    if (data.projectId) {
+      conversationData.project = {
+        connect: {
+          id: data.projectId,
         },
-      },
+      };
+    }
+
+    return this.prisma.conversation.create({
+      data: conversationData,
     });
   }
 
