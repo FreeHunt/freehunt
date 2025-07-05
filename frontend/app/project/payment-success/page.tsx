@@ -21,7 +21,7 @@ function PaymentSuccessContent() {
 
     if (sessionIdParam && jobPostingIdParam) {
       setSessionId(sessionIdParam);
-      
+
       // Récupérer l'ID du projet créé automatiquement
       fetchProjectId(jobPostingIdParam);
     } else {
@@ -61,7 +61,9 @@ function PaymentSuccessContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-freehunt-main mx-auto mb-4" />
-          <p className="text-gray-600">Vérification du paiement et création du projet...</p>
+          <p className="text-gray-600">
+            Vérification du paiement et création du projet...
+          </p>
         </div>
       </div>
     );
@@ -76,7 +78,8 @@ function PaymentSuccessContent() {
             Paiement réussi !
           </h1>
           <p className="text-gray-600">
-            Votre annonce a été payée avec succès et un projet a été créé automatiquement.
+            Votre annonce a été payée avec succès et un projet a été créé
+            automatiquement.
           </p>
         </div>
 
@@ -91,7 +94,8 @@ function PaymentSuccessContent() {
           {projectId ? (
             <>
               <p className="text-sm text-green-700 mt-1">
-                Un <strong>projet</strong> a été créé automatiquement pour gérer cette mission.
+                Un <strong>projet</strong> a été créé automatiquement pour gérer
+                cette mission.
               </p>
               <p className="text-sm text-green-700 mt-1">
                 Vous serez redirigé vers votre projet dans quelques secondes...
@@ -113,9 +117,7 @@ function PaymentSuccessContent() {
         <div className="space-y-3">
           {projectId ? (
             <Button asChild className="w-full">
-              <Link href={`/project/${projectId}`}>
-                Accéder au projet
-              </Link>
+              <Link href={`/project/${projectId}`}>Accéder au projet</Link>
             </Button>
           ) : (
             <Button disabled className="w-full">

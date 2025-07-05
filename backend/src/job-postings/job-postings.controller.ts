@@ -370,7 +370,8 @@ export class JobPostingsController {
   @Get(':id/project')
   @ApiOperation({
     summary: 'Get project associated with a job posting',
-    description: 'Retrieve the project ID associated with a job posting if it exists',
+    description:
+      'Retrieve the project ID associated with a job posting if it exists',
   })
   @ApiParam({
     name: 'id',

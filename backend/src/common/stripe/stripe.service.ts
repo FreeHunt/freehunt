@@ -152,7 +152,7 @@ export class StripeService {
     } catch (error) {
       console.error('Error handling payment success:', error);
     }
-    
+
     return null;
   }
 
