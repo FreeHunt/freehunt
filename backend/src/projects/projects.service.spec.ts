@@ -118,7 +118,9 @@ describe('ProjectsService', () => {
       prismaService.freelance.findUnique.mockResolvedValue(
         mockFreelance as any,
       );
-      conversationsService.createConversation.mockResolvedValue(mockConversation as any);
+      conversationsService.createConversation.mockResolvedValue(
+        mockConversation as any,
+      );
       prismaService.project.create.mockResolvedValue(mockProject as any);
       prismaService.message.create.mockResolvedValue({} as any);
 
