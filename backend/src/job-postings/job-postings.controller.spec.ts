@@ -444,4 +444,24 @@ describe('JobPostingsController', () => {
       expect(result.data[0].recommended).toBe(true);
     });
   });
+
+  describe('canBeCancelled', () => {
+    it('should check if a job posting can be cancelled', async () => {
+      const canBeCancelledResult = { canBeCancelled: true };
+      jest.spyOn(jobPostingsService, 'canBeCancelled').mockResolvedValue(true);
+
+      expect(await jobPostingsController.canBeCancelled(jobPosting.id)).toEqual(
+        canBeCancelledResult,
+      );
+    });
+
+    it('should return false if job posting cannot be cancelled', async () => {
+      const canBeCancelledResult = { canBeCancelled: false };
+      jest.spyOn(jobPostingsService, 'canBeCancelled').mockResolvedValue(false);
+
+      expect(await jobPostingsController.canBeCancelled(jobPosting.id)).toEqual(
+        canBeCancelledResult,
+      );
+    });
+  });
 });

@@ -6,13 +6,22 @@ import {
   getJobPostingsByUserId,
   processJobPostingPayment,
   publishJobPosting,
+  deleteJobPosting,
+  canJobPostingBeCancelled,
 } from "@/actions/jobPostings";
 import { JobPosting, JobPostingStatus, User } from "@/lib/interfaces";
 import { showToast } from "@/lib/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreditCard, Eye, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import {
+  CreditCard,
+  Eye,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  X,
+} from "lucide-react";
 
 const getStatusBadge = (status: JobPostingStatus) => {
   switch (status) {
@@ -45,42 +54,83 @@ const getStatusBadge = (status: JobPostingStatus) => {
 const getStatusAction = (
   jobPosting: JobPosting,
   onAction: (action: string, id: string) => void,
+  canBeCancelled: boolean = false,
 ) => {
   switch (jobPosting.status) {
     case JobPostingStatus.PENDING_PAYMENT:
       return (
-        <Button
-          size="sm"
-          onClick={() => onAction("pay", jobPosting.id)}
-          className="flex items-center gap-2"
-        >
-          <CreditCard size={16} />
-          Payer ({jobPosting.totalAmount ? `${jobPosting.totalAmount}€` : "N/A"}
-          )
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => onAction("pay", jobPosting.id)}
+            className="flex items-center gap-2"
+          >
+            <CreditCard size={16} />
+            Payer (
+            {jobPosting.totalAmount ? `${jobPosting.totalAmount}€` : "N/A"})
+          </Button>
+          {canBeCancelled && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onAction("cancel", jobPosting.id)}
+              className="flex items-center gap-2"
+            >
+              <X size={16} />
+              Annuler
+            </Button>
+          )}
+        </div>
       );
     case JobPostingStatus.PAID:
       return (
-        <Button
-          size="sm"
-          onClick={() => onAction("publish", jobPosting.id)}
-          className="flex items-center gap-2"
-        >
-          <CheckCircle size={16} />
-          Publier l&apos;annonce
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => onAction("publish", jobPosting.id)}
+            className="flex items-center gap-2"
+          >
+            <CheckCircle size={16} />
+            Publier l&apos;annonce
+          </Button>
+          {canBeCancelled && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onAction("cancel", jobPosting.id)}
+              className="flex items-center gap-2"
+            >
+              <X size={16} />
+              Annuler
+            </Button>
+          )}
+        </div>
       );
     case JobPostingStatus.PUBLISHED:
       return (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => onAction("view", jobPosting.id)}
-          className="flex items-center gap-2"
-        >
-          <Eye size={16} />
-          Voir l&apos;annonce
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onAction("view", jobPosting.id)}
+            className="flex items-center gap-2"
+          >
+            <Eye size={16} />
+            Voir l&apos;annonce
+          </Button>
+          {canBeCancelled && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => onAction("cancel", jobPosting.id)}
+              className="flex items-center gap-2"
+              title="Aucune candidature acceptée, l'annonce peut encore être annulée"
+            >
+              <X size={16} />
+              Annuler
+            </Button>
+          )}
+        </div>
       );
     default:
       return null;
@@ -91,6 +141,9 @@ export default function CompanyJobPostingsDashboard() {
   const [user, setUser] = useState<User | null>(null);
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancellableJobPostings, setCancellableJobPostings] = useState<
+    Set<string>
+  >(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,6 +165,20 @@ export default function CompanyJobPostingsDashboard() {
 
         const userJobPostings = await getJobPostingsByUserId(currentUser.id);
         setJobPostings(userJobPostings);
+
+        // Vérifier quelles annonces peuvent être annulées
+        const cancellableSet = new Set<string>();
+        await Promise.all(
+          userJobPostings.map(async (jobPosting) => {
+            const canBeCancelled = await canJobPostingBeCancelled(
+              jobPosting.id,
+            );
+            if (canBeCancelled) {
+              cancellableSet.add(jobPosting.id);
+            }
+          }),
+        );
+        setCancellableJobPostings(cancellableSet);
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
         showToast.error("Erreur lors du chargement des annonces");
@@ -138,6 +205,24 @@ export default function CompanyJobPostingsDashboard() {
           showToast.success("Annonce publiée avec succès!");
           break;
 
+        case "cancel":
+          // Demander confirmation avant suppression
+          if (
+            window.confirm(
+              "Êtes-vous sûr de vouloir annuler et supprimer cette annonce ?\n\nCette action est irréversible. L'annonce sera supprimée définitivement ainsi que toutes les candidatures associées.\n\nNote: Cette action n'est possible que si aucune candidature n'a été acceptée (aucun projet créé).",
+            )
+          ) {
+            const result = await deleteJobPosting(jobPostingId);
+            if (result.success) {
+              showToast.success(result.message);
+            } else {
+              showToast.error(result.message);
+            }
+          } else {
+            return; // Annulation par l'utilisateur, pas besoin de recharger
+          }
+          break;
+
         case "view":
           window.open(`/job-postings/${jobPostingId}`, "_blank");
           return; // Pas besoin de recharger les données
@@ -147,13 +232,34 @@ export default function CompanyJobPostingsDashboard() {
       }
 
       // Recharger les données après l'action
-      if (user) {
-        const updatedJobPostings = await getJobPostingsByUserId(user.id);
-        setJobPostings(updatedJobPostings);
-      }
+      await refreshData();
     } catch (error) {
       console.error(`Erreur lors de l'action ${action}:`, error);
       showToast.error(`Erreur lors de l'action ${action}`);
+    }
+  };
+
+  const refreshData = async () => {
+    if (!user) return;
+
+    try {
+      const userJobPostings = await getJobPostingsByUserId(user.id);
+      setJobPostings(userJobPostings);
+
+      // Vérifier quelles annonces peuvent être annulées
+      const cancellableSet = new Set<string>();
+      await Promise.all(
+        userJobPostings.map(async (jobPosting) => {
+          const canBeCancelled = await canJobPostingBeCancelled(jobPosting.id);
+          if (canBeCancelled) {
+            cancellableSet.add(jobPosting.id);
+          }
+        }),
+      );
+      setCancellableJobPostings(cancellableSet);
+    } catch (error) {
+      console.error("Erreur lors du rechargement des données:", error);
+      showToast.error("Erreur lors du rechargement des annonces");
     }
   };
 
@@ -273,7 +379,11 @@ export default function CompanyJobPostingsDashboard() {
                     </div>
                     <div className="flex items-center gap-3">
                       {getStatusBadge(jobPosting.status)}
-                      {getStatusAction(jobPosting, handleAction)}
+                      {getStatusAction(
+                        jobPosting,
+                        handleAction,
+                        cancellableJobPostings.has(jobPosting.id),
+                      )}
                     </div>
                   </div>
                 </CardHeader>

@@ -59,9 +59,7 @@ const profileSchema = z.object({
       }),
     )
     .nonempty("Au moins une compétence est requise."),
-  tjm: z
-    .number()
-    .min(1, "Le tarif journalier doit être supérieur à 0"),
+  tjm: z.number().min(1, "Le tarif journalier doit être supérieur à 0"),
   typePresence: z
     .string()
     .refine((val) => validPresenceForZod.includes(val), {
@@ -70,9 +68,7 @@ const profileSchema = z.object({
     .refine((val) => val !== "", {
       message: "Le type de présence est requis",
     }),
-  seniority: z
-    .number()
-    .min(0, "L'expérience doit être un nombre positif"),
+  seniority: z.number().min(0, "L'expérience doit être un nombre positif"),
 });
 
 const checkpointSchema = z.object({
@@ -385,11 +381,11 @@ export default function MultiStepForm() {
     setFormData((prev) => ({
       ...prev,
       checkpoints: prev.checkpoints.map((checkpoint) =>
-        checkpoint.id === id 
-          ? { 
-              ...checkpoint, 
-              [field]: field === "amount" ? (parseFloat(value) || 0) : value 
-            } 
+        checkpoint.id === id
+          ? {
+              ...checkpoint,
+              [field]: field === "amount" ? parseFloat(value) || 0 : value,
+            }
           : checkpoint,
       ),
     }));
@@ -537,13 +533,13 @@ export default function MultiStepForm() {
     >,
   ) => {
     const { name, value } = e.target;
-    
+
     // Convert numeric fields to numbers
     let convertedValue: string | number = value;
-    if (name === 'tjm' || name === 'seniority') {
+    if (name === "tjm" || name === "seniority") {
       convertedValue = parseFloat(value) || 0;
     }
-    
+
     setFormData({
       ...formData,
       [name]: convertedValue,
@@ -1453,9 +1449,7 @@ export default function MultiStepForm() {
                     <p className="text-gray-500 text-sm">Montant réparti</p>
                     <p className="font-medium text-lg">
                       {formData.checkpoints.reduce((sum, checkpoint) => {
-                        return (
-                          sum + (checkpoint.amount || 0)
-                        );
+                        return sum + (checkpoint.amount || 0);
                       }, 0)}{" "}
                       €
                     </p>

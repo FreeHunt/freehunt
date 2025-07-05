@@ -48,6 +48,11 @@ export class JobPostingsService {
     return this.prisma.jobPosting.findMany({
       where: {
         status: 'PUBLISHED', // Ne retourner que les annonces publiées
+        candidates: {
+          none: {
+            status: 'ACCEPTED', // Exclure les annonces avec candidature acceptée
+          },
+        },
       },
       include: {
         skills: true,
@@ -104,6 +109,31 @@ export class JobPostingsService {
   }
 
   async remove(id: string): Promise<JobPosting> {
+    // Vérifier qu'aucune candidature n'a été acceptée pour cette annonce
+    const acceptedCandidate = await this.prisma.candidate.findFirst({
+      where: {
+        jobPostingId: id,
+        status: 'ACCEPTED',
+      },
+    });
+
+    if (acceptedCandidate) {
+      throw new BadRequestException(
+        'Cette annonce ne peut pas être supprimée car une candidature a déjà été acceptée.',
+      );
+    }
+
+    // Supprimer d'abord les candidatures associées
+    await this.prisma.candidate.deleteMany({
+      where: { jobPostingId: id },
+    });
+
+    // Supprimer les checkpoints associés
+    await this.prisma.checkpoint.deleteMany({
+      where: { jobPostingId: id },
+    });
+
+    // Supprimer l'annonce
     return this.prisma.jobPosting.delete({
       where: { id },
       include: {
@@ -149,6 +179,11 @@ export class JobPostingsService {
 
     const where: Prisma.JobPostingWhereInput = {
       status: 'PUBLISHED', // Ne rechercher que dans les annonces publiées
+      candidates: {
+        none: {
+          status: 'ACCEPTED', // Exclure les annonces avec candidature acceptée
+        },
+      },
     };
     const andConditions: Prisma.JobPostingWhereInput[] = [];
 
@@ -409,5 +444,17 @@ export class JobPostingsService {
         checkpoints: true,
       },
     });
+  }
+
+  async canBeCancelled(id: string): Promise<boolean> {
+    // Vérifier qu'aucune candidature n'a été acceptée pour cette annonce
+    const acceptedCandidate = await this.prisma.candidate.findFirst({
+      where: {
+        jobPostingId: id,
+        status: 'ACCEPTED',
+      },
+    });
+
+    return !acceptedCandidate;
   }
 }

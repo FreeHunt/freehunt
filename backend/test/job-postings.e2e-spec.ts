@@ -128,4 +128,16 @@ describe('JobPostingsController (e2e)', () => {
       .expect(200)
       .expect([jobPostingResponse]);
   });
+
+  it('/job-postings/:id/can-be-cancelled (GET)', () => {
+    return request(app.getHttpServer())
+      .get(`/job-postings/${jobPostingResponse.id}/can-be-cancelled`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('canBeCancelled');
+        expect(
+          typeof (res.body as { canBeCancelled: boolean }).canBeCancelled,
+        ).toBe('boolean');
+      });
+  });
 });

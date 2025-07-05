@@ -269,4 +269,31 @@ export class JobPostingsController {
       status,
     );
   }
+
+  @Get(':id/can-be-cancelled')
+  @ApiOperation({
+    summary: 'Check if a job posting can be cancelled',
+    description:
+      'Check if a job posting can be cancelled (no project associated)',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the job posting (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns whether the job posting can be cancelled',
+    schema: {
+      type: 'object',
+      properties: {
+        canBeCancelled: { type: 'boolean' },
+      },
+    },
+  })
+  async canBeCancelled(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<{ canBeCancelled: boolean }> {
+    const canBeCancelled = await this.jobPostingsService.canBeCancelled(id);
+    return { canBeCancelled };
+  }
 }

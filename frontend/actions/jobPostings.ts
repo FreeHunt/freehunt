@@ -159,3 +159,41 @@ export async function getJobPostingsByUserIdAndStatus(
   );
   return response.data;
 }
+
+/**
+ * Supprimer une annonce de mission
+ */
+export async function deleteJobPosting(
+  jobPostingId: string,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    await api.delete(`/job-postings/${jobPostingId}`);
+    return {
+      success: true,
+      message: "Annonce supprimée avec succès",
+    };
+  } catch (error) {
+    console.error("Erreur lors de la suppression:", error);
+    return {
+      success: false,
+      message: "Erreur lors de la suppression de l'annonce",
+    };
+  }
+}
+
+/**
+ * Vérifier si une annonce peut être annulée
+ */
+export async function canJobPostingBeCancelled(
+  jobPostingId: string,
+): Promise<boolean> {
+  try {
+    const response = await api.get<{ canBeCancelled: boolean }>(
+      `/job-postings/${jobPostingId}/can-be-cancelled`,
+    );
+    return response.data.canBeCancelled;
+  } catch (error) {
+    console.error("Erreur lors de la vérification:", error);
+    return false;
+  }
+}
