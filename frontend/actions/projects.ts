@@ -44,10 +44,35 @@ export const checkProjectExistsForJobPosting = async (
   jobPostingId: string,
 ): Promise<boolean> => {
   try {
-    const response = await api.get<boolean>(`/projects/exists/job-posting/${jobPostingId}`);
+    const response = await api.get<boolean>(
+      `/projects/exists/job-posting/${jobPostingId}`,
+    );
     return response.data;
   } catch (error) {
     console.error("Error checking if project exists for job posting:", error);
     return false;
+  }
+};
+
+/**
+ * Récupérer un projet avec sa conversation et tous les détails
+ */
+export const getProjectWithConversation = async (projectId: string) => {
+  try {
+    const [project, conversation] = await Promise.all([
+      getProject(projectId),
+      api
+        .get(`/conversations/project/${projectId}`)
+        .then((res) => res.data)
+        .catch(() => null),
+    ]);
+
+    return {
+      project,
+      conversation,
+    };
+  } catch (error) {
+    console.error("Error fetching project with conversation:", error);
+    throw error;
   }
 };

@@ -59,10 +59,7 @@ const profileSchema = z.object({
       }),
     )
     .nonempty("Au moins une compétence est requise."),
-  tjm: z
-    .string()
-    .min(1, "Le tarif journalier est requis")
-    .regex(/^\d+$/, "Le tarif doit être un nombre valide"),
+  tjm: z.number().min(1, "Le tarif journalier doit être supérieur à 0"),
   typePresence: z
     .string()
     .refine((val) => validPresenceForZod.includes(val), {
@@ -71,10 +68,7 @@ const profileSchema = z.object({
     .refine((val) => val !== "", {
       message: "Le type de présence est requis",
     }),
-  seniority: z
-    .string()
-    .min(0, "L'expérience doit être un nombre positif")
-    .regex(/^\d+$/, "Le niveau d'expérience doit être un nombre valide"),
+  seniority: z.number().min(0, "L'expérience doit être un nombre positif"),
 });
 
 const checkpointSchema = z.object({
@@ -101,54 +95,19 @@ const checkpointSchema = z.object({
     CheckpointStatus.DELAYED,
     CheckpointStatus.CANCELED,
   ]),
-  amount: z.string().regex(/^\d+$/, "Le montant doit être un nombre valide"),
+  amount: z.number().min(0, "Le montant doit être supérieur ou égal à 0"),
 });
 
 // Schéma complet du formulaire
-const formSchema = z
-  .object({
-    jobTitle: jobSchema.shape.jobTitle,
-    jobDescription: jobSchema.shape.jobDescription,
-    skills: profileSchema.shape.skills,
-    tjm: profileSchema.shape.tjm,
-    typePresence: profileSchema.shape.typePresence,
-    seniority: profileSchema.shape.seniority,
-    checkpoints: z.array(checkpointSchema),
-  })
-  .refine(
-    (data) => {
-      // Validation personnalisée : la somme des montants des checkpoints doit égaler le montant total
-      if (data.checkpoints.length === 0) return true;
-
-      // Calculer le nombre de jours à partir des checkpoints
-      const latestDate = data.checkpoints.reduce((latest, checkpoint) => {
-        if (!checkpoint.date) return latest;
-        const checkpointDate = new Date(checkpoint.date);
-        return !latest || checkpointDate > latest ? checkpointDate : latest;
-      }, null as Date | null);
-
-      if (!latestDate) return true; // Pas de date définie
-
-      const today = new Date();
-      const diffTime = latestDate.getTime() - today.getTime();
-      const workingDays = Math.max(
-        1,
-        Math.ceil(diffTime / (1000 * 60 * 60 * 24)),
-      );
-
-      const totalAmount = parseInt(data.tjm) * workingDays;
-      const checkpointsTotal = data.checkpoints.reduce((sum, checkpoint) => {
-        return sum + (parseInt(checkpoint.amount) || 0);
-      }, 0);
-
-      return checkpointsTotal === totalAmount;
-    },
-    {
-      message:
-        "La somme des montants des checkpoints doit être égale au montant total de la mission",
-      path: ["checkpoints"], // L'erreur sera associée au champ checkpoints
-    },
-  );
+const formSchema = z.object({
+  jobTitle: jobSchema.shape.jobTitle,
+  jobDescription: jobSchema.shape.jobDescription,
+  skills: profileSchema.shape.skills,
+  tjm: profileSchema.shape.tjm,
+  typePresence: profileSchema.shape.typePresence,
+  seniority: profileSchema.shape.seniority,
+  checkpoints: z.array(checkpointSchema),
+});
 
 // Type inféré à partir du schéma Zod
 export type FormData = Omit<
@@ -172,9 +131,9 @@ export default function MultiStepForm() {
     jobTitle: "",
     jobDescription: "",
     skills: [],
-    tjm: "",
-    typePresence: "",
-    seniority: "",
+    tjm: 1, // Set minimum valid value instead of 0
+    typePresence: "REMOTE", // Set default valid value instead of empty string
+    seniority: 0,
     checkpoints: [],
   });
 
@@ -269,7 +228,7 @@ export default function MultiStepForm() {
 
   // Fonction pour calculer le montant total de la mission (TJM × Jours travaillés)
   const getTotalMissionAmount = useCallback(() => {
-    const tjm = parseInt(formData.tjm) || 0;
+    const tjm = formData.tjm || 0;
     const workingDays = getCalculatedWorkingDays();
     return tjm * workingDays;
   }, [formData.tjm, getCalculatedWorkingDays]);
@@ -282,7 +241,7 @@ export default function MultiStepForm() {
     if (formData.checkpoints.length === 1) {
       // Une seule tâche : prend tout le montant automatiquement
       const checkpoint = formData.checkpoints[0];
-      if (parseInt(checkpoint.amount.toString()) !== totalAmount) {
+      if (checkpoint.amount !== totalAmount) {
         const updatedCheckpoints = formData.checkpoints.map((cp) => ({
           ...cp,
           amount: totalAmount,
@@ -301,7 +260,7 @@ export default function MultiStepForm() {
   const isAmountFullyAllocated = useCallback(() => {
     const totalAmount = getTotalMissionAmount();
     const allocatedAmount = formData.checkpoints.reduce((sum, checkpoint) => {
-      return sum + (parseInt(checkpoint.amount.toString()) || 0);
+      return sum + (checkpoint.amount || 0);
     }, 0);
     return totalAmount > 0 && allocatedAmount === totalAmount;
   }, [formData.checkpoints, getTotalMissionAmount]);
@@ -310,7 +269,7 @@ export default function MultiStepForm() {
   const getRemainingAmount = () => {
     const totalAmount = getTotalMissionAmount();
     const usedAmount = formData.checkpoints.reduce((sum, checkpoint) => {
-      return sum + (parseInt(checkpoint.amount.toString()) || 0);
+      return sum + (checkpoint.amount || 0);
     }, 0);
     return totalAmount - usedAmount;
   };
@@ -320,7 +279,7 @@ export default function MultiStepForm() {
     const totalAmount = getTotalMissionAmount();
     const usedAmount = formData.checkpoints.reduce((sum, checkpoint) => {
       if (checkpoint.id === checkpointId) return sum; // Exclure le checkpoint actuel
-      return sum + (parseInt(checkpoint.amount.toString()) || 0);
+      return sum + (checkpoint.amount || 0);
     }, 0);
     return totalAmount - usedAmount;
   };
@@ -365,7 +324,7 @@ export default function MultiStepForm() {
     // Si on modifie le montant, vérifier qu'il ne dépasse pas le montant restant
     if (field === "amount") {
       const maxAmount = getMaxAmountForCheckpoint(id);
-      const newAmount = parseInt(value) || 0;
+      const newAmount = parseFloat(value) || 0;
 
       if (newAmount > maxAmount) {
         // Afficher une erreur ou limiter la valeur
@@ -387,7 +346,12 @@ export default function MultiStepForm() {
     setFormData((prev) => ({
       ...prev,
       checkpoints: prev.checkpoints.map((checkpoint) =>
-        checkpoint.id === id ? { ...checkpoint, [field]: value } : checkpoint,
+        checkpoint.id === id
+          ? {
+              ...checkpoint,
+              [field]: field === "amount" ? parseFloat(value) || 0 : value,
+            }
+          : checkpoint,
       ),
     }));
 
@@ -451,7 +415,7 @@ export default function MultiStepForm() {
           const stepErrors: Record<string, string> = {};
 
           // Valider que TJM est renseigné pour calculer le total
-          if (!formData.tjm || parseInt(formData.tjm) <= 0) {
+          if (!formData.tjm || formData.tjm <= 0) {
             stepErrors.tjm = "Le TJM est requis pour calculer le montant total";
           }
 
@@ -482,7 +446,7 @@ export default function MultiStepForm() {
           // Vérifier la répartition du montant total
           const totalCheckpointsAmount = formData.checkpoints.reduce(
             (sum, checkpoint) => {
-              return sum + (parseInt(checkpoint.amount.toString()) || 0);
+              return sum + (checkpoint.amount || 0);
             },
             0,
           );
@@ -534,9 +498,16 @@ export default function MultiStepForm() {
     >,
   ) => {
     const { name, value } = e.target;
+
+    // Convert numeric fields to numbers
+    let convertedValue: string | number = value;
+    if (name === "tjm" || name === "seniority") {
+      convertedValue = parseFloat(value) || 0;
+    }
+
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: convertedValue,
     });
 
     // Mark field as touched
@@ -643,7 +614,7 @@ export default function MultiStepForm() {
         const totalAmount = getTotalMissionAmount();
         const allocatedAmount = formData.checkpoints.reduce(
           (sum, checkpoint) => {
-            return sum + (parseInt(checkpoint.amount.toString()) || 0);
+            return sum + (checkpoint.amount || 0);
           },
           0,
         );
@@ -658,8 +629,14 @@ export default function MultiStepForm() {
       const auth = await getCurrentUser();
       const currentCompany = await getCurrentCompany(auth.id);
 
+      // Logs de debug pour comprendre le problème
+      console.log("Données du formulaire avant validation:", {
+        formData: JSON.stringify(formData, null, 2),
+        totalAmount: getTotalMissionAmount(),
+      });
+
       const validatedData = formSchema.parse(formData);
-      // console.log("Données validées:", validatedData);
+      console.log("Données validées:", validatedData);
       setSubmitResult(null);
       setIsSubmitting(true);
       const result = await submitJobPosting(
@@ -693,9 +670,31 @@ export default function MultiStepForm() {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        showToast.error(
-          "Le formulaire contient des erreurs. Veuillez les corriger.",
-        );
+        // Logs détaillés des erreurs de validation
+        console.error("Erreurs de validation Zod:", error.errors);
+
+        // Afficher les erreurs détaillées
+        const fieldErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path && err.path.length > 0) {
+            fieldErrors[err.path.join(".")] = err.message;
+          }
+        });
+
+        setErrors(fieldErrors);
+
+        // Afficher le premier message d'erreur trouvé
+        const firstError = error.errors[0];
+        if (firstError) {
+          showToast.error(firstError.message);
+        } else {
+          showToast.error(
+            "Le formulaire contient des erreurs. Veuillez les corriger.",
+          );
+        }
+      } else {
+        console.error("Erreur lors de la soumission:", error);
+        showToast.error("Une erreur inattendue s'est produite.");
       }
     } finally {
       setIsSubmitting(false);
@@ -853,7 +852,7 @@ export default function MultiStepForm() {
               <Input
                 type="number"
                 name="tjm"
-                value={formData.tjm}
+                value={formData.tjm.toString()}
                 onChange={handleChange}
                 onBlur={() => handleBlur("tjm")}
                 className={`text-freehunt-black-two rounded-full ${
@@ -946,7 +945,7 @@ export default function MultiStepForm() {
               <Input
                 type="number"
                 name="seniority"
-                value={formData.seniority}
+                value={formData.seniority.toString()}
                 onChange={handleChange}
                 onBlur={() => handleBlur("seniority")}
                 className={`text-freehunt-black-two rounded-full ${
@@ -1270,7 +1269,7 @@ export default function MultiStepForm() {
                       </p>
                       <Input
                         type="number"
-                        value={checkpoint.amount}
+                        value={checkpoint.amount.toString()}
                         onChange={(e) =>
                           updateCheckpoint(
                             checkpoint.id,
@@ -1443,9 +1442,7 @@ export default function MultiStepForm() {
                     <p className="text-gray-500 text-sm">Montant réparti</p>
                     <p className="font-medium text-lg">
                       {formData.checkpoints.reduce((sum, checkpoint) => {
-                        return (
-                          sum + (parseInt(checkpoint.amount.toString()) || 0)
-                        );
+                        return sum + (checkpoint.amount || 0);
                       }, 0)}{" "}
                       €
                     </p>
@@ -1519,14 +1516,36 @@ export default function MultiStepForm() {
                     : "bg-red-50 border border-red-200 text-red-800"
                 }`}
               >
-                <div className="flex items-center">
+                <div className="flex items-center mb-2">
                   {submitResult.success ? (
                     <CheckCircle2 className="h-5 w-5 mr-2" />
                   ) : (
                     <AlertCircle className="h-5 w-5 mr-2" />
                   )}
-                  <p>{submitResult.message}</p>
+                  <p className="font-semibold">{submitResult.message}</p>
                 </div>
+                {submitResult.success && (
+                  <div className="mt-3 text-sm">
+                    <p className="mb-2">
+                      🎉 Votre annonce a été créée avec succès! Pour
+                      qu&apos;elle soit visible par les freelances, vous devez
+                      maintenant effectuer le paiement.
+                    </p>
+                    <p className="mb-3">
+                      💰 <strong>Montant total :</strong>{" "}
+                      {getTotalMissionAmount()}€ (calculé automatiquement selon
+                      votre TJM et la durée des étapes)
+                    </p>
+                    <Button
+                      onClick={() =>
+                        (window.location.href = "/dashboard/job-postings")
+                      }
+                      className="bg-freehunt-main hover:bg-freehunt-main/90"
+                    >
+                      Gérer mes annonces et payer
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>

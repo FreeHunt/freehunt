@@ -19,6 +19,10 @@ describe('JobPostingsController (e2e)', () => {
     description: 'We are looking for a Frontend Developer to join our team.',
     location: JobPostingLocation.REMOTE,
     isPromoted: true,
+    averageDailyRate: 600,
+    seniority: 3,
+    totalAmount: 12000,
+    status: 'PUBLISHED',
     company: {
       id: '550e8400-e29b-41d4-a716-446655440001',
       name: 'Tech Company',
@@ -123,5 +127,17 @@ describe('JobPostingsController (e2e)', () => {
       .send(searchDto)
       .expect(200)
       .expect([jobPostingResponse]);
+  });
+
+  it('/job-postings/:id/can-be-cancelled (GET)', () => {
+    return request(app.getHttpServer())
+      .get(`/job-postings/${jobPostingResponse.id}/can-be-cancelled`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toHaveProperty('canBeCancelled');
+        expect(
+          typeof (res.body as { canBeCancelled: boolean }).canBeCancelled,
+        ).toBe('boolean');
+      });
   });
 });

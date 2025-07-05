@@ -11,8 +11,10 @@ import { UsersController } from '../users/users.controller';
 import { HttpModule } from '@nestjs/axios';
 import { SkillsService } from '../skills/skills.service';
 import { FreelancesService } from '../freelances/freelances.service';
+import { StripeModule } from '../common/stripe/stripe.module';
+
 @Module({
-  imports: [PrismaModule, HttpModule],
+  imports: [PrismaModule, HttpModule, StripeModule],
   controllers: [JobPostingsController, AuthController, UsersController],
   providers: [
     JobPostingsService,

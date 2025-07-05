@@ -68,7 +68,12 @@ export default function ConversationComponent({
           if (messageExists) {
             return prevMessages;
           }
-          return [...prevMessages, message];
+          // Ajouter le nouveau message et trier par date de création
+          const newMessages = [...prevMessages, message];
+          return newMessages.sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          );
         });
       }
     });
@@ -89,7 +94,12 @@ export default function ConversationComponent({
         setLoading(true);
         try {
           const data = await getMessagesByConversation(conversation.id);
-          setMessages(data);
+          // S'assurer que les messages sont triés par date de création
+          const sortedMessages = data.sort(
+            (a: Message, b: Message) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          );
+          setMessages(sortedMessages);
         } catch (error) {
           console.error("Failed to fetch messages:", error);
         } finally {
@@ -159,15 +169,66 @@ export default function ConversationComponent({
 
   // Helper to determine if a message is from the current user
   const isCurrentUserMessage = (msg: Message) => {
-    console.log(msg.senderId, user?.id);
-    return msg.senderId === user?.id; // Doit correspondre à currentUserId
+    // Comparer avec l'ID de l'utilisateur actuel
+    return msg.senderId === user?.id;
   };
 
   // Get the appropriate avatar based on who sent the message
-  const getCurrentUserAvatar = () =>
-    currentUserPicture?.url || "/images/default-avatar.png";
-  const getOtherUserAvatar = () =>
-    otherUserPicture?.url || "/images/default-avatar.png";
+  const getCurrentUserAvatar = () => {
+    return currentUserPicture?.url || "/images/default-avatar.png";
+  };
+  const getOtherUserAvatar = () => {
+    return otherUserPicture?.url || "/images/default-avatar.png";
+  };
+
+  // Composant réutilisable pour un message
+  const MessageItem = ({ msg }: { msg: Message }) => (
+    <div key={msg.id}>
+      <div
+        className={`flex ${
+          isCurrentUserMessage(msg) ? "justify-end" : "justify-start"
+        }`}
+      >
+        {!isCurrentUserMessage(msg) ? (
+          <div className="flex items-end space-x-1 md:space-x-2">
+            <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden flex-shrink-0">
+              <Image
+                src={getOtherUserAvatar()}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+                width={32}
+                height={32}
+              />
+            </div>
+            <div className="bg-gray-200 rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
+              <p className="text-xs md:text-sm">{msg.content}</p>
+              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1 text-right">
+                {formatMessageTime(msg.createdAt)}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-end space-x-1 md:space-x-2">
+            <div className="bg-blue-500 text-white rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
+              <p className="text-xs md:text-sm">{msg.content}</p>
+              <p className="text-[10px] md:text-xs text-blue-100 mt-0.5 md:mt-1">
+                {formatMessageTime(msg.createdAt)}
+              </p>
+            </div>
+            <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden flex-shrink-0">
+              <Image
+                src={getCurrentUserAvatar()}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+                width={32}
+                height={32}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   if (loading) {
     return (
@@ -230,55 +291,7 @@ export default function ConversationComponent({
                   Aucun message dans cette conversation
                 </div>
               ) : (
-                messages.map((msg) => (
-                  <div key={msg.id}>
-                    <div
-                      className={`flex ${
-                        isCurrentUserMessage(msg)
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      {!isCurrentUserMessage(msg) ? (
-                        <div className="flex items-end space-x-1 md:space-x-2">
-                          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden flex-shrink-0">
-                            <Image
-                              src={getOtherUserAvatar()}
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                              width={32}
-                              height={32}
-                            />
-                          </div>
-                          <div className="bg-gray-200 rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
-                            <p className="text-xs md:text-sm">{msg.content}</p>
-                            <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1 text-right">
-                              {formatMessageTime(msg.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-end space-x-1 md:space-x-2">
-                          <div className="bg-blue-500 text-white rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
-                            <p className="text-xs md:text-sm">{msg.content}</p>
-                            <p className="text-[10px] md:text-xs text-blue-100 mt-0.5 md:mt-1">
-                              {formatMessageTime(msg.createdAt)}
-                            </p>
-                          </div>
-                          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden flex-shrink-0">
-                            <Image
-                              src={getCurrentUserAvatar()}
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                              width={32}
-                              height={32}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
+                messages.map((msg) => <MessageItem key={msg.id} msg={msg} />)
               )}
 
               {/* Invisible element for scrolling to bottom */}
@@ -352,55 +365,7 @@ export default function ConversationComponent({
                   Aucun message dans cette conversation
                 </div>
               ) : (
-                messages.map((msg) => (
-                  <div key={msg.id}>
-                    <div
-                      className={`flex ${
-                        isCurrentUserMessage(msg)
-                          ? "justify-end"
-                          : "justify-start"
-                      }`}
-                    >
-                      {!isCurrentUserMessage(msg) ? (
-                        <div className="flex items-end space-x-1 md:space-x-2">
-                          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden flex-shrink-0">
-                            <Image
-                              src={getOtherUserAvatar()}
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                              width={32}
-                              height={32}
-                            />
-                          </div>
-                          <div className="bg-gray-200 rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
-                            <p className="text-xs md:text-sm">{msg.content}</p>
-                            <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1 text-right">
-                              {formatMessageTime(msg.createdAt)}
-                            </p>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-end space-x-1 md:space-x-2">
-                          <div className="bg-blue-500 text-white rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
-                            <p className="text-xs md:text-sm">{msg.content}</p>
-                            <p className="text-[10px] md:text-xs text-blue-100 mt-0.5 md:mt-1">
-                              {formatMessageTime(msg.createdAt)}
-                            </p>
-                          </div>
-                          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full overflow-hidden flex-shrink-0">
-                            <Image
-                              src={getCurrentUserAvatar()}
-                              alt="Avatar"
-                              className="w-full h-full object-cover"
-                              width={32}
-                              height={32}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))
+                messages.map((msg) => <MessageItem key={msg.id} msg={msg} />)
               )}
 
               {/* Invisible element for scrolling to bottom */}

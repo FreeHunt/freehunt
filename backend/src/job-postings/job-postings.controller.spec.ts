@@ -13,6 +13,7 @@ import { UsersService } from '../users/users.service';
 import { AuthService } from '../auth/auth.service';
 import { EnvironmentService } from '../common/environment/environment.service';
 import { AuthentikService } from '../common/authentik/authentik.service';
+import { StripeService } from '../common/stripe/stripe.service';
 import { HttpModule } from '@nestjs/axios';
 
 // Interface pour les job postings avec recommandation
@@ -40,6 +41,15 @@ describe('JobPostingsController', () => {
         AuthService,
         EnvironmentService,
         AuthentikService,
+        {
+          provide: StripeService,
+          useValue: {
+            createCheckoutSession: jest.fn().mockResolvedValue({
+              id: 'cs_test_123',
+              url: 'https://checkout.stripe.com/test',
+            }),
+          },
+        },
       ],
     }).compile();
 
@@ -53,7 +63,7 @@ describe('JobPostingsController', () => {
     title: 'SEO Optimization Specialist',
     description:
       'We are looking for a SEO Optimization Specialist to join our team.',
-    location: 'ONSITE',
+    location: JobPostingLocation.ONSITE,
     isPromoted: false,
     averageDailyRate: 500,
     seniority: 5,
@@ -65,6 +75,7 @@ describe('JobPostingsController', () => {
     ...createJobPostingDto,
     id: '3246540a-3ecd-4912-a909-953c881816fc',
     totalAmount: 5000,
+    status: 'PENDING_PAYMENT', // Ajout du champ status
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -153,6 +164,7 @@ describe('JobPostingsController', () => {
         seniority: 3,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         totalAmount: 12000,
+        status: 'PUBLISHED',
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -167,6 +179,7 @@ describe('JobPostingsController', () => {
         seniority: 4,
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         totalAmount: 13000,
+        status: 'PUBLISHED',
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -184,6 +197,7 @@ describe('JobPostingsController', () => {
       seniority: 5,
       companyId: '3246540a-3ecd-4912-a909-953c881816fc',
       totalAmount: 14000,
+      status: 'PUBLISHED',
       createdAt: new Date(),
       updatedAt: new Date(),
       recommended: true,
@@ -438,6 +452,26 @@ describe('JobPostingsController', () => {
       expect(searchSpy).toHaveBeenCalledWith(searchDto, mockFreelanceUser);
       expect(result).toEqual(searchResult);
       expect(result.data[0].recommended).toBe(true);
+    });
+  });
+
+  describe('canBeCancelled', () => {
+    it('should check if a job posting can be cancelled', async () => {
+      const canBeCancelledResult = { canBeCancelled: true };
+      jest.spyOn(jobPostingsService, 'canBeCancelled').mockResolvedValue(true);
+
+      expect(await jobPostingsController.canBeCancelled(jobPosting.id)).toEqual(
+        canBeCancelledResult,
+      );
+    });
+
+    it('should return false if job posting cannot be cancelled', async () => {
+      const canBeCancelledResult = { canBeCancelled: false };
+      jest.spyOn(jobPostingsService, 'canBeCancelled').mockResolvedValue(false);
+
+      expect(await jobPostingsController.canBeCancelled(jobPosting.id)).toEqual(
+        canBeCancelledResult,
+      );
     });
   });
 });

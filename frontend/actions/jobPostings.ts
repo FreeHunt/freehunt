@@ -108,7 +108,8 @@ export async function submitJobPosting(
     return {
       success: true,
       data: response.data,
-      message: "Formulaire soumis avec succès!",
+      message:
+        "Annonce créée avec succès! Un paiement est requis pour la publier.",
     };
   } catch (error) {
     console.error("Erreur lors de la soumission du formulaire:", error);
@@ -117,5 +118,139 @@ export async function submitJobPosting(
       error: "Une erreur est survenue lors de la soumission du formulaire",
       message: "Une erreur est survenue. Veuillez réessayer plus tard.",
     };
+  }
+}
+
+/**
+ * Traiter le paiement d'une annonce en redirigeant vers Stripe
+ */
+export async function processJobPostingPayment(
+  jobPostingId: string,
+  customerEmail: string,
+): Promise<void> {
+  try {
+    const paymentSession = await createJobPostingPayment(
+      jobPostingId,
+      customerEmail,
+    );
+
+    // Rediriger vers Stripe Checkout
+    if (paymentSession.url) {
+      window.location.href = paymentSession.url;
+    } else {
+      throw new Error("URL de paiement non disponible");
+    }
+  } catch (error) {
+    console.error("Erreur lors du processus de paiement:", error);
+    throw error;
+  }
+}
+
+/**
+ * Publier une annonce après paiement
+ */
+export async function publishJobPosting(
+  jobPostingId: string,
+): Promise<JobPosting> {
+  const response = await api.post<JobPosting>(
+    `/job-postings/${jobPostingId}/publish`,
+  );
+  return response.data;
+}
+
+/**
+ * Récupérer les annonces par statut pour un utilisateur
+ */
+export async function getJobPostingsByUserIdAndStatus(
+  userId: string,
+  status: string,
+): Promise<JobPosting[]> {
+  const response = await api.get<JobPosting[]>(
+    `/job-postings/user/${userId}/status/${status}`,
+  );
+  return response.data;
+}
+
+/**
+ * Supprimer une annonce de mission
+ */
+export async function deleteJobPosting(
+  jobPostingId: string,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    await api.delete(`/job-postings/${jobPostingId}`);
+    return {
+      success: true,
+      message: "Annonce supprimée avec succès",
+    };
+  } catch (error) {
+    console.error("Erreur lors de la suppression:", error);
+    return {
+      success: false,
+      message: "Erreur lors de la suppression de l'annonce",
+    };
+  }
+}
+
+/**
+ * Vérifier si une annonce peut être annulée
+ */
+export async function canJobPostingBeCancelled(
+  jobPostingId: string,
+): Promise<boolean> {
+  try {
+    const response = await api.get<{ canBeCancelled: boolean }>(
+      `/job-postings/${jobPostingId}/can-be-cancelled`,
+    );
+    return response.data.canBeCancelled;
+  } catch (error) {
+    console.error("Erreur lors de la vérification:", error);
+    return false;
+  }
+}
+
+/**
+ * Créer une session de paiement Stripe pour une annonce
+ */
+export async function createJobPostingPayment(
+  jobPostingId: string,
+  customerEmail: string,
+): Promise<{ url: string; sessionId: string }> {
+  try {
+    const baseUrl =
+      typeof window !== "undefined"
+        ? window.location.origin
+        : "http://localhost:3000";
+
+    const response = await api.post<{ url: string; sessionId: string }>(
+      `/job-postings/${jobPostingId}/create-payment`,
+      {
+        successUrl: `${baseUrl}/project/payment-success?session_id={CHECKOUT_SESSION_ID}&job_posting_id=${jobPostingId}`,
+        cancelUrl: `${baseUrl}/dashboard/job-postings?payment=cancelled`,
+        customerEmail,
+      },
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la création du paiement:", error);
+    throw error;
+  }
+}
+
+/**
+ * Récupérer l'ID du projet associé à une annonce
+ */
+export async function getJobPostingProject(
+  jobPostingId: string,
+): Promise<string | null> {
+  try {
+    const response = await api.get<{ projectId: string | null }>(
+      `/job-postings/${jobPostingId}/project`,
+    );
+    return response.data.projectId;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du projet:", error);
+    return null;
   }
 }

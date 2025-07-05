@@ -54,15 +54,18 @@ interface FormData {
   avatar: File | null;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
 const DEFAULT_AVATAR_URL = "../assets/logo.jpg";
 
 const freelanceSchema = z.object({
   firstName: z.string().min(2, "Le prénom doit faire au moins 2 caractères"),
-  lastName: z.string().min(2, "Le nom doit faire au moins 2 caractères"), 
+  lastName: z.string().min(2, "Le nom doit faire au moins 2 caractères"),
   location: z.string().min(2, "Le lieu doit faire au moins 2 caractères"),
   jobTitle: z.string().min(2, "Le poste doit faire au moins 2 caractères"),
-  seniority: z.number().min(0, "L'expérience doit être supérieure ou égale à 0"),
+  seniority: z
+    .number()
+    .min(0, "L'expérience doit être supérieure ou égale à 0"),
   averageDailyRate: z.number().min(1, "Le TJM doit être supérieur à 0"),
   stripeAccountId: z.string().optional(),
 });
@@ -81,10 +84,12 @@ export default function FreelanceProfile() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [errorSkillsSection, setErrorSkillsSection] = useState<z.ZodError | null>(null);
-  const [stripeConnectionStatus, setStripeConnectionStatus] = useState<string>("");
+  const [errorSkillsSection, setErrorSkillsSection] =
+    useState<z.ZodError | null>(null);
+  const [stripeConnectionStatus, setStripeConnectionStatus] =
+    useState<string>("");
   const [isConnectingStripe, setIsConnectingStripe] = useState<boolean>(false);
-  
+
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -112,14 +117,14 @@ export default function FreelanceProfile() {
       }
 
       const userData: User = await response.json();
-      
+
       if (userData.role !== "FREELANCE") {
         router.push("/");
         return;
       }
 
       setUser(userData);
-            
+
       if (userData.freelance) {
         setFreelance(userData.freelance);
         setFormData({
@@ -149,12 +154,11 @@ export default function FreelanceProfile() {
         });
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
     } finally {
       setLoading(false);
     }
   }, [router]);
-  
 
   const fetchFreelanceAvatar = async (userId: string) => {
     try {
@@ -174,7 +178,9 @@ export default function FreelanceProfile() {
 
         if (documents.length > 0) {
           const sortedDocuments = documents.sort(
-            (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
+            (a, b) =>
+              new Date(b.createdAt ?? 0).getTime() -
+              new Date(a.createdAt ?? 0).getTime(),
           );
           const latestDocument = sortedDocuments[0];
           setAvatarUrl(latestDocument.url);
@@ -191,15 +197,14 @@ export default function FreelanceProfile() {
     fetchCurrentUser();
   }, [fetchCurrentUser]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'seniority' || name === 'averageDailyRate' 
-        ? parseFloat(value) || 0 
-        : value,
+      [name]:
+        name === "seniority" || name === "averageDailyRate"
+          ? parseFloat(value) || 0
+          : value,
     }));
   };
 
@@ -298,7 +303,7 @@ export default function FreelanceProfile() {
         setAvatarPreview(null);
       }
 
-      const skillIds = formData.skills.map(skill => skill.id);
+      const skillIds = formData.skills.map((skill) => skill.id);
 
       let response: Response;
 
@@ -358,128 +363,148 @@ export default function FreelanceProfile() {
 
   const createStripeConnection = async () => {
     if (!freelance?.id) {
-      alert("Erreur: profil freelance non trouvé. Veuillez d'abord enregistrer votre profil.");
+      alert(
+        "Erreur: profil freelance non trouvé. Veuillez d'abord enregistrer votre profil.",
+      );
       return;
     }
-  
+
     if (!user?.email) {
       alert("Erreur: email utilisateur non trouvé.");
       return;
     }
-  
-    const fullName = `${formData.firstName || freelance.firstName || ''} ${formData.lastName || freelance.lastName || ''}`.trim() || user.username || 'Utilisateur';
-  
+
+    const fullName =
+      `${formData.firstName || freelance.firstName || ""} ${
+        formData.lastName || freelance.lastName || ""
+      }`.trim() ||
+      user.username ||
+      "Utilisateur";
+
     setIsConnectingStripe(true);
-    
+
     try {
       const requestData = {
         freelanceId: freelance.id,
         email: user.email,
         name: fullName,
       };
-      
-      const response = await fetch(`${BACKEND_URL}/stripe/create-account-connection`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
+
+      const response = await fetch(
+        `${BACKEND_URL}/stripe/create-account-connection`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
         },
-        body: JSON.stringify(requestData),
-      });
-  
-      const responseText = await response.text();
-  
+      );
+
       if (!response.ok) {
-        let errorMessage = `Erreur ${response.status}`;
-        try {
-          const errorData = JSON.parse(responseText);
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch {
-          errorMessage = responseText || response.statusText;
-        }
-        
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage =
+          errorData.message || errorData.error || `Erreur ${response.status}`;
         throw new Error(errorMessage);
       }
-  
-      if (!responseText.trim()) {
-        throw new Error('Réponse vide du serveur');
-      }
-  
-      let accountConnection;
-      try {
-        accountConnection = JSON.parse(responseText);
-      } catch {
-        throw new Error('Format de réponse invalide du serveur');
-      }
-      
+
+      const accountConnection = await response.json();
+
+      // Rediriger vers le lien d'activation Stripe
       if (accountConnection.accountLink) {
         window.location.href = accountConnection.accountLink;
-      } else if (accountConnection.stripeAccountId) {
-        setFormData(prev => ({
-          ...prev,
-          stripeAccountId: accountConnection.stripeAccountId
-        }));
-        
-        setStripeConnectionStatus("Compte Stripe connecté avec succès !");
-      } else if (accountConnection.account_id) {
-        setFormData(prev => ({
-          ...prev,
-          stripeAccountId: accountConnection.account_id
-        }));
-        
-        setStripeConnectionStatus("Compte Stripe connecté avec succès !");
       } else {
-        await fetchCurrentUser();
-        setStripeConnectionStatus("Connexion Stripe initiée. Vous pouvez maintenant enregistrer les modifications");
+        throw new Error("Lien d'activation Stripe non reçu");
       }
-      
     } catch (error) {
-      console.error('Erreur complète:', error);
-      alert("Erreur lors de la connexion Stripe: " + (error instanceof Error ? error.message : String(error)));
+      console.error("Erreur complète:", error);
+      alert(
+        "Erreur lors de la connexion Stripe: " +
+          (error instanceof Error ? error.message : String(error)),
+      );
     } finally {
       setIsConnectingStripe(false);
     }
   };
 
-  const activateStripeConnection = async (accountId: string) => {
-    if (!freelance?.id) return;
-
-    try {
-      const response = await fetch(`${BACKEND_URL}/stripe/activate-account-connection`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          freelanceId: freelance.id,
-          stripeAccountId: accountId,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'activation de la connexion Stripe");
-      }
-
-      setStripeConnectionStatus("Compte Stripe activé avec succès !");
-      
-    } catch (error: unknown) {
-      console.error("Erreur activation Stripe:", error);
-    }
-  };
-
   useEffect(() => {
     fetchCurrentUser();
-    
+  }, [fetchCurrentUser]);
+
+  // Gérer le retour de Stripe avec confirmation d'activation
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const stripeReturn = urlParams.get('stripe_return');
-    const accountId = urlParams.get('account_id');
-    
-    if (stripeReturn === 'success' && accountId) {
-      activateStripeConnection(accountId);
-      window.history.replaceState({}, document.title, window.location.pathname);
+    const stripeReturn = urlParams.get("stripe_return");
+    const accountId = urlParams.get("account_id");
+
+    if (stripeReturn === "success" && accountId && freelance?.id) {
+      console.log("Stripe return detected:", { accountId, freelanceId: freelance.id });
+      
+      // Appeler l'API pour confirmer l'activation du compte Stripe
+      const confirmActivation = async () => {
+        try {
+          console.log("Calling confirm-account-activation...");
+          const response = await fetch(
+            `${BACKEND_URL}/stripe/confirm-account-activation`,
+            {
+              method: "POST",
+              credentials: "include",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                freelanceId: freelance.id,
+                accountId: accountId,
+              }),
+            },
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Error confirming activation:", errorText);
+            throw new Error("Erreur lors de la confirmation de l'activation Stripe");
+          }
+
+          const result = await response.json();
+          console.log("Activation confirmed:", result);
+
+          if (result.freelance) {
+            setFreelance(result.freelance);
+            setFormData((prev) => ({
+              ...prev,
+              stripeAccountId: result.freelance.stripeAccountId || "",
+            }));
+          }
+          
+          setStripeConnectionStatus("Compte Stripe configuré avec succès !");
+        } catch (error) {
+          console.error("Error during activation confirmation:", error);
+          setStripeConnectionStatus("Erreur lors de la confirmation de l'activation Stripe");
+        } finally {
+          // Nettoyer l'URL
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+          );
+        }
+      };
+
+      confirmActivation();
+    } else if (stripeReturn === "success") {
+      console.log("Stripe return detected but missing account_id or freelance not loaded yet");
+      // Si pas d'account_id, juste refresher les données
+      fetchCurrentUser().then(() => {
+        setStripeConnectionStatus("Retour de Stripe détecté !");
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+      });
     }
-  }, []);
+  }, [freelance?.id, fetchCurrentUser]);
 
   if (loading) {
     return (
@@ -513,20 +538,22 @@ export default function FreelanceProfile() {
   }
 
   const displayAvatar = avatarPreview || avatarUrl || DEFAULT_AVATAR_URL;
-  const displayName = `${formData.firstName || freelance?.firstName || ''} ${formData.lastName || freelance?.lastName || ''}`.trim() || user.username;
+  const displayName =
+    `${formData.firstName || freelance?.firstName || ""} ${
+      formData.lastName || freelance?.lastName || ""
+    }`.trim() || user.username;
 
   return (
     <form onSubmit={handleSubmit}>
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-              
             {/* Card Profil */}
             <Card className="overflow-hidden py-0">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex-shrink-0 overflow-hidden">
-                    <img 
+                    <img
                       src={displayAvatar}
                       alt={displayName}
                       className="w-full h-full object-cover"
@@ -543,15 +570,22 @@ export default function FreelanceProfile() {
                     <h3 className="text-xl font-semibold text-gray-900 mb-1">
                       {displayName}
                     </h3>
-                    <Badge className="text-white" style={{backgroundColor: '#FF4D6D'}}>
+                    <Badge
+                      className="text-white"
+                      style={{ backgroundColor: "#FF4D6D" }}
+                    >
                       Freelance
                     </Badge>
                     <p className="text-gray-600 my-2">
-                      {formData.jobTitle || freelance?.jobTitle || "Poste non renseigné"}
+                      {formData.jobTitle ||
+                        freelance?.jobTitle ||
+                        "Poste non renseigné"}
                     </p>
                     <div className="flex items-center text-gray-500 text-sm mb-4">
                       <MapPin className="w-4 h-4 mr-1" />
-                      {formData.location || freelance?.location || "Lieu non renseigné"}
+                      {formData.location ||
+                        freelance?.location ||
+                        "Lieu non renseigné"}
                     </div>
                   </div>
                 </div>
@@ -574,19 +608,35 @@ export default function FreelanceProfile() {
             {/* Card Statistiques */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-xl font-semibold">Statistiques</CardTitle>
+                <CardTitle className="text-xl font-semibold">
+                  Statistiques
+                </CardTitle>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <span>Année</span>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
                   </svg>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-2">Revenus de cette année</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Revenus de cette année
+                  </p>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-bold text-gray-900">€108.9k</span>
+                    <span className="text-3xl font-bold text-gray-900">
+                      €108.9k
+                    </span>
                     <div className="flex items-center text-green-600 text-sm">
                       <TrendingUp className="w-4 h-4 mr-1" />
                       <span>2.3%</span>
@@ -596,7 +646,11 @@ export default function FreelanceProfile() {
 
                 {/* Graphique simulé */}
                 <div className="relative h-48 bg-gradient-to-t from-purple-200 to-purple-100 rounded-lg overflow-hidden">
-                  <svg className="w-full h-full" viewBox="0 0 400 200" preserveAspectRatio="none">
+                  <svg
+                    className="w-full h-full"
+                    viewBox="0 0 400 200"
+                    preserveAspectRatio="none"
+                  >
                     <path
                       d="M0,120 Q50,100 100,110 T200,90 T300,70 T400,80"
                       fill="none"
@@ -609,17 +663,37 @@ export default function FreelanceProfile() {
                       fillOpacity="0.3"
                     />
                     <defs>
-                      <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" style={{stopColor: 'rgb(147, 51, 234)', stopOpacity: 0.4}} />
-                        <stop offset="100%" style={{stopColor: 'rgb(147, 51, 234)', stopOpacity: 0.1}} />
+                      <linearGradient
+                        id="gradient"
+                        x1="0%"
+                        y1="0%"
+                        x2="0%"
+                        y2="100%"
+                      >
+                        <stop
+                          offset="0%"
+                          style={{
+                            stopColor: "rgb(147, 51, 234)",
+                            stopOpacity: 0.4,
+                          }}
+                        />
+                        <stop
+                          offset="100%"
+                          style={{
+                            stopColor: "rgb(147, 51, 234)",
+                            stopOpacity: 0.1,
+                          }}
+                        />
                       </linearGradient>
                     </defs>
                   </svg>
-                  
+
                   {/* Point avec tooltip */}
                   <div className="absolute top-6 right-16">
                     <div className="bg-black text-white px-3 py-2 rounded-lg text-sm relative">
-                      <span className="text-xs text-gray-300">807 missions</span>
+                      <span className="text-xs text-gray-300">
+                        807 missions
+                      </span>
                       <br />
                       <span className="font-semibold">€5,569</span>
                       <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
@@ -627,10 +701,23 @@ export default function FreelanceProfile() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Labels des mois */}
                   <div className="absolute bottom-2 left-0 right-0 flex justify-between px-4 text-xs text-gray-500">
-                    {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((month) => (
+                    {[
+                      "JAN",
+                      "FEB",
+                      "MAR",
+                      "APR",
+                      "MAY",
+                      "JUN",
+                      "JUL",
+                      "AUG",
+                      "SEP",
+                      "OCT",
+                      "NOV",
+                      "DEC",
+                    ].map((month) => (
                       <span key={month}>{month}</span>
                     ))}
                   </div>
@@ -641,9 +728,14 @@ export default function FreelanceProfile() {
 
           {/* Card formulaire informations */}
           <div className="space-y-6">
-            <Card className='p-0'>
-              <div className="px-6 py-4 rounded-t-xl" style={{backgroundColor: '#FF4D6D'}}>
-                <h2 className="text-white font-semibold text-lg">Informations</h2>
+            <Card className="p-0">
+              <div
+                className="px-6 py-4 rounded-t-xl"
+                style={{ backgroundColor: "#FF4D6D" }}
+              >
+                <h2 className="text-white font-semibold text-lg">
+                  Informations
+                </h2>
               </div>
               <CardContent className="p-6 space-y-6">
                 {/* Section Avatar */}
@@ -682,32 +774,42 @@ export default function FreelanceProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="firstName"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Prénom
                   </Label>
-                  <Input 
-                    id="firstName" 
-                    name='firstName'
-                    type="text" 
+                  <Input
+                    id="firstName"
+                    name="firstName"
+                    type="text"
                     value={formData.firstName}
                     onChange={handleInputChange}
                     className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
-                      formErrors.firstName ? "border border-red-500" : "border-0"
+                      formErrors.firstName
+                        ? "border border-red-500"
+                        : "border-0"
                     }`}
                   />
                   {formErrors.firstName && (
-                    <p className="text-sm text-red-600">{formErrors.firstName}</p>
+                    <p className="text-sm text-red-600">
+                      {formErrors.firstName}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="lastName"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Nom
                   </Label>
-                  <Input 
-                    id="lastName" 
-                    name='lastName'
-                    type="text" 
+                  <Input
+                    id="lastName"
+                    name="lastName"
+                    type="text"
                     value={formData.lastName}
                     onChange={handleInputChange}
                     className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
@@ -715,18 +817,23 @@ export default function FreelanceProfile() {
                     }`}
                   />
                   {formErrors.lastName && (
-                    <p className="text-sm text-red-600">{formErrors.lastName}</p>
+                    <p className="text-sm text-red-600">
+                      {formErrors.lastName}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="location" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="location"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Lieu
                   </Label>
-                  <Input 
-                    id="location" 
-                    name='location'
-                    type="text" 
+                  <Input
+                    id="location"
+                    name="location"
+                    type="text"
                     value={formData.location}
                     onChange={handleInputChange}
                     className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
@@ -734,18 +841,23 @@ export default function FreelanceProfile() {
                     }`}
                   />
                   {formErrors.location && (
-                    <p className="text-sm text-red-600">{formErrors.location}</p>
+                    <p className="text-sm text-red-600">
+                      {formErrors.location}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="jobTitle" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="jobTitle"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Poste
                   </Label>
-                  <Input 
-                    id="jobTitle" 
-                    name='jobTitle'
-                    type="text" 
+                  <Input
+                    id="jobTitle"
+                    name="jobTitle"
+                    type="text"
                     value={formData.jobTitle}
                     onChange={handleInputChange}
                     className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
@@ -753,69 +865,96 @@ export default function FreelanceProfile() {
                     }`}
                   />
                   {formErrors.jobTitle && (
-                    <p className="text-sm text-red-600">{formErrors.jobTitle}</p>
+                    <p className="text-sm text-red-600">
+                      {formErrors.jobTitle}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="seniority" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="seniority"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Expérience (années)
                   </Label>
-                  <Input 
-                    id="seniority" 
-                    name='seniority'
-                    type="number" 
+                  <Input
+                    id="seniority"
+                    name="seniority"
+                    type="number"
                     min="0"
                     value={formData.seniority}
                     onChange={handleInputChange}
                     className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
-                      formErrors.seniority ? "border border-red-500" : "border-0"
+                      formErrors.seniority
+                        ? "border border-red-500"
+                        : "border-0"
                     }`}
                   />
                   {formErrors.seniority && (
-                    <p className="text-sm text-red-600">{formErrors.seniority}</p>
+                    <p className="text-sm text-red-600">
+                      {formErrors.seniority}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="averageDailyRate" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="averageDailyRate"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     TJM (€)
                   </Label>
-                  <Input 
+                  <Input
                     id="averageDailyRate"
-                    name='averageDailyRate'
-                    type="number" 
+                    name="averageDailyRate"
+                    type="number"
                     min="1"
                     step="0.01"
                     value={formData.averageDailyRate}
                     onChange={handleInputChange}
                     className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
-                      formErrors.averageDailyRate ? "border border-red-500" : "border-0"
+                      formErrors.averageDailyRate
+                        ? "border border-red-500"
+                        : "border-0"
                     }`}
                   />
                   {formErrors.averageDailyRate && (
-                    <p className="text-sm text-red-600">{formErrors.averageDailyRate}</p>
+                    <p className="text-sm text-red-600">
+                      {formErrors.averageDailyRate}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="stripeAccountId" className="text-sm font-medium text-gray-700">
+                  <Label
+                    htmlFor="stripeAccountId"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Compte Stripe
                   </Label>
-                  
+
                   {formData.stripeAccountId ? (
                     <div className="space-y-2">
-                      <Input 
-                        id="stripeAccountId" 
-                        name='stripeAccountId'
-                        type="text" 
+                      <Input
+                        id="stripeAccountId"
+                        name="stripeAccountId"
+                        type="text"
                         value={formData.stripeAccountId}
                         readOnly
-                        className="w-full bg-gray-50 border text-gray-600" 
+                        className="w-full bg-gray-50 border text-gray-600"
                       />
                       <div className="flex items-center text-green-600 text-sm">
-                        <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                         Compte Stripe connecté
                       </div>
@@ -827,7 +966,7 @@ export default function FreelanceProfile() {
                         onClick={createStripeConnection}
                         disabled={isConnectingStripe}
                         className="w-full text-white"
-                        style={{backgroundColor: '#FF4D6D'}}
+                        style={{ backgroundColor: "#FF4D6D" }}
                       >
                         {isConnectingStripe ? (
                           <div className="flex items-center">
@@ -839,13 +978,16 @@ export default function FreelanceProfile() {
                         )}
                       </Button>
                       <p className="text-xs text-gray-500">
-                        Connectez votre compte Stripe pour recevoir vos paiements
+                        Connectez votre compte Stripe pour recevoir vos
+                        paiements
                       </p>
                     </div>
                   )}
-                  
+
                   {stripeConnectionStatus && (
-                    <p className="text-sm text-green-600">{stripeConnectionStatus}</p>
+                    <p className="text-sm text-green-600">
+                      {stripeConnectionStatus}
+                    </p>
                   )}
                 </div>
               </CardContent>
@@ -856,12 +998,12 @@ export default function FreelanceProfile() {
           <Button
             type="submit"
             className="w-full max-w-2xl text-white font-bold p-6"
-            style={{ backgroundColor: '#FF4D6D' }}
+            style={{ backgroundColor: "#FF4D6D" }}
           >
             Enregistrer les modifications
           </Button>
         </div>
-      </div> 
+      </div>
     </form>
   );
-};
+}

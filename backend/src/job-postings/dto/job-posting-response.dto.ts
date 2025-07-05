@@ -50,6 +50,27 @@ export class JobPostingResponseDto {
   seniority: number;
 
   @ApiProperty({
+    description: 'The total amount for the mission (TJM × number of days)',
+    example: 12500,
+    required: false,
+  })
+  totalAmount?: number | null;
+
+  @ApiProperty({
+    description: 'The status of the job posting',
+    enum: [
+      'PENDING_PAYMENT',
+      'PAID',
+      'PUBLISHED',
+      'DRAFT',
+      'EXPIRED',
+      'REJECTED',
+    ],
+    example: 'PENDING_PAYMENT',
+  })
+  status: string;
+
+  @ApiProperty({
     description: 'The company associated with the job posting',
     type: CompanyResponseDto,
   })

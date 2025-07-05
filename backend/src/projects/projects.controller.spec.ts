@@ -10,6 +10,7 @@ import { HttpService } from '@nestjs/axios';
 import { UsersService } from '../users/users.service';
 import { EnvironmentService } from '../common/environment/environment.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ConversationsService } from '../conversations/conversations.service';
 
 describe('ProjectController', () => {
   let projectController: ProjectController;
@@ -38,6 +39,14 @@ describe('ProjectController', () => {
     emit: jest.fn(),
     on: jest.fn(),
     removeListener: jest.fn(),
+  };
+
+  const mockConversationsService = {
+    create: jest.fn(),
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    remove: jest.fn(),
   };
 
   const mockUser = {
@@ -73,6 +82,10 @@ describe('ProjectController', () => {
         {
           provide: EventEmitter2,
           useValue: mockEventEmitter,
+        },
+        {
+          provide: ConversationsService,
+          useValue: mockConversationsService,
         },
       ],
     })

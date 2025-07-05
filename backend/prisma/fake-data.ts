@@ -1,4 +1,4 @@
-import { Role, SkillType, JobPostingLocation, CheckpointStatus, DocumentType, CandidateStatus } from '@prisma/client';
+import { Role, SkillType, JobPostingLocation, JobPostingStatus, CheckpointStatus, DocumentType, CandidateStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import Decimal from 'decimal.js';
 
@@ -108,6 +108,7 @@ export function fakeJobPostingComplete() {
     averageDailyRate: faker.number.float({ min: 50, max: 1000, multipleOf: 50 }),
     seniority: faker.number.int({ min: 0, max: 10 }),
     totalAmount: undefined,
+    status: JobPostingStatus.PENDING_PAYMENT,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

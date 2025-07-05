@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { JobPosting } from "@/lib/interfaces";
-import { getJobPostingsByUserId } from "@/actions/jobPostings";
+import { getJobPostingsByUserIdAndStatus } from "@/actions/jobPostings";
 import { getCurrentUser } from "@/actions/auth";
 import { JobPostingCard } from "@/components/job-posting/card";
 import { Banner } from "@/components/common/banner";
@@ -19,7 +19,7 @@ interface User {
   role: string;
 }
 
-export default function MyJobPostingsPage() {
+export default function MyPublishedJobPostingsPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [user, setUser] = useState<User | null>(null);
   const [jobPostings, setJobPostings] = useState<JobPosting[]>([]);
@@ -36,12 +36,15 @@ export default function MyJobPostingsPage() {
         const currentUser = await getCurrentUser();
         setUser(currentUser);
 
-        // Récupérer les offres d'emploi de l'utilisateur
-        const userJobPostings = await getJobPostingsByUserId(currentUser.id);
-        setJobPostings(userJobPostings);
+        // Récupérer SEULEMENT les annonces publiées
+        const publishedJobPostings = await getJobPostingsByUserIdAndStatus(
+          currentUser.id,
+          "PUBLISHED",
+        );
+        setJobPostings(publishedJobPostings);
       } catch (err) {
         console.error("Erreur lors du chargement des données:", err);
-        setError("Impossible de charger vos offres d'emploi");
+        setError("Impossible de charger vos offres d'emploi publiées");
       } finally {
         setLoading(false);
       }
@@ -52,28 +55,55 @@ export default function MyJobPostingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Banner text="Gérez vos offres d'emploi" redPointerClassName="right-0" />
+      <Banner
+        text="Mes annonces publiées et visibles"
+        redPointerClassName="right-0"
+      />
 
       <div className="max-w-7xl mx-auto px-4 lg:px-5 py-6">
+        {/* Note explicative */}
+        <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-6">
+          <h2 className="text-lg font-semibold text-green-800 mb-2">
+            👁️ Consultation des annonces publiées
+          </h2>
+          <p className="text-green-700 text-sm mb-2">
+            <strong>Cette page montre uniquement vos annonces publiées</strong>{" "}
+            - celles que les freelances peuvent voir et pour lesquelles ils
+            peuvent postuler.
+          </p>
+          <p className="text-green-600 text-sm">
+            💡 Pour gérer vos paiements, publications ou annuler des annonces,
+            utilisez la <strong>&quot;Gestion des annonces&quot;</strong> depuis
+            votre dashboard.
+          </p>
+        </div>
+
         {/* En-tête */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-freehunt-black-two">
-              Mes offres d&apos;emploi
+              Mes annonces publiées
             </h1>
             {!loading && (
-              <Badge className="bg-freehunt-main font-bold text-white">
+              <Badge className="bg-green-600 font-bold text-white">
                 {jobPostings.length}
               </Badge>
             )}
           </div>
 
-          <Link href="/job-postings/new">
-            <Button className="flex items-center gap-2">
-              <Plus size={16} />
-              Créer une offre
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/dashboard/job-postings">
+              <Button variant="outline" className="flex items-center gap-2">
+                📋 Gérer mes annonces
+              </Button>
+            </Link>
+            <Link href="/job-postings/new">
+              <Button className="flex items-center gap-2">
+                <Plus size={16} />
+                Créer une annonce
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Contenu principal */}
@@ -103,18 +133,26 @@ export default function MyJobPostingsPage() {
               <Plus className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              Aucune offre d&apos;emploi
+              Aucune annonce publiée
             </h3>
             <p className="text-gray-600 text-center max-w-md mb-4">
-              Vous n&apos;avez pas encore publié d&apos;offres d&apos;emploi.
-              Créez votre première offre pour commencer à attirer des talents.
+              Vous n&apos;avez pas encore d&apos;annonces publiées et visibles
+              par les freelances. Créez et publiez votre première annonce pour
+              commencer à recevoir des candidatures.
             </p>
-            <Link href="/job-postings/new">
-              <Button className="flex items-center gap-2">
-                <Plus size={16} />
-                Créer ma première offre
-              </Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link href="/job-postings/new">
+                <Button className="flex items-center gap-2">
+                  <Plus size={16} />
+                  Créer une annonce
+                </Button>
+              </Link>
+              <Link href="/dashboard/job-postings">
+                <Button variant="outline" className="flex items-center gap-2">
+                  📋 Gérer mes annonces
+                </Button>
+              </Link>
+            </div>
           </div>
         ) : (
           <>
@@ -135,22 +173,25 @@ export default function MyJobPostingsPage() {
             </div>
 
             {/* Informations supplémentaires */}
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-900 mb-2">
-                💡 Conseils pour améliorer vos offres
+            <div className="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
+              <h4 className="font-semibold text-green-900 mb-2">
+                ✅ Vos annonces sont en ligne !
               </h4>
-              <ul className="text-sm text-blue-800 space-y-1">
+              <ul className="text-sm text-green-800 space-y-1">
                 <li>
-                  • Ajoutez des descriptions détaillées pour attirer plus de
-                  candidats
-                </li>
-                <li>• Utilisez des mots-clés pertinents dans le titre</li>
-                <li>
-                  • Mettez vos offres en avant pour augmenter leur visibilité
+                  • Ces annonces sont visibles par tous les freelances de la
+                  plateforme
                 </li>
                 <li>
-                  • Répondez rapidement aux candidatures pour maintenir
-                  l&apos;engagement
+                  • Les freelances peuvent postuler et vous envoyer des
+                  candidatures
+                </li>
+                <li>
+                  • Consultez vos candidatures reçues depuis votre dashboard
+                </li>
+                <li>
+                  • Pour modifier, annuler ou gérer le paiement, utilisez la
+                  &quot;Gestion des annonces&quot;
                 </li>
               </ul>
             </div>

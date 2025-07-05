@@ -1,31 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MessagesController } from './messages.controller';
 import { MessagesService } from './messages.service';
 import { PrismaService } from '../common/prisma/prisma.service';
-import { HttpModule } from '@nestjs/axios';
-import { UsersService } from '../users/users.service';
-import { ChatService } from '../common/chat/chat.service';
-import { EnvironmentService } from '../common/environment/environment.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
 
-describe('MessagesController', () => {
-  let controller: MessagesController;
-
-  const mockMessagesService = {
-    create: jest.fn(),
-    findOne: jest.fn(),
-    findAll: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
-    getMessagesByConversationId: jest.fn(),
-  };
-
-  const mockChatService = {
-    server: {
-      emit: jest.fn(),
-    },
-  };
+describe('MessagesService', () => {
+  let service: MessagesService;
 
   const mockPrismaService = {
     message: {
@@ -37,43 +17,18 @@ describe('MessagesController', () => {
     },
   };
 
-  const mockUsersService = {
-    findOne: jest.fn(),
-  };
-
-  const mockEnvironmentService = {
-    get: jest.fn(),
-  };
-
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [MessagesController],
       providers: [
-        {
-          provide: MessagesService,
-          useValue: mockMessagesService,
-        },
+        MessagesService,
         {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
-        {
-          provide: UsersService,
-          useValue: mockUsersService,
-        },
-        {
-          provide: ChatService,
-          useValue: mockChatService,
-        },
-        {
-          provide: EnvironmentService,
-          useValue: mockEnvironmentService,
-        },
       ],
-      imports: [HttpModule],
     }).compile();
 
-    controller = module.get<MessagesController>(MessagesController);
+    service = module.get<MessagesService>(MessagesService);
   });
 
   afterEach(() => {
@@ -81,7 +36,7 @@ describe('MessagesController', () => {
   });
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
+    expect(service).toBeDefined();
   });
 
   describe('create', () => {
@@ -102,11 +57,13 @@ describe('MessagesController', () => {
         updatedAt: new Date(),
       };
 
-      mockMessagesService.create.mockResolvedValue(expectedResult);
+      mockPrismaService.message.create.mockResolvedValue(expectedResult);
 
-      const result = await controller.create(createMessageDto);
+      const result = await service.create(createMessageDto);
 
-      expect(mockMessagesService.create).toHaveBeenCalledWith(createMessageDto);
+      expect(mockPrismaService.message.create).toHaveBeenCalledWith({
+        data: createMessageDto,
+      });
       expect(result).toEqual(expectedResult);
     });
   });
@@ -124,11 +81,13 @@ describe('MessagesController', () => {
         updatedAt: new Date(),
       };
 
-      mockMessagesService.findOne.mockResolvedValue(expectedResult);
+      mockPrismaService.message.findUnique.mockResolvedValue(expectedResult);
 
-      const result = await controller.findOne(messageId);
+      const result = await service.findOne(messageId);
 
-      expect(mockMessagesService.findOne).toHaveBeenCalledWith(messageId);
+      expect(mockPrismaService.message.findUnique).toHaveBeenCalledWith({
+        where: { id: messageId },
+      });
       expect(result).toEqual(expectedResult);
     });
   });
@@ -142,16 +101,25 @@ describe('MessagesController', () => {
           senderId: 'sender-id',
           receiverId: 'receiver-id',
           conversationId: 'conversation-id',
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date('2024-01-01'),
+        },
+        {
+          id: 'message-2',
+          content: 'Test message 2',
+          senderId: 'sender-id',
+          receiverId: 'receiver-id',
+          conversationId: 'conversation-id',
+          createdAt: new Date('2024-01-02'),
+          updatedAt: new Date('2024-01-02'),
         },
       ];
 
-      mockMessagesService.findAll.mockResolvedValue(expectedResult);
+      mockPrismaService.message.findMany.mockResolvedValue(expectedResult);
 
-      const result = await controller.findAll();
+      const result = await service.findAll();
 
-      expect(mockMessagesService.findAll).toHaveBeenCalled();
+      expect(mockPrismaService.message.findMany).toHaveBeenCalled();
       expect(result).toEqual(expectedResult);
     });
   });
@@ -169,19 +137,22 @@ describe('MessagesController', () => {
 
       const expectedResult = {
         id: messageId,
-        ...updateMessageDto,
+        content: 'Updated message',
+        senderId: 'sender-id',
+        receiverId: 'receiver-id',
+        conversationId: 'conversation-id',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
 
-      mockMessagesService.update.mockResolvedValue(expectedResult);
+      mockPrismaService.message.update.mockResolvedValue(expectedResult);
 
-      const result = await controller.update(messageId, updateMessageDto);
+      const result = await service.update(messageId, updateMessageDto);
 
-      expect(mockMessagesService.update).toHaveBeenCalledWith(
-        messageId,
-        updateMessageDto,
-      );
+      expect(mockPrismaService.message.update).toHaveBeenCalledWith({
+        where: { id: messageId },
+        data: updateMessageDto,
+      });
       expect(result).toEqual(expectedResult);
     });
   });
@@ -199,17 +170,19 @@ describe('MessagesController', () => {
         updatedAt: new Date(),
       };
 
-      mockMessagesService.delete.mockResolvedValue(expectedResult);
+      mockPrismaService.message.delete.mockResolvedValue(expectedResult);
 
-      const result = await controller.delete(messageId);
+      const result = await service.delete(messageId);
 
-      expect(mockMessagesService.delete).toHaveBeenCalledWith(messageId);
+      expect(mockPrismaService.message.delete).toHaveBeenCalledWith({
+        where: { id: messageId },
+      });
       expect(result).toEqual(expectedResult);
     });
   });
 
   describe('getMessagesByConversationId', () => {
-    it('should return messages for a conversation and emit socket event', async () => {
+    it('should return messages for a conversation ordered by creation date', async () => {
       const conversationId = 'conversation-id';
       const expectedResult = [
         {
@@ -252,57 +225,100 @@ describe('MessagesController', () => {
         },
       ];
 
-      mockMessagesService.getMessagesByConversationId.mockResolvedValue(
-        expectedResult,
-      );
+      mockPrismaService.message.findMany.mockResolvedValue(expectedResult);
 
-      const result =
-        await controller.getMessagesByConversationId(conversationId);
+      const result = await service.getMessagesByConversationId(conversationId);
 
-      expect(
-        mockMessagesService.getMessagesByConversationId,
-      ).toHaveBeenCalledWith(conversationId);
-      expect(mockChatService.server.emit).toHaveBeenCalledWith(
-        'getMessagesByConversationId',
-        expectedResult,
-      );
+      expect(mockPrismaService.message.findMany).toHaveBeenCalledWith({
+        where: { conversationId },
+        orderBy: {
+          createdAt: 'asc',
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+            },
+          },
+          receiver: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+            },
+          },
+        },
+      });
       expect(result).toEqual(expectedResult);
     });
 
-    it('should ensure messages are returned in chronological order', async () => {
-      const conversationId = 'conversation-id';
-      const messagesInOrder = [
-        {
-          id: 'message-1',
-          content: 'First message',
-          createdAt: new Date('2024-01-01T10:00:00Z'),
-          conversationId,
+    it('should return empty array when no messages found for conversation', async () => {
+      const conversationId = 'non-existent-conversation-id';
+      const expectedResult = [];
+
+      mockPrismaService.message.findMany.mockResolvedValue(expectedResult);
+
+      const result = await service.getMessagesByConversationId(conversationId);
+
+      expect(mockPrismaService.message.findMany).toHaveBeenCalledWith({
+        where: { conversationId },
+        orderBy: {
+          createdAt: 'asc',
         },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+            },
+          },
+          receiver: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+            },
+          },
+        },
+      });
+      expect(result).toEqual(expectedResult);
+    });
+
+    it('should ensure messages are ordered chronologically (oldest first)', async () => {
+      const conversationId = 'conversation-id';
+      // Messages dans l'ordre inverse pour tester le tri
+      const messagesFromDb = [
         {
           id: 'message-2',
           content: 'Second message',
           createdAt: new Date('2024-01-01T11:00:00Z'),
-          conversationId,
+        },
+        {
+          id: 'message-1',
+          content: 'First message',
+          createdAt: new Date('2024-01-01T10:00:00Z'),
+        },
+        {
+          id: 'message-3',
+          content: 'Third message',
+          createdAt: new Date('2024-01-01T12:00:00Z'),
         },
       ];
 
-      mockMessagesService.getMessagesByConversationId.mockResolvedValue(
-        messagesInOrder,
-      );
+      mockPrismaService.message.findMany.mockResolvedValue(messagesFromDb);
 
-      const result =
-        await controller.getMessagesByConversationId(conversationId);
+      await service.getMessagesByConversationId(conversationId);
 
-      // Vérifier que le service est appelé
-      expect(
-        mockMessagesService.getMessagesByConversationId,
-      ).toHaveBeenCalledWith(conversationId);
-      // Vérifier que les messages sont dans le bon ordre (le service doit les trier)
-      expect(result).toEqual(messagesInOrder);
-      // Vérifier que l'émission socket a eu lieu
-      expect(mockChatService.server.emit).toHaveBeenCalledWith(
-        'getMessagesByConversationId',
-        messagesInOrder,
+      // Vérifier que Prisma est appelé avec l'ordre croissant
+      expect(mockPrismaService.message.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: {
+            createdAt: 'asc',
+          },
+        }),
       );
     });
   });
