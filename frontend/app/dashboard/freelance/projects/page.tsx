@@ -146,13 +146,13 @@ export default function FreelanceProjectsPage() {
                   key={project.id}
                   className="bg-card rounded-xl border border-border overflow-hidden shadow-sm"
                 >
-                  <div className="bg-freehunt-main/5 p-6">
+                  <div className="bg-freehunt-main p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-2">
+                        <h2 className="text-xl lg:text-2xl font-bold text-white mb-2">
                           {project.name}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-2">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-white/80 mb-2">
                           <span className="flex items-center gap-1">
                             <Building className="w-4 h-4" />
                             {project.jobPosting?.company?.name || "Entreprise"}
@@ -168,7 +168,7 @@ export default function FreelanceProjectsPage() {
                             {project.amount}€
                           </span>
                         </div>
-                        <p className="text-freehunt-black-two opacity-80 mb-2 line-clamp-2">
+                        <p className="text-white/90 mb-2 line-clamp-2">
                           {project.description}
                         </p>
                       </div>
@@ -185,7 +185,7 @@ export default function FreelanceProjectsPage() {
                           <Clock className="w-3 h-3 mr-1" />
                           {status.label}
                         </Badge>
-                        <span className="text-xs text-freehunt-black-two opacity-50">
+                        <span className="text-xs text-white/60">
                           Créé le {formatDate(project.createdAt)}
                         </span>
                       </div>

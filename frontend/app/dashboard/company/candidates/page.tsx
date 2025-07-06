@@ -221,13 +221,13 @@ export default function CompanyCandidatesPage() {
                 key={candidate.id}
                 className="bg-card rounded-xl border border-border overflow-hidden shadow-sm"
               >
-                <div className="bg-freehunt-main/5 p-6">
+                <div className="bg-freehunt-main p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-2">
+                      <h2 className="text-xl lg:text-2xl font-bold text-white mb-2">
                         {candidate.freelance?.user?.username || "Freelance"}
                       </h2>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-2">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-white/80 mb-2">
                         <span className="flex items-center gap-1">
                           <User className="w-4 h-4" />
                           {candidate.freelance?.firstName}{" "}
@@ -246,16 +246,16 @@ export default function CompanyCandidatesPage() {
                           {candidate.freelance?.seniority} ans d&apos;expérience
                         </span>
                       </div>
-                      <p className="text-freehunt-black-two opacity-80 mb-2">
+                      <p className="text-white/90 mb-2">
                         <strong>Poste :</strong> {candidate.jobPosting?.title}
                       </p>
-                      <p className="text-freehunt-black-two opacity-70">
+                      <p className="text-white/80">
                         {candidate.freelance?.jobTitle}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {getStatusBadge(candidate.status)}
-                      <span className="text-xs text-freehunt-black-two opacity-50">
+                      <span className="text-xs text-white/60">
                         Candidature du {formatDate(candidate.createdAt)}
                       </span>
                     </div>
