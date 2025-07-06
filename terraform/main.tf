@@ -27,7 +27,7 @@ resource "aws_s3_bucket_cors_configuration" "freehunt_avatar_cors" {
 
   cors_rule {
     allowed_headers = ["*"]
-    allowed_methods = ["GET", "PUT", "POST", "HEAD", "OPTIONS"]
+    allowed_methods = ["GET", "PUT", "POST", "DELETE", "HEAD"]
     allowed_origins = [var.frontend_url]
     expose_headers  = ["ETag"]
     max_age_seconds = var.max_age_seconds
@@ -47,7 +47,7 @@ resource "aws_s3_bucket_public_access_block" "freehunt_avatar_pab" {
 # Bucket policy to allow public read access to objects
 resource "aws_s3_bucket_policy" "freehunt_avatar_policy" {
   bucket = aws_s3_bucket.freehunt_avatar.id
-  
+
   depends_on = [aws_s3_bucket_public_access_block.freehunt_avatar_pab]
 
   policy = jsonencode({
