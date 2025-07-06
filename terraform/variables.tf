@@ -15,3 +15,9 @@ variable "frontend_url" {
   type        = string
   default     = "https://freehunt.fr"
 }
+
+variable "max_age_seconds" {
+  description = "The maximum age for CORS preflight requests"
+  type        = number
+  default     = 3000
+}
