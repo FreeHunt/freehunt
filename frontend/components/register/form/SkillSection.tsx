@@ -1,11 +1,11 @@
-import { useState, ChangeEvent, KeyboardEvent, useEffect, useRef } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/common/button";
 import { TipBox } from "@/components/common/banner/TipBox";
-import { Montserrat } from "next/font/google";
-import { ZodError, ZodIssue } from "zod";
+import { Button } from "@/components/common/button";
+import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { Skill } from "@/lib/interfaces";
+import { Montserrat } from "next/font/google";
+import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { ZodError, ZodIssue } from "zod";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -196,7 +196,7 @@ export function SkillsSection({
         {/* Skill Type Selector - Stacks on mobile */}
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full pb-2">
           <button
-            type="button" 
+            type="button"
             onClick={() => setSkillType("TECHNICAL")}
             className={`w-full py-2 px-2 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
               skillType === "TECHNICAL"
@@ -207,7 +207,7 @@ export function SkillsSection({
             Compétences techniques ({technicalSkillsCount}/3)
           </button>
           <button
-            type="button" 
+            type="button"
             onClick={() => setSkillType("SOFT")}
             className={`w-full py-2 px-2 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-colors ${
               skillType === "SOFT"
@@ -255,7 +255,7 @@ export function SkillsSection({
 
           {/* Error message */}
           {error && (
-            <p className="text-red-500 text-xs sm:text-sm mt-1">{error}</p>
+            <p className="text-destructive text-xs sm:text-sm mt-1">{error}</p>
           )}
 
           {/* Suggestions dropdown - Full width on mobile with better positioning */}
@@ -349,7 +349,7 @@ export function SkillsSection({
         {errorSkillsSection && (
           <div className="flex flex-col justify-center items-center gap-2 sm:gap-5 self-stretch w-full">
             <p
-              className={`${montserrat.className} text-red-500 text-center text-sm sm:text-lg font-medium`}
+              className={`${montserrat.className} text-destructive text-center text-sm sm:text-lg font-medium`}
             >
               {
                 errorSkillsSection.errors.find(
@@ -361,7 +361,7 @@ export function SkillsSection({
         )}
       </div>
       <div className="w-full px-1 sm:px-0 mt-1 sm:mt-2">
-        <TipBox content="Sélectionnez un équilibre entre compétences techniques et soft skills pour vous démarquer auprès des recruteurs !" />
+        <TipBox content="Un bon équilibre entre compétences techniques et soft skills vous aidera à vous démarquer ! 💡" />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
-import { ReactNode } from "react";
-import { AnimatePresence } from "framer-motion";
 import { SectionTitle as SectionTitleType } from "@/actions/register";
 import { SectionTitle } from "@/components/register/form/SectionTitle";
+import { AnimatePresence } from "framer-motion";
+import { ReactNode } from "react";
 
 interface RegisterPageLayoutProps {
   children: ReactNode;
@@ -9,15 +9,16 @@ interface RegisterPageLayoutProps {
   currentSection: number;
 }
 
-export function RegisterPageLayout({ 
-  children, 
-  sectionTitles, 
-  currentSection 
+export function RegisterPageLayout({
+  children,
+  sectionTitles,
+  currentSection,
 }: RegisterPageLayoutProps) {
   return (
-    <div className="flex flex-col items-center gap-4 md:gap-8 lg:gap-20 my-6 md:my-10 lg:my-28">
-      <div className="flex flex-col justify-center items-center gap-2 self-stretch px-4">
-        <div className="flex p-3 md:p-5 justify-center items-center gap-2 h-16">
+    <div className="min-h-[calc(100svh-64px)] bg-gradient-to-br from-background to-muted/30 py-8 px-4">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Section Header */}
+        <div className="text-center">
           <AnimatePresence mode="wait">
             <SectionTitle
               title={sectionTitles[currentSection]}
@@ -25,9 +26,9 @@ export function RegisterPageLayout({
             />
           </AnimatePresence>
         </div>
-      </div>
-      <div className="flex flex-col justify-center items-center gap-4 md:gap-8 lg:gap-20 p-4 max-md:w-full">
-        {children}
+
+        {/* Main Content */}
+        <div className="w-full">{children}</div>
       </div>
     </div>
   );

@@ -1,14 +1,16 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import Form from "next/form";
-import { FieldError, register } from "@/actions/register";
-import { Input } from "@/components/ui/input";
+import {
+  AuthFlowResponseError,
+  FieldError,
+  register,
+} from "@/actions/register";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEffect, useState, Suspense } from "react";
-import { AuthFlowResponseError } from "@/actions/register";
-import { useSearchParams } from "next/navigation";
+import Form from "next/form";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 // Create a client component that safely uses useSearchParams
 function RegisterForm() {
@@ -84,105 +86,130 @@ function RegisterForm() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 md:gap-8 lg:gap-20 my-6 md:my-10 lg:my-28">
-      <div className="flex flex-col justify-center items-center gap-2 self-stretch px-4">
-        <div className="flex p-3 md:p-5 justify-center items-center gap-2">
-          <p className="text-xl md:text-2xl lg:text-4xl text-center font-bold">
-            <span className="text-freehunt-main">Présentez</span>
-            <span className="text-black font-normal">-vous !</span>
+    <div className="min-h-[calc(100svh-64px)] bg-gradient-to-br from-background to-muted/30 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+            Créons votre{" "}
+            <span className="text-freehunt-main">profil FreeHunt</span> ! 🚀
+          </h1>
+          <p className="text-lg text-muted-foreground">
+            Quelques informations pour commencer votre aventure
           </p>
         </div>
-      </div>
 
-      <div className="flex flex-col justify-center items-center gap-4 md:gap-8 lg:gap-20 px-4 max-md:w-full">
-        <Form
-          action={async () => {
-            await handleSubmit();
-          }}
-          className="flex p-4 md:p-6 lg:p-9 flex-col items-start gap-4 md:gap-6 lg:gap-8 self-stretch w-full md:w-[600px] lg:w-[700px] border-black border rounded-2xl md:rounded-3xl lg:rounded-4xl bg-white"
-        >
-          {errors.length > 0 && (
-            <p className="text-red-500">{errors.join(", ")}</p>
-          )}
-          <div className="flex flex-col md:flex-row gap-2.5 md:gap-4 self-stretch w-full">
-            <div className="flex flex-col gap-2.5 self-stretch w-full md:w-1/2">
-              <Label className="text-freehunt-main text-sm md:text-base font-bold">
-                Email
-              </Label>
-              <Input
-                className="flex h-10 p-2 items-center gap-2.5 self-stretch w-full rounded-xl border-black border"
-                placeholder="Email de l'entreprise"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              {errorsEmail.length > 0 && (
-                <p className="text-red-500">{errorsEmail.join(", ")}</p>
-              )}
+        {/* Form Card */}
+        <div className="bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden">
+          <div className="bg-gradient-to-r from-freehunt-main to-freehunt-main/90 p-6">
+            <h2 className="text-xl font-semibold text-white text-center">
+              Informations de base
+            </h2>
+          </div>
+
+          <Form
+            action={async () => {
+              await handleSubmit();
+            }}
+            className="p-6 space-y-6"
+          >
+            {errors.length > 0 && (
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                {errors.join(", ")}
+              </div>
+            )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-foreground text-sm font-medium">
+                  Adresse e-mail
+                </Label>
+                <Input
+                  className="rounded-lg"
+                  placeholder="votre@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                {errorsEmail.length > 0 && (
+                  <p className="text-destructive text-xs">
+                    {errorsEmail.join(", ")}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-foreground text-sm font-medium">
+                  Nom d&apos;utilisateur
+                </Label>
+                <Input
+                  className="rounded-lg"
+                  placeholder="nom_utilisateur"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                />
+                {errorsUsername.length > 0 && (
+                  <p className="text-destructive text-xs">
+                    {errorsUsername.join(", ")}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="flex flex-col gap-2.5 self-stretch w-full md:w-1/2">
-              <Label className="text-freehunt-main text-sm md:text-base font-bold">
-                Nom d&apos;utilisateur
-              </Label>
-              <Input
-                className="flex h-10 p-2 items-center gap-2.5 self-stretch w-full rounded-xl border-black border"
-                placeholder="Nom d'utilisateur"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-              {errorsUsername.length > 0 && (
-                <p className="text-red-500">{errorsUsername.join(", ")}</p>
-              )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-foreground text-sm font-medium">
+                  Mot de passe
+                </Label>
+                <Input
+                  className="rounded-lg"
+                  placeholder="••••••••"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                {errorsPassword.length > 0 && (
+                  <p className="text-destructive text-xs">
+                    {errorsPassword.join(", ")}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-foreground text-sm font-medium">
+                  Confirmer le mot de passe
+                </Label>
+                <Input
+                  className="rounded-lg"
+                  placeholder="••••••••"
+                  type="password"
+                  value={password_repeat}
+                  onChange={(e) => setPasswordRepeat(e.target.value)}
+                />
+                {errorsPasswordRepeat.length > 0 && (
+                  <p className="text-destructive text-xs">
+                    {errorsPasswordRepeat.join(", ")}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col md:flex-row gap-2.5 md:gap-4 self-stretch w-full">
-            <div className="flex flex-col items-start gap-2 self-stretch w-full md:w-1/2">
-              <Label className="text-freehunt-main text-sm md:text-base font-bold">
-                Mot de passe
-              </Label>
-              <Input
-                className="flex h-10 p-2 items-center gap-2.5 self-stretch w-full rounded-xl border-black border"
-                placeholder="Mot de passe"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              {errorsPassword.length > 0 && (
-                <p className="text-red-500">{errorsPassword.join(", ")}</p>
-              )}
+
+            {/* Action buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-lg"
+                onClick={() => router.back()}
+              >
+                Retour
+              </Button>
+              <Button
+                type="submit"
+                className="bg-freehunt-main hover:bg-freehunt-main/90 text-white rounded-lg"
+              >
+                Continuer →
+              </Button>
             </div>
-            <div className="flex flex-col items-start gap-2 self-stretch w-full md:w-1/2">
-              <Label className="text-freehunt-main text-sm md:text-base font-bold">
-                Confirmation du mot de passe
-              </Label>
-              <Input
-                className="flex h-10 p-2 items-center gap-2.5 self-stretch w-full rounded-xl border-black border"
-                placeholder="Confirmation du mot de passe"
-                type="password"
-                value={password_repeat}
-                onChange={(e) => setPasswordRepeat(e.target.value)}
-              />
-              {errorsPasswordRepeat.length > 0 && (
-                <p className="text-red-500">
-                  {errorsPasswordRepeat.join(", ")}
-                </p>
-              )}
-            </div>
-          </div>
-        </Form>
-        <div className="flex flex-row justify-end items-center gap-2.5 self-stretch w-full md:w-[600px] lg:w-[700px]">
-          <Button
-            className="flex p-2 items-center gap-2.5 self-stretch w-28 md:w-36 h-10 rounded-xl border-black border bg-transparent text-gray-500 text-base md:text-xl"
-            onClick={() => router.back()}
-          >
-            Retour
-          </Button>
-          <Button
-            className="flex w-28 md:w-36 h-10 p-2 items-center gap-2.5 self-stretch rounded-xl border-black border bg-freehunt-main text-white text-base md:text-xl"
-            onClick={handleSubmit}
-          >
-            Continuer
-          </Button>
+          </Form>
         </div>
       </div>
     </div>

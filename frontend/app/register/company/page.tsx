@@ -57,10 +57,10 @@ export default function CompanyRegisterPage() {
   } = useMultiStepForm(totalSections);
 
   const sectionTitles: SectionTitleType[] = [
-    { highlight: "Identifiez", regular: " votre entreprise" },
-    { highlight: "Où se situe", regular: " votre entreprise ?" },
-    { highlight: "Décrivez", regular: " votre activité" },
-    { highlight: "Ajoutez votre", regular: " logo d'entreprise" },
+    { highlight: "Parlez-nous", regular: " de votre entreprise" },
+    { highlight: "Où êtes-vous", regular: " basés ?" },
+    { highlight: "Votre activité", regular: " en quelques mots" },
+    { highlight: "Votre identité", regular: " visuelle" },
   ];
 
   const handleFormSubmit = async () => {

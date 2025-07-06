@@ -1,6 +1,6 @@
-import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ChangeEvent } from "react";
 import { ZodError, ZodIssue } from "zod";
 
 interface CompanyIdentitySectionProps {
@@ -32,7 +32,7 @@ export function CompanyIdentitySection({
           required
         />
         {errorNameSection && (
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             {
               errorNameSection.errors.find(
                 (error: ZodIssue) => error.path[0] === "name",
@@ -53,12 +53,12 @@ export function CompanyIdentitySection({
           pattern="[0-9]{9}"
           required
         />
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Le numéro SIREN est un identifiant unique à 9 chiffres attribué à
           chaque entreprise française.
         </p>
         {errorSirenSection && (
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             {
               errorSirenSection.errors.find(
                 (error: ZodIssue) => error.path[0] === "siren",

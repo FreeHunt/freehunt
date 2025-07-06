@@ -10,19 +10,21 @@ function RegisterCard({
   onClick: () => void;
 }) {
   return (
-    <button onClick={onClick}>
-      <div
-        className="flex flex-col justify-center items-center gap-4 md:gap-9 w-72 md:w-96 h-64 md:h-96 bg-slate-50 text-freehunt-black-two rounded-xl border border-freehunt-grey-dark"
-        style={{
-          boxShadow: "0px 4px 4px 0px rgba(0, 0, 0, 0.25)",
-        }}
-      >
-        {icon}
-        <div className="flex flex-col justify-center items-center gap-3 md:gap-5">
-          <p className="text-2xl md:text-3xl font-semibold text-center">
+    <button
+      onClick={onClick}
+      className="group w-full transform transition-all duration-200 hover:scale-105 hover:-translate-y-1"
+    >
+      <div className="flex flex-col justify-center items-center gap-6 h-80 bg-card text-foreground rounded-xl border border-border shadow-lg hover:shadow-xl transition-all duration-200 p-8 group-hover:border-freehunt-main/50">
+        <div className="flex justify-center items-center w-20 h-20 rounded-full bg-freehunt-main/10 group-hover:bg-freehunt-main/20 transition-colors">
+          {icon}
+        </div>
+        <div className="flex flex-col justify-center items-center gap-3 text-center">
+          <h3 className="text-2xl font-bold text-freehunt-main group-hover:text-freehunt-main/90 transition-colors">
             {title}
+          </h3>
+          <p className="text-muted-foreground text-lg group-hover:text-foreground transition-colors">
+            {description}
           </p>
-          <p className="text-center text-lg md:text-xl">{description}</p>
         </div>
       </div>
     </button>

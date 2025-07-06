@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
 import { SectionTitle as SectionTitleType } from "@/actions/register";
+import { motion } from "framer-motion";
 
 interface SectionTitleProps {
   title: SectionTitleType;
@@ -19,6 +19,7 @@ export function SectionTitle({ title, currentSection }: SectionTitleProps) {
         type: "spring",
         stiffness: 300,
         damping: 25,
+        delay: 0.1,
       },
     },
     exit: {
@@ -31,16 +32,19 @@ export function SectionTitle({ title, currentSection }: SectionTitleProps) {
   };
 
   return (
-    <motion.p
-      key={`title-${currentSection}`}
-      className="text-xl md:text-2xl lg:text-4xl text-center font-bold"
-      variants={titleVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-    >
-      <span className="text-freehunt-main">{title.highlight}</span>
-      <span className="text-black font-normal">{title.regular}</span>
-    </motion.p>
+    <div className="text-center space-y-2">
+      <motion.h2
+        key={`title-${currentSection}`}
+        className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight"
+        variants={titleVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      >
+        <span className="text-freehunt-main">{title.highlight}</span>
+        <span className="text-foreground">{title.regular}</span>
+      </motion.h2>
+      <div className="w-20 h-1 bg-freehunt-main rounded-full mx-auto opacity-60"></div>
+    </div>
   );
 }

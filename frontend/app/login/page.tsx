@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Eye, EyeOff, ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { login } from "@/actions/login";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Login() {
   const router = useRouter();
@@ -23,31 +23,41 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100svh-64px)] bg-gray-50">
-      <div className="w-full max-w-md px-6 py-8">
-        <div className="flex justify-center mb-8">
-          <div className="text-3xl font-bold text-gray-800">
-            On vous <span className="text-pink-500"> attendait... 🙂</span>
-          </div>
+    <div className="min-h-[calc(100svh-64px)] bg-gradient-to-br from-background to-muted/50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Welcome Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">
+            Bon retour sur{" "}
+            <span className="text-freehunt-main">FreeHunt</span> ! 👋
+          </h1>
+          <p className="text-muted-foreground">
+            Connectez-vous pour accéder à votre espace
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-pink-500 to-red-500 py-4 px-6">
-            <h2 className="text-2xl font-bold text-white">Connexion</h2>
-            <p className="text-pink-100 text-sm mt-1">
-              Accédez à votre espace personnel
-            </p>
+        {/* Login Card */}
+        <div className="bg-card rounded-xl shadow-xl border border-border/50 overflow-hidden">
+          {/* Header with gradient */}
+          <div className="bg-gradient-to-r from-freehunt-main to-freehunt-main/90 p-6 text-center">
+            <h2 className="text-xl font-semibold text-white">Connexion</h2>
           </div>
 
-          <div className="p-6">
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {error && <div className="text-red-500">{error}</div>}
-              <div>
+          {/* Form */}
+          <div className="p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-2">
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-foreground"
                 >
-                  Adresse mail
+                  Adresse e-mail
                 </label>
                 <input
                   type="email"
@@ -55,21 +65,19 @@ export default function Login() {
                   name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
-                  placeholder="exemple@email.com"
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:ring-2 focus:ring-freehunt-main/20 focus:border-freehunt-main transition-all duration-200 placeholder:text-muted-foreground"
+                  placeholder="votre@email.com"
                   required
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Mot de passe
-                  </label>
-                </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-foreground"
+                >
+                  Mot de passe
+                </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -77,14 +85,14 @@ export default function Login() {
                     name="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-colors"
+                    className="w-full px-4 py-3 pr-12 rounded-lg border border-border bg-background focus:ring-2 focus:ring-freehunt-main/20 focus:border-freehunt-main transition-all duration-200 placeholder:text-muted-foreground"
                     placeholder="••••••••"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-freehunt-main transition-colors"
                     aria-label={
                       showPassword
                         ? "Masquer le mot de passe"
@@ -98,25 +106,26 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                className="w-full bg-freehunt-main hover:bg-freehunt-main/90 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 aria-label="Se connecter"
               >
                 Se connecter <ArrowRight size={18} />
               </button>
             </form>
-          </div>
-        </div>
 
-        <div className="text-center mt-6">
-          <p className="text-gray-600">
-            Pas encore de compte ?{" "}
-            <Link
-              href="/register/choice"
-              className="font-medium text-pink-600 hover:text-pink-800"
-            >
-              S&apos;inscrire
-            </Link>
-          </p>
+            {/* Register Link */}
+            <div className="text-center pt-4 border-t border-border">
+              <p className="text-muted-foreground text-sm">
+                Nouveau sur FreeHunt ?{" "}
+                <Link
+                  href="/register/choice"
+                  className="font-medium text-freehunt-main hover:text-freehunt-main/80 transition-colors"
+                >
+                  Créer un compte
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

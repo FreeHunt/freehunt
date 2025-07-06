@@ -1,8 +1,7 @@
-import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Montserrat } from "next/font/google";
-import { ZodIssue } from "zod";
-import { ZodError } from "zod";
+import { ChangeEvent } from "react";
+import { ZodError, ZodIssue } from "zod";
 const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
@@ -36,20 +35,22 @@ export function LocationRateSection({
       {/* Section Localisation */}
       <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
         <p
-          className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium px-2`}
+          className={`${montserrat.className} text-foreground text-center text-base md:text-lg font-medium px-2`}
         >
-          Quelle est votre localisation ?{" "}
+          Où travaillez-vous habituellement ?{" "}
           <span className="hidden md:inline">
             <br />
-            (les recruteurs vous trouveront via ces informations)
+            <span className="text-sm text-muted-foreground font-normal">
+              (Votre ville ou région de prédilection)
+            </span>
           </span>
-          <span className="inline md:hidden text-xs text-gray-600 block mt-1">
-            (les recruteurs vous trouveront via ces informations)
+          <span className="md:hidden text-xs text-muted-foreground block mt-1 font-normal">
+            (Votre ville ou région de prédilection)
           </span>
         </p>
         <Input
           type="text"
-          className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
+          className="w-full h-10 rounded-lg border text-sm font-normal"
           value={location}
           onChange={onLocationChange}
           placeholder="Ex: Paris, Lyon, Bordeaux..."
@@ -57,7 +58,7 @@ export function LocationRateSection({
         {errorLocationSection && (
           <div className="w-full">
             <p
-              className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
+              className={`${montserrat.className} text-destructive text-center text-sm md:text-base font-medium`}
             >
               {
                 errorLocationSection.errors.find(
@@ -74,13 +75,13 @@ export function LocationRateSection({
         {/* Taux journalier */}
         <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
           <p
-            className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium`}
+            className={`${montserrat.className} text-foreground text-center text-base md:text-lg font-medium`}
           >
-            Quel est votre taux journalier ?
+            Votre taux journalier moyen ?
           </p>
           <Input
             type="number"
-            className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
+            className="w-full h-10 rounded-lg border text-sm font-normal"
             value={averageDailyRate || ""}
             onChange={onRateChange}
             placeholder="€ / jour"
@@ -89,7 +90,7 @@ export function LocationRateSection({
           {errorAverageDailyRateSection && (
             <div className="w-full">
               <p
-                className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
+                className={`${montserrat.className} text-destructive text-center text-sm md:text-base font-medium`}
               >
                 {
                   errorAverageDailyRateSection.errors.find(
@@ -104,13 +105,13 @@ export function LocationRateSection({
         {/* Années d'expérience */}
         <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
           <p
-            className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium`}
+            className={`${montserrat.className} text-foreground text-center text-base md:text-lg font-medium`}
           >
-            Années d&apos;expérience
+            Combien d&apos;années d&apos;expérience ?
           </p>
           <Input
             type="number"
-            className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
+            className="w-full h-10 rounded-lg border text-sm font-normal"
             value={experienceYear || ""}
             onChange={onExperienceYearChange}
             placeholder="Nombre d'années"
@@ -119,7 +120,7 @@ export function LocationRateSection({
           {errorExperienceYearSection && (
             <div className="w-full">
               <p
-                className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
+                className={`${montserrat.className} text-destructive text-center text-sm md:text-base font-medium`}
               >
                 {
                   errorExperienceYearSection.errors.find(
