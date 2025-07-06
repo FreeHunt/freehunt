@@ -277,10 +277,67 @@ export class StripeService {
     return accountConnection || null;
   }
 
-  // faire un transfer de l'argent vers le compte stripe du freelance
-  async transferFundsToAccountStripe(accountId: string, amount: number) {
+  // Calculer les frais Stripe (2.9% + 0.25€ pour l'Europe)
+  calculateStripeFees(amount: number): {
+    stripeFee: number;
+    netAmount: number;
+  } {
+    // amount est en centimes
+    const feePercentage = 0.029; // 2.9%
+    const fixedFee = 25; // 0.25€ en centimes
+
+    const stripeFee = Math.round(amount * feePercentage) + fixedFee;
+    const netAmount = amount - stripeFee;
+
+    return {
+      stripeFee,
+      netAmount: Math.max(0, netAmount), // S'assurer que le montant net n'est pas négatif
+    };
+  }
+
+  // Calculer le montant net à transférer au freelance après déduction des frais Stripe
+  calculateNetTransferAmount(grossAmount: number): number {
+    // grossAmount en euros, on le convertit en centimes
+    const amountInCents = Math.round(grossAmount * 100);
+    const { netAmount } = this.calculateStripeFees(amountInCents);
+    return netAmount; // Retourne en centimes pour Stripe
+  }
+
+  // faire un transfer de l'argent vers le compte stripe du freelance (avec déduction automatique des frais)
+  async transferFundsToAccountStripe(
+    accountId: string,
+    grossAmountInEuros: number,
+  ) {
+    // Calculer le montant net après déduction des frais Stripe
+    const netAmountInCents =
+      this.calculateNetTransferAmount(grossAmountInEuros);
+
+    if (netAmountInCents <= 0) {
+      throw new Error(
+        'Le montant net après déduction des frais Stripe est insuffisant pour effectuer le transfert',
+      );
+    }
+
+    console.log(
+      `Transfer: ${grossAmountInEuros}€ gross -> ${netAmountInCents / 100}€ net (fees: ${(grossAmountInEuros * 100 - netAmountInCents) / 100}€)`,
+    );
+
     const transfer = await this.stripe.transfers.create({
-      amount: amount,
+      amount: netAmountInCents,
+      currency: 'eur',
+      destination: accountId,
+      description: `Paiement checkpoint - Montant brut: ${grossAmountInEuros}€`,
+    });
+    return transfer;
+  }
+
+  // Ancienne méthode renommée pour les transferts directs sans déduction automatique
+  async transferFundsToAccountStripeRaw(
+    accountId: string,
+    amountInCents: number,
+  ) {
+    const transfer = await this.stripe.transfers.create({
+      amount: amountInCents,
       currency: 'eur',
       destination: accountId,
     });
@@ -402,5 +459,23 @@ export class StripeService {
         }`,
       );
     }
+  }
+
+  // Méthode utilitaire pour prévisualiser les frais et montants nets
+  previewTransferAmount(grossAmountInEuros: number): {
+    grossAmount: number;
+    stripeFee: number;
+    netAmount: number;
+    feesInEuros: number;
+  } {
+    const amountInCents = Math.round(grossAmountInEuros * 100);
+    const { stripeFee, netAmount } = this.calculateStripeFees(amountInCents);
+
+    return {
+      grossAmount: grossAmountInEuros,
+      stripeFee: stripeFee / 100, // Convertir en euros
+      netAmount: netAmount / 100, // Convertir en euros
+      feesInEuros: stripeFee / 100,
+    };
   }
 }

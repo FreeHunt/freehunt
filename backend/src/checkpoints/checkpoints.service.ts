@@ -32,6 +32,14 @@ export class CheckpointsService {
         description: updateCheckpointDto.description,
         jobPostingId: updateCheckpointDto.jobPostingId,
         amount: updateCheckpointDto.amount,
+        submittedAt: updateCheckpointDto.submittedAt
+          ? new Date(updateCheckpointDto.submittedAt)
+          : undefined,
+        validatedAt: updateCheckpointDto.validatedAt
+          ? new Date(updateCheckpointDto.validatedAt)
+          : undefined,
+        submittedBy: updateCheckpointDto.submittedBy,
+        validatedBy: updateCheckpointDto.validatedBy,
       },
     });
   }
