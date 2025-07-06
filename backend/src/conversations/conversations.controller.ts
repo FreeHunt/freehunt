@@ -8,7 +8,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ConversationsService } from './conversations.service';
+import {
+  ConversationsService,
+  ConversationWithRelations,
+} from './conversations.service';
 import { CreateConversationDto } from './dto/create-conversation.dto';
 import { ChatService } from '../common/chat/chat.service';
 import { AuthentikAuthGuard } from '../auth/auth.guard';
@@ -118,6 +121,29 @@ export class ConversationsController {
   async deleteConversation(@Param('id') id: string) {
     const conversation = await this.conversationsService.deleteConversation(id);
     this.chatService.server.emit('deleteConversation', conversation);
+    return conversation;
+  }
+
+  @Post('find-or-create')
+  @ApiOperation({
+    summary: 'Find or create a conversation between two users',
+    description:
+      'Find an existing conversation or create a new one between two users, with optional project association',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Conversation found or created successfully',
+  })
+  async findOrCreateConversation(
+    @Body() body: { senderId: string; receiverId: string; projectId?: string },
+  ): Promise<ConversationWithRelations> {
+    const conversation =
+      await this.conversationsService.findOrCreateConversation(
+        body.senderId,
+        body.receiverId,
+        body.projectId,
+      );
+    this.chatService.server.emit('conversationReady', conversation);
     return conversation;
   }
 }
