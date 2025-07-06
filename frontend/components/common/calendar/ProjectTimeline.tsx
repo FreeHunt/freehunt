@@ -1,7 +1,7 @@
 "use client";
 
 import { Checkpoint, JobPosting, Quote } from "@/lib/interfaces";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface ProjectTimelineProps {
   checkpoints?: Checkpoint[];
@@ -382,10 +382,10 @@ export default function ProjectTimeline({
             {days.map((day, index) => (
               <div
                 key={index}
-                className={`flex-1 text-center py-2 border-r w-20 sm:w-auto ${
+                className={`text-center py-2 border-r ${
                   index % 2 === 0 ? "bg-gray-50/50" : ""
                 } ${day.isFirstOfMonth ? "border-l-2 border-blue-200" : ""}`}
-                style={{ minWidth: "80px" }}
+                style={{ width: "80px", minWidth: "80px", flexShrink: 0 }}
               >
                 {day.isFirstOfMonth && (
                   <div className="text-xs text-blue-600 font-semibold pb-1 border-b border-dashed border-blue-300 bg-blue-50 mx-1 rounded-sm">
@@ -398,7 +398,6 @@ export default function ProjectTimeline({
                 </div>
               </div>
             ))}
-            <div className="w-6 flex-shrink-0 border-r bg-white"></div>
           </div>
 
           {/* Timeline rows */}
@@ -416,7 +415,7 @@ export default function ProjectTimeline({
                 </div>
 
                 {/* Cells for each day */}
-                <div className="flex-1 flex relative">
+                <div className="flex relative">
                   {days.map((day, dayIndex) => (
                     <div
                       key={dayIndex}
@@ -425,7 +424,7 @@ export default function ProjectTimeline({
                       } ${
                         day.isFirstOfMonth ? "border-l-2 border-blue-200" : ""
                       } relative min-h-24`}
-                      style={{ flex: "1 0 80px" }}
+                      style={{ width: "80px", minWidth: "80px", flexShrink: 0 }}
                     ></div>
                   ))}
 
@@ -460,9 +459,7 @@ export default function ProjectTimeline({
                           isSelected ? "scale-125 ring-4 ring-blue-200" : ""
                         }`}
                         style={{
-                          left: `calc(${
-                            ((checkpoint.dayIndex + 0.5) / days.length) * 100
-                          }%)`,
+                          left: `${checkpoint.dayIndex * 80 + 40}px`,
                           top: "50%",
                           transform: `translate(-50%, -50%) ${
                             isSelected ? "scale(1.25)" : ""
@@ -675,7 +672,8 @@ export default function ProjectTimeline({
                         ? "À faire"
                         : selectedCheckpointData.status === "IN_PROGRESS"
                         ? "En cours"
-                        : selectedCheckpointData.status === "PENDING_COMPANY_APPROVAL"
+                        : selectedCheckpointData.status ===
+                          "PENDING_COMPANY_APPROVAL"
                         ? "En attente validation"
                         : selectedCheckpointData.status === "DONE"
                         ? "Terminé"
