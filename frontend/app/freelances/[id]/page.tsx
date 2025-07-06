@@ -1,17 +1,12 @@
 "use client";
 
+import { useAuth } from "@/actions/auth";
 import { getFreelanceById } from "@/actions/freelances";
 import { Button } from "@/components/common/button";
+import ContactUserButton from "@/components/common/ContactUserButton";
 import { Badge } from "@/components/ui/badge";
 import { Freelance } from "@/lib/interfaces";
-import {
-  ArrowLeft,
-  Calendar,
-  DollarSign,
-  MapPin,
-  MessageSquare,
-  User,
-} from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, MapPin, User } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,6 +14,7 @@ import { useEffect, useState } from "react";
 export default function FreelanceProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const [freelance, setFreelance] = useState<Freelance | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -157,12 +153,13 @@ export default function FreelanceProfilePage() {
 
             {/* Actions */}
             <div className="pt-6 border-t border-freehunt-grey flex gap-3">
-              <Button asChild>
-                <Link href={`/messages?freelanceId=${freelance.id}`}>
-                  <MessageSquare className="w-4 h-4 mr-1" />
-                  Contacter ce freelance
-                </Link>
-              </Button>
+              <ContactUserButton
+                currentUserId={user?.id || ""}
+                targetUserId={freelance.userId}
+                targetUserName={`${freelance.firstName} ${freelance.lastName}`}
+                buttonText="Contacter ce freelance"
+                size="default"
+              />
               <Button variant="outline" theme="secondary" asChild>
                 <Link href={`/freelances`}>Voir d&apos;autres freelances</Link>
               </Button>

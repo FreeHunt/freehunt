@@ -7,6 +7,7 @@ import {
 } from "@/actions/candidates";
 import { getCurrentCompany } from "@/actions/company";
 import { Button } from "@/components/common/button";
+import ContactUserButton from "@/components/common/ContactUserButton";
 import { Badge } from "@/components/ui/badge";
 import { Candidate, CandidateStatus } from "@/lib/interfaces";
 import { showToast } from "@/lib/toast";
@@ -17,7 +18,6 @@ import {
   DollarSign,
   Eye,
   MapPin,
-  MessageSquare,
   User,
   XCircle,
 } from "lucide-react";
@@ -292,14 +292,14 @@ export default function CompanyCandidatesPage() {
                           Voir le profil
                         </Link>
                       </Button>
-                      <Button variant="outline" theme="secondary" asChild>
-                        <Link
-                          href={`/messages?freelanceId=${candidate.freelance?.id}`}
-                        >
-                          <MessageSquare className="w-4 h-4 mr-1" />
-                          Contacter
-                        </Link>
-                      </Button>
+                      <ContactUserButton
+                        currentUserId={user?.id || ""}
+                        targetUserId={candidate.freelance?.user?.id || ""}
+                        targetUserName={`${candidate.freelance?.firstName} ${candidate.freelance?.lastName}`}
+                        buttonText="Contacter"
+                        variant="outline"
+                        theme="secondary"
+                      />
                     </div>
 
                     {candidate.status === "PENDING" && (

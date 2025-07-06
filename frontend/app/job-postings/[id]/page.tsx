@@ -19,6 +19,8 @@ import {
 import { useEffect, useState } from "react";
 import { getJobPosting } from "@/actions/jobPostings";
 import { useParams } from "next/navigation";
+import { useAuth } from "@/actions/auth";
+import ContactUserButton from "@/components/common/ContactUserButton";
 import {
   Candidate,
   CandidateStatus,
@@ -89,6 +91,7 @@ const getStatusLabel = (status: string) => {
 
 export default function JobPostingDetail() {
   const router = useRouter();
+  const { user: currentUser } = useAuth();
 
   const [showAllSkills, setShowAllSkills] = useState(false);
   const { id } = useParams();
@@ -590,13 +593,15 @@ export default function JobPostingDetail() {
                     >
                       Ajouter aux favoris
                     </FreeHuntButton>
-                    <FreeHuntButton
+                    <ContactUserButton
+                      currentUserId={currentUser?.id || ""}
+                      targetUserId={company?.user?.id || ""}
+                      targetUserName={company?.name}
+                      buttonText="Contacter l'entreprise"
                       variant="outline"
                       theme="secondary"
-                      className="w-full"
-                    >
-                      Contacter l&apos;entreprise
-                    </FreeHuntButton>
+                      fullWidth={true}
+                    />
                   </div>
                 </CardContent>
               </Card>
