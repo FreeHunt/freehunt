@@ -5,8 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function MessagesPage() {
+function MessagesContent() {
   const searchParams = useSearchParams();
   const freelanceId = searchParams.get("freelanceId");
 
@@ -45,5 +46,13 @@ export default function MessagesPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div>Chargement...</div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }
