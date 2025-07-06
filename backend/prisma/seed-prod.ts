@@ -4,6 +4,7 @@ import {
   SkillType,
   JobPostingLocation,
   CheckpointStatus,
+  ProjectStatus,
   type Skill,
   type User,
   type Freelance,
@@ -755,6 +756,7 @@ async function main() {
           isPromoted: Math.random() < 0.3, // 30% des offres sont promues
           averageDailyRate: generateDailyRate(),
           seniority: generateSeniority(),
+          status: 'PUBLISHED', // Pour la prod, on considère que les offres sont publiées
           skills: {
             connect: requiredSkills.map((skill) => ({ id: skill.id })),
           },
@@ -770,56 +772,17 @@ async function main() {
 
   console.log(`✅ ${jobPostings.length} offres d'emploi créées`);
 
-  console.log('📋 Création des checkpoints...');
+  console.log('� Création des projets...');
 
-  const checkpoints: Checkpoint[] = [];
-  const CHECKPOINT_NAMES = [
-    'Analyse des besoins',
-    'Conception technique',
-    'Développement MVP',
-    'Tests unitaires',
-    'Intégration continue',
-    'Tests utilisateurs',
-    'Déploiement staging',
-    'Formation équipe',
-    'Mise en production',
-    'Documentation technique',
-    'Optimisation performance',
-    'Maintenance corrective',
-  ];
+  // Fonction pour déterminer le statut du projet basé sur la progression
+  function getProjectStatus(hasFreelance: boolean) {
+    if (!hasFreelance) return ProjectStatus.IN_PROGRESS;
 
-  for (const jobPosting of jobPostings) {
-    const checkpointCount = Math.floor(Math.random() * 4) + 2; // 2 à 5 checkpoints par job posting
-    const selectedCheckpoints = getRandomItems(
-      CHECKPOINT_NAMES,
-      checkpointCount,
-      checkpointCount,
-    );
-
-    for (let i = 0; i < selectedCheckpoints.length; i++) {
-      const checkpointName = selectedCheckpoints[i];
-      const baseDate = new Date();
-      const daysOffset = (i + 1) * 30; // Checkpoints étalés sur 30 jours chacun
-
-      const checkpoint = await prisma.checkpoint.create({
-        data: {
-          name: checkpointName,
-          description: `Étape ${i + 1}: ${checkpointName} - Livrable attendu selon le cahier des charges`,
-          amount: Math.floor(Math.random() * 5000) + 1000, // Entre 1k et 6k€ par checkpoint
-          date: new Date(baseDate.getTime() + daysOffset * 24 * 60 * 60 * 1000),
-          status:
-            i === 0 ? CheckpointStatus.IN_PROGRESS : CheckpointStatus.TODO, // Premier checkpoint en cours
-          jobPostingId: jobPosting.id,
-        },
-      });
-
-      checkpoints.push(checkpoint);
-    }
+    const rand = Math.random();
+    if (rand < 0.1) return ProjectStatus.COMPLETED; // 10% des projets terminés
+    if (rand < 0.05) return ProjectStatus.CANCELED; // 5% des projets annulés
+    return ProjectStatus.IN_PROGRESS; // 85% en cours
   }
-
-  console.log(`✅ ${checkpoints.length} checkpoints créés`);
-
-  console.log('🚀 Création des projets...');
 
   const projects: Project[] = [];
   for (const jobPosting of jobPostings) {
@@ -840,6 +803,7 @@ async function main() {
                 Date.now() + (Math.random() * 180 + 30) * 24 * 60 * 60 * 1000,
               )
             : null, // 80% ont une date de fin
+        status: getProjectStatus(!!assignedFreelance),
         jobPostingId: jobPosting.id,
         freelanceId: assignedFreelance?.id || null,
         companyId: jobPosting.companyId,
@@ -850,6 +814,227 @@ async function main() {
   }
 
   console.log(`✅ ${projects.length} projets créés`);
+
+  console.log('�📋 Création des checkpoints...');
+
+  const checkpoints: Checkpoint[] = [];
+  const CHECKPOINT_NAMES = [
+    'Analyse des besoins',
+    'Conception technique',
+    'Développement MVP',
+    'Tests unitaires',
+    'Intégration continue',
+    'Tests utilisateurs',
+    'Déploiement staging',
+    'Formation équipe',
+    'Mise en production',
+    'Documentation technique',
+    'Optimisation performance',
+    'Maintenance corrective',
+  ];
+
+  // Fonction pour générer un statut de checkpoint réaliste avec traçabilité
+  function generateCheckpointStatus(
+    index: number,
+    total: number,
+    freelanceId: string | null,
+    companyId: string,
+    projectStatus: ProjectStatus,
+  ) {
+    const progress = index / total;
+
+    // Si pas de freelance assigné, tous les checkpoints restent TODO
+    if (!freelanceId) {
+      return {
+        status: CheckpointStatus.TODO,
+        submittedAt: null,
+        validatedAt: null,
+        submittedBy: null,
+        validatedBy: null,
+      };
+    }
+
+    // Si le projet est terminé, tous les checkpoints doivent être DONE
+    if (projectStatus === ProjectStatus.COMPLETED) {
+      const submittedDate = new Date(
+        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+      );
+      const validatedDate = new Date(
+        submittedDate.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000,
+      );
+      return {
+        status: CheckpointStatus.DONE,
+        submittedAt: submittedDate,
+        validatedAt: validatedDate,
+        submittedBy: freelanceId,
+        validatedBy: companyId,
+      };
+    }
+
+    // Si le projet est annulé, certains checkpoints peuvent être annulés
+    if (projectStatus === ProjectStatus.CANCELED) {
+      if (progress < 0.3) {
+        const submittedDate = new Date(
+          Date.now() - Math.random() * 15 * 24 * 60 * 60 * 1000,
+        );
+        const validatedDate = new Date(
+          submittedDate.getTime() + Math.random() * 2 * 24 * 60 * 60 * 1000,
+        );
+        return {
+          status: CheckpointStatus.DONE,
+          submittedAt: submittedDate,
+          validatedAt: validatedDate,
+          submittedBy: freelanceId,
+          validatedBy: companyId,
+        };
+      } else {
+        return {
+          status: CheckpointStatus.CANCELED,
+          submittedAt: null,
+          validatedAt: null,
+          submittedBy: null,
+          validatedBy: null,
+        };
+      }
+    }
+
+    // Pour les projets en cours
+    if (progress < 0.2) {
+      // 20% premiers checkpoints : en cours ou terminés
+      if (Math.random() < 0.7) {
+        return {
+          status: CheckpointStatus.IN_PROGRESS,
+          submittedAt: null,
+          validatedAt: null,
+          submittedBy: null,
+          validatedBy: null,
+        };
+      } else {
+        // Checkpoint terminé avec validation complète
+        const submittedDate = new Date(
+          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+        );
+        const validatedDate = new Date(
+          submittedDate.getTime() + Math.random() * 3 * 24 * 60 * 60 * 1000,
+        );
+        return {
+          status: CheckpointStatus.DONE,
+          submittedAt: submittedDate,
+          validatedAt: validatedDate,
+          submittedBy: freelanceId,
+          validatedBy: companyId,
+        };
+      }
+    } else if (progress < 0.4) {
+      // 20% suivants : certains en attente de validation
+      const rand = Math.random();
+      if (rand < 0.4) {
+        // En attente de validation company
+        const submittedDate = new Date(
+          Date.now() - Math.random() * 3 * 24 * 60 * 60 * 1000,
+        );
+        return {
+          status: CheckpointStatus.PENDING_COMPANY_APPROVAL,
+          submittedAt: submittedDate,
+          validatedAt: null,
+          submittedBy: freelanceId,
+          validatedBy: null,
+        };
+      } else if (rand < 0.7) {
+        // Terminé
+        const submittedDate = new Date(
+          Date.now() - Math.random() * 10 * 24 * 60 * 60 * 1000,
+        );
+        const validatedDate = new Date(
+          submittedDate.getTime() + Math.random() * 2 * 24 * 60 * 60 * 1000,
+        );
+        return {
+          status: CheckpointStatus.DONE,
+          submittedAt: submittedDate,
+          validatedAt: validatedDate,
+          submittedBy: freelanceId,
+          validatedBy: companyId,
+        };
+      } else {
+        return {
+          status: CheckpointStatus.IN_PROGRESS,
+          submittedAt: null,
+          validatedAt: null,
+          submittedBy: null,
+          validatedBy: null,
+        };
+      }
+    } else {
+      // 60% restants : TODO ou quelques retards
+      if (Math.random() < 0.1) {
+        return {
+          status: CheckpointStatus.DELAYED,
+          submittedAt: null,
+          validatedAt: null,
+          submittedBy: null,
+          validatedBy: null,
+        };
+      } else {
+        return {
+          status: CheckpointStatus.TODO,
+          submittedAt: null,
+          validatedAt: null,
+          submittedBy: null,
+          validatedBy: null,
+        };
+      }
+    }
+  }
+
+  for (const jobPosting of jobPostings) {
+    const checkpointCount = Math.floor(Math.random() * 4) + 2; // 2 à 5 checkpoints par job posting
+    const selectedCheckpoints = getRandomItems(
+      CHECKPOINT_NAMES,
+      checkpointCount,
+      checkpointCount,
+    );
+
+    // Trouver le projet associé pour récupérer le freelanceId et le statut
+    const associatedProject = projects.find(
+      (p) => p.jobPostingId === jobPosting.id,
+    );
+    const freelanceId = associatedProject?.freelanceId || null;
+    const projectStatus =
+      associatedProject?.status || ProjectStatus.IN_PROGRESS;
+
+    for (let i = 0; i < selectedCheckpoints.length; i++) {
+      const checkpointName = selectedCheckpoints[i];
+      const baseDate = new Date();
+      const daysOffset = (i + 1) * 30; // Checkpoints étalés sur 30 jours chacun
+
+      const checkpointData = generateCheckpointStatus(
+        i,
+        selectedCheckpoints.length,
+        freelanceId,
+        jobPosting.companyId,
+        projectStatus,
+      );
+
+      const checkpoint = await prisma.checkpoint.create({
+        data: {
+          name: checkpointName,
+          description: `Étape ${i + 1}: ${checkpointName} - Livrable attendu selon le cahier des charges`,
+          amount: Math.floor(Math.random() * 5000) + 1000, // Entre 1k et 6k€ par checkpoint
+          date: new Date(baseDate.getTime() + daysOffset * 24 * 60 * 60 * 1000),
+          status: checkpointData.status,
+          submittedAt: checkpointData.submittedAt,
+          validatedAt: checkpointData.validatedAt,
+          submittedBy: checkpointData.submittedBy,
+          validatedBy: checkpointData.validatedBy,
+          jobPostingId: jobPosting.id,
+        },
+      });
+
+      checkpoints.push(checkpoint);
+    }
+  }
+
+  console.log(`✅ ${checkpoints.length} checkpoints créés`);
 
   console.log('📊 Statistiques finales:');
   console.log(`- Utilisateurs: ${totalUsers + 2}`);

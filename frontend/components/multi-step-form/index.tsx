@@ -291,7 +291,7 @@ export default function MultiStepForm() {
       name: "",
       description: "",
       date: "",
-      status: "TODO",
+      status: CheckpointStatus.TODO,
       jobPostingId: "",
       amount: 0,
     };

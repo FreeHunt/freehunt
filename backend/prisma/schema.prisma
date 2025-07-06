@@ -134,6 +134,7 @@ model Project {
   amount         Float         @default(1)
   startDate      DateTime
   endDate        DateTime?
+  status         ProjectStatus @default(IN_PROGRESS)
   jobPosting     JobPosting    @relation(fields: [jobPostingId], references: [id])
   jobPostingId   String        @unique @db.Uuid
   freelance      Freelance?    @relation(fields: [freelanceId], references: [id])
@@ -148,23 +149,36 @@ model Project {
 }
 
 model Checkpoint {
-  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  description  String
-  amount       Float            @default(1)
-  date         DateTime
-  status       CheckpointStatus @default(TODO)
-  jobPosting   JobPosting       @relation(fields: [jobPostingId], references: [id])
-  jobPostingId String           @db.Uuid
-  quote        Quote?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @default(now()) @updatedAt
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  description      String
+  amount           Float            @default(1)
+  date             DateTime
+  status           CheckpointStatus @default(TODO)
+  submittedAt      DateTime?        // Date de soumission par le freelance
+  validatedAt      DateTime?        // Date de validation par la company
+  submittedBy      String?          @db.Uuid // ID de l'utilisateur qui a soumis
+  validatedBy      String?          @db.Uuid // ID de l'utilisateur qui a validé
+  jobPosting       JobPosting       @relation(fields: [jobPostingId], references: [id])
+  jobPostingId     String           @db.Uuid
+  quote            Quote?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
 }
 
 enum CheckpointStatus {
   TODO
   IN_PROGRESS
+  PENDING_COMPANY_APPROVAL  // Freelance a soumis, en attente validation company
   DONE
+  DELAYED
+  CANCELED
+}
+
+enum ProjectStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
 }
 
 // Devis

@@ -1,4 +1,4 @@
-import { Role, SkillType, JobPostingLocation, JobPostingStatus, CheckpointStatus, DocumentType, CandidateStatus } from '@prisma/client';
+import { Role, SkillType, JobPostingLocation, JobPostingStatus, CheckpointStatus, ProjectStatus, DocumentType, CandidateStatus } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import Decimal from 'decimal.js';
 
@@ -129,6 +129,7 @@ export function fakeProjectComplete() {
     amount: 1,
     startDate: faker.date.anytime(),
     endDate: undefined,
+    status: ProjectStatus.IN_PROGRESS,
     jobPostingId: faker.string.uuid(),
     freelanceId: undefined,
     companyId: undefined,
@@ -142,6 +143,10 @@ export function fakeCheckpoint() {
     name: faker.person.fullName(),
     description: faker.lorem.words(5),
     date: faker.date.anytime(),
+    submittedAt: undefined,
+    validatedAt: undefined,
+    submittedBy: undefined,
+    validatedBy: undefined,
   };
 }
 export function fakeCheckpointComplete() {
@@ -152,6 +157,10 @@ export function fakeCheckpointComplete() {
     amount: 1,
     date: faker.date.anytime(),
     status: CheckpointStatus.TODO,
+    submittedAt: undefined,
+    validatedAt: undefined,
+    submittedBy: undefined,
+    validatedBy: undefined,
     jobPostingId: faker.string.uuid(),
     createdAt: new Date(),
     updatedAt: new Date(),

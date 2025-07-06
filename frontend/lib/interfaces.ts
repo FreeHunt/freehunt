@@ -64,8 +64,15 @@ export enum JobPostingStatus {
 export enum CheckpointStatus {
   TODO = "TODO",
   IN_PROGRESS = "IN_PROGRESS",
+  PENDING_COMPANY_APPROVAL = "PENDING_COMPANY_APPROVAL",
   DONE = "DONE",
   DELAYED = "DELAYED",
+  CANCELED = "CANCELED",
+}
+
+export enum ProjectStatus {
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
   CANCELED = "CANCELED",
 }
 
@@ -143,6 +150,7 @@ export interface Project {
   description: string;
   startDate: string;
   endDate: string;
+  status: ProjectStatus;
   freelanceId: string;
   companyId: string;
   conversationId: string;
@@ -172,7 +180,11 @@ export interface Checkpoint {
   name: string;
   description?: string;
   date: string | Date;
-  status: "TODO" | "IN_PROGRESS" | "DONE" | "DELAYED" | "CANCELED";
+  status: CheckpointStatus;
+  submittedAt?: string | Date;
+  validatedAt?: string | Date;
+  submittedBy?: string;
+  validatedBy?: string;
   jobPostingId: string;
   quoteId?: string;
   freelanceId?: string;

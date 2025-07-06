@@ -109,4 +109,9 @@ export class StripeController {
       });
     }
   }
+
+  @Post('preview-transfer-fees')
+  previewTransferFees(@Body() body: { amount: number }) {
+    return this.stripeService.previewTransferAmount(body.amount);
+  }
 }

@@ -22,7 +22,7 @@ export const createCheckpoint = async (
   return response.data;
 };
 
-export const updateCheckpoint = async (checkpoint: Checkpoint) => {
+export const updateCheckpoint = async (checkpoint: Checkpoint, userId?: string) => {
   const response = await api.put(`/checkpoints/${checkpoint.id}`, {
     status: checkpoint.status,
     quoteId: checkpoint.quoteId,
@@ -32,6 +32,33 @@ export const updateCheckpoint = async (checkpoint: Checkpoint) => {
     jobPostingId: checkpoint.jobPostingId,
     freelanceId: checkpoint.freelanceId,
     amount: checkpoint.amount,
+    userId: userId, // Ajout de l'userId pour identifier qui fait l'action
+    submittedAt: checkpoint.submittedAt,
+    validatedAt: checkpoint.validatedAt,
+    submittedBy: checkpoint.submittedBy,
+    validatedBy: checkpoint.validatedBy,
   });
   return response.data;
+};
+
+// Nouvelle fonction pour valider un checkpoint avec gestion du projet
+export const validateCheckpoint = async (
+  checkpointId: string, 
+  userId: string,
+  isCompany: boolean = false
+) => {
+  const response = await api.put(`/checkpoints/${checkpointId}`, {
+    status: 'DONE', // Sera ajusté côté backend selon qui fait la demande
+    userId: userId,
+  });
+  return response.data;
+};
+
+// Fonction pour vérifier si c'est le dernier checkpoint d'un projet
+export const checkIfLastCheckpoint = async (jobPostingId: string, checkpointId: string) => {
+  const allCheckpoints = await getCheckpoints(jobPostingId);
+  const remainingCheckpoints = allCheckpoints.filter((cp: Checkpoint) => 
+    cp.id !== checkpointId && cp.status !== 'DONE'
+  );
+  return remainingCheckpoints.length === 0;
 };
