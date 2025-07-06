@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Calendar, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { Checkpoint } from "@/lib/interfaces";
+import { AlertCircle, Calendar, CheckCircle, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Composant pour afficher les statistiques des checkpoints
 export default function CheckpointStats({
@@ -59,27 +59,28 @@ export default function CheckpointStats({
 
   return (
     <div className="w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+      <div className="flex overflow-x-auto gap-4 mb-6 pb-2">
+        <div className="flex gap-4 min-w-max">
         {/* Carte - Total des checkpoints */}
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="rounded-full bg-purple-100 p-3 mr-4">
+        <div className="bg-card rounded-xl shadow-sm p-4 flex flex-col items-center border border-border hover:shadow-md transition-shadow min-w-[140px]">
+          <div className="rounded-full bg-purple-100 p-3 mb-3">
             <Calendar className="h-6 w-6 text-purple-600" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
               Total
             </p>
-            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+            <p className="text-2xl font-bold text-foreground">{stats.total}</p>
           </div>
         </div>
 
         {/* Carte - Checkpoints complétés */}
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="rounded-full bg-green-100 p-3 mr-4">
+        <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center border border-gray-200 hover:shadow-md transition-shadow min-w-[140px]">
+          <div className="rounded-full bg-green-100 p-3 mb-3">
             <CheckCircle className="h-6 w-6 text-green-600" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
               Terminés
             </p>
             <p className="text-2xl font-bold text-green-600">{stats.done}</p>
@@ -87,12 +88,12 @@ export default function CheckpointStats({
         </div>
 
         {/* Carte - Checkpoints en cours */}
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="rounded-full bg-blue-100 p-3 mr-4">
+        <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center border border-gray-200 hover:shadow-md transition-shadow min-w-[140px]">
+          <div className="rounded-full bg-blue-100 p-3 mb-3">
             <Clock className="h-6 w-6 text-blue-600" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
               En cours
             </p>
             <p className="text-2xl font-bold text-blue-600">
@@ -102,12 +103,12 @@ export default function CheckpointStats({
         </div>
 
         {/* Carte - À faire */}
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="rounded-full bg-amber-100 p-3 mr-4">
+        <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center border border-gray-200 hover:shadow-md transition-shadow min-w-[140px]">
+          <div className="rounded-full bg-amber-100 p-3 mb-3">
             <AlertCircle className="h-6 w-6 text-amber-600" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
               À faire
             </p>
             <p className="text-2xl font-bold text-amber-600">{stats.todo}</p>
@@ -115,8 +116,8 @@ export default function CheckpointStats({
         </div>
 
         {/* Carte - Montant total */}
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="rounded-full bg-indigo-100 p-3 mr-4">
+        <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center border border-gray-200 hover:shadow-md transition-shadow min-w-[160px]">
+          <div className="rounded-full bg-indigo-100 p-3 mb-3">
             <svg
               className="h-6 w-6 text-indigo-600"
               fill="currentColor"
@@ -129,11 +130,11 @@ export default function CheckpointStats({
               />
             </svg>
           </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
               Montant total
             </p>
-            <p className="text-lg font-bold text-indigo-600">
+            <p className="text-lg font-bold text-indigo-600 whitespace-nowrap">
               {stats.totalAmount.toLocaleString("fr-FR", {
                 style: "currency",
                 currency: "EUR",
@@ -143,8 +144,8 @@ export default function CheckpointStats({
         </div>
 
         {/* Carte - Montant gagné */}
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="rounded-full bg-emerald-100 p-3 mr-4">
+        <div className="bg-white rounded-lg shadow-sm p-4 flex flex-col items-center border border-gray-200 hover:shadow-md transition-shadow min-w-[160px]">
+          <div className="rounded-full bg-emerald-100 p-3 mb-3">
             <svg
               className="h-6 w-6 text-emerald-600"
               fill="currentColor"
@@ -158,17 +159,18 @@ export default function CheckpointStats({
               />
             </svg>
           </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
+          <div className="text-center">
+            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
               Montant gagné
             </p>
-            <p className="text-lg font-bold text-emerald-600">
+            <p className="text-lg font-bold text-emerald-600 whitespace-nowrap">
               {stats.completedAmount.toLocaleString("fr-FR", {
                 style: "currency",
                 currency: "EUR",
               })}
             </p>
           </div>
+        </div>
         </div>
       </div>
 

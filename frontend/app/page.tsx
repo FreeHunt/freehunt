@@ -1,9 +1,8 @@
 "use client";
 
 import { SearchInput } from "@/components/common/search-input";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { ReactNode, useEffect } from "react";
+import { useEffect } from "react";
 
 import { useAuth } from "@/actions/auth";
 import {
@@ -12,32 +11,6 @@ import {
 } from "@/components/common/red-pointer";
 import { UserRole } from "@/lib/interfaces";
 import { useRouter } from "next/navigation";
-
-function HomeCardColumn({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col gap-3 lg:gap-[34px]">{children}</div>;
-}
-
-function HomeCard({
-  title,
-  content,
-  className,
-}: {
-  title: string;
-  content: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col justify-center lg:w-[312px] lg:h-[200px] bg-white rounded-3xl px-[25px] py-[30px] gap-2.5",
-        className,
-      )}
-    >
-      <h3 className="font-medium text-4xl lg:text-5xl">{title}</h3>
-      <p className="text-lg lg:text-xl">{content}</p>
-    </div>
-  );
-}
 
 export default function Home() {
   const router = useRouter();
@@ -132,40 +105,53 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="flex flex-col lg:flex-row pb-10 lg:px-20 lg:pb-20 justify-between items-center gap-3">
-        <HomeCardColumn>
-          <HomeCard
-            title="+ 7 000"
-            content="Freelances inscrits"
-            className="bg-freehunt-main"
-          />
-          <HomeCard
-            title="+ 800"
-            content="Entreprises inscrites"
-            className="bg-freehunt-blue"
-          />
-        </HomeCardColumn>
+      <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="container mx-auto px-6 lg:px-20">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            {/* Stats Column 1 */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <h3 className="text-4xl lg:text-5xl font-bold text-freehunt-main mb-3">
+                  + 7 000
+                </h3>
+                <p className="text-lg text-gray-700">Freelances inscrits</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <h3 className="text-4xl lg:text-5xl font-bold text-freehunt-main mb-3">
+                  + 800
+                </h3>
+                <p className="text-lg text-gray-700">Entreprises inscrites</p>
+              </div>
+            </div>
 
-        <Image
-          src="/assets/home.jpg"
-          width={443}
-          height={428}
-          alt=""
-          className="hidden lg:block object-cover lg:h-[428px] lg:w-[443px] rounded-3xl"
-        />
+            {/* Image */}
+            <div className="flex justify-center">
+              <Image
+                src="/assets/home.jpg"
+                width={443}
+                height={428}
+                alt="Équipe de freelances travaillant ensemble"
+                className="object-cover h-[400px] w-full max-w-[400px] rounded-2xl shadow-xl"
+              />
+            </div>
 
-        <HomeCardColumn>
-          <HomeCard
-            title="98%"
-            content="Utilisateurs satisfaits"
-            className="bg-freehunt-yellow"
-          />
-          <HomeCard
-            title="+ 9 000"
-            content="Postes pourvus"
-            className="bg-freehunt-green"
-          />
-        </HomeCardColumn>
+            {/* Stats Column 2 */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <h3 className="text-4xl lg:text-5xl font-bold text-freehunt-main mb-3">
+                  98%
+                </h3>
+                <p className="text-lg text-gray-700">Utilisateurs satisfaits</p>
+              </div>
+              <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+                <h3 className="text-4xl lg:text-5xl font-bold text-freehunt-main mb-3">
+                  + 9 000
+                </h3>
+                <p className="text-lg text-gray-700">Postes pourvus</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </>
   );

@@ -7,23 +7,23 @@ import {
 } from "@/actions/candidates";
 import { getCurrentCompany } from "@/actions/company";
 import { Button } from "@/components/common/button";
-import { Badge } from "@/components/ui/badge";
 import ContactUserButton from "@/components/common/ContactUserButton";
+import { Badge } from "@/components/ui/badge";
 import { Candidate, CandidateStatus } from "@/lib/interfaces";
 import { showToast } from "@/lib/toast";
 import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  User,
-  MapPin,
-  DollarSign,
   Calendar,
+  CheckCircle,
+  Clock,
+  DollarSign,
   Eye,
+  MapPin,
+  User,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function CompanyCandidatesPage() {
   const { user, isLoading } = useAuth();
@@ -127,28 +127,28 @@ export default function CompanyCandidatesPage() {
     switch (status) {
       case "PENDING":
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1">
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1 rounded-md">
             <Clock className="w-3 h-3" />
             En attente
           </Badge>
         );
       case "ACCEPTED":
         return (
-          <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+          <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1 rounded-md">
             <CheckCircle className="w-3 h-3" />
             Acceptée
           </Badge>
         );
       case "REJECTED":
         return (
-          <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1">
+          <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1 rounded-md">
             <XCircle className="w-3 h-3" />
             Refusée
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+          <Badge className="bg-muted text-foreground border-border">
             {status}
           </Badge>
         );
@@ -169,11 +169,11 @@ export default function CompanyCandidatesPage() {
     return (
       <div className="px-4 lg:px-5 py-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="h-8 bg-muted rounded-lg w-1/3 mb-4"></div>
+          <div className="h-4 bg-muted rounded-lg w-1/2 mb-8"></div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-[30px]"></div>
+              <div key={i} className="h-32 bg-muted rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function CompanyCandidatesPage() {
         </div>
 
         {candidates.length === 0 ? (
-          <div className="bg-white rounded-[30px] border border-freehunt-grey p-12 text-center">
+          <div className="bg-card rounded-xl border border-border p-12 text-center">
             <User className="w-12 h-12 text-freehunt-black-two opacity-40 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-freehunt-black-two mb-2">
               Aucune candidature
@@ -219,15 +219,15 @@ export default function CompanyCandidatesPage() {
             {candidates.map((candidate) => (
               <div
                 key={candidate.id}
-                className="bg-white rounded-[30px] border border-freehunt-grey overflow-hidden"
+                className="bg-card rounded-xl border border-border overflow-hidden shadow-sm"
               >
-                <div className="bg-gradient-to-r from-freehunt-main/10 to-freehunt-main/5 p-6">
+                <div className="bg-freehunt-main p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h2 className="text-xl lg:text-2xl font-bold text-freehunt-black-two mb-2">
+                      <h2 className="text-xl lg:text-2xl font-bold text-white mb-2">
                         {candidate.freelance?.user?.username || "Freelance"}
                       </h2>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-freehunt-black-two opacity-70 mb-2">
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-white/80 mb-2">
                         <span className="flex items-center gap-1">
                           <User className="w-4 h-4" />
                           {candidate.freelance?.firstName}{" "}
@@ -246,16 +246,16 @@ export default function CompanyCandidatesPage() {
                           {candidate.freelance?.seniority} ans d&apos;expérience
                         </span>
                       </div>
-                      <p className="text-freehunt-black-two opacity-80 mb-2">
+                      <p className="text-white/90 mb-2">
                         <strong>Poste :</strong> {candidate.jobPosting?.title}
                       </p>
-                      <p className="text-freehunt-black-two opacity-70">
+                      <p className="text-white/80">
                         {candidate.freelance?.jobTitle}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {getStatusBadge(candidate.status)}
-                      <span className="text-xs text-freehunt-black-two opacity-50">
+                      <span className="text-xs text-white/60">
                         Candidature du {formatDate(candidate.createdAt)}
                       </span>
                     </div>
@@ -307,7 +307,7 @@ export default function CompanyCandidatesPage() {
                         <Button
                           variant="outline"
                           theme="secondary"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
                           onClick={() =>
                             handleStatusUpdate(candidate.id, "REJECTED")
                           }

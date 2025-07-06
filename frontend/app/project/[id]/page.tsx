@@ -1,25 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ProjectTimeline from "@/components/common/calendar/ProjectTimeline";
-import Conversation from "@/components/common/conversation/conversation";
+import { getCurrentUser } from "@/actions/auth";
 import { getCheckpoints, validateCheckpoint } from "@/actions/checkPoints";
+import {
+  getConversation,
+  getUserPicture,
+  identifyUser,
+  joinConversationRoom,
+} from "@/actions/conversations";
+import { getProject } from "@/actions/projects";
+import ProjectTimeline from "@/components/common/calendar/ProjectTimeline";
+import CheckpointStats from "@/components/common/card/checkPointsStats";
+import Conversation from "@/components/common/conversation/conversation";
+import { SocketProvider } from "@/hooks/useSocket";
 import {
   Checkpoint,
   Conversation as ConversationInterface,
+  Document,
+  Project,
 } from "@/lib/interfaces";
-import CheckpointStats from "@/components/common/card/checkPointsStats";
-import { Project } from "@/lib/interfaces";
-import { getProject } from "@/actions/projects";
-import {
-  getUserPicture,
-  joinConversationRoom,
-  identifyUser,
-  getConversation,
-} from "@/actions/conversations";
-import { Document } from "@/lib/interfaces";
-import { SocketProvider } from "@/hooks/useSocket";
-import { getCurrentUser } from "@/actions/auth";
+import { useEffect, useState } from "react";
 
 export default function ProjectDetailPage({
   params,
@@ -160,7 +160,7 @@ export default function ProjectDetailPage({
     <SocketProvider userId={currentUserId || ""}>
       <div className="flex w-full h-full p-2 md:p-4">
         <div className="flex w-full h-full flex-col items-start gap-2 md:gap-3">
-          <div className="flex h-16 md:h-20 p-3 md:p-5 items-center md:items-start gap-2.5 self-stretch bg-gradient-to-r from-freehunt-main to-pink-600 text-white rounded-lg shadow-lg mb-4">
+          <div className="flex h-16 md:h-20 p-3 md:p-5 items-center gap-2.5 self-stretch bg-gradient-to-r from-freehunt-main to-freehunt-main/90 text-white rounded-lg shadow-lg mb-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
                 <svg
@@ -175,12 +175,12 @@ export default function ProjectDetailPage({
                   />
                 </svg>
               </div>
-              <div>
-                <h1 className="text-xl md:text-3xl font-bold">
+              <div className="flex flex-col justify-center">
+                <h1 className="text-xl md:text-3xl font-bold leading-tight">
                   {project ? project.name : "Chargement..."}
                 </h1>
                 {project && (
-                  <p className="text-white/80 text-sm md:text-base">
+                  <p className="text-white/80 text-sm md:text-base leading-tight mt-1">
                     Projet géré avec FreeHunt
                   </p>
                 )}
@@ -210,7 +210,7 @@ export default function ProjectDetailPage({
               <div className="flex w-full md:w-2/3 flex-col items-start gap-2 md:gap-3">
                 <div className="flex w-full flex-col items-start gap-2 md:gap-3 p-2 md:p-5 bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="flex items-center gap-3 w-full">
-                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-freehunt-main to-pink-600 rounded-lg">
+                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-freehunt-main to-freehunt-main/90 rounded-lg">
                       <svg
                         className="w-5 h-5 text-white"
                         fill="currentColor"
@@ -239,7 +239,7 @@ export default function ProjectDetailPage({
                 </div>
                 <div className="flex w-full flex-col items-start gap-2 md:gap-3 p-2 md:p-5 bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="flex items-center gap-3 w-full">
-                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
+                    <div className="flex items-center justify-center w-8 h-8 bg-primary rounded-lg">
                       <svg
                         className="w-5 h-5 text-white"
                         fill="currentColor"
@@ -249,17 +249,17 @@ export default function ProjectDetailPage({
                         <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
                       </svg>
                     </div>
-                    <h1 className="text-lg md:text-2xl font-bold text-gray-900">
+                    <h1 className="text-lg md:text-2xl font-bold text-foreground">
                       Statistiques du projet
                     </h1>
                   </div>
-                  <div className="w-full bg-gradient-to-r from-gray-50 to-blue-50 p-4 rounded-lg border border-gray-100">
+                  <div className="w-full bg-muted p-4 rounded-lg border border-border">
                     <CheckpointStats checkpoints={checkpoints} />
                   </div>
                 </div>
                 <div className="flex w-full flex-col items-start gap-2 md:gap-3 p-2 md:p-5 bg-white rounded-lg shadow-sm border border-gray-200">
                   <div className="flex items-center gap-3 w-full">
-                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
+                    <div className="flex items-center justify-center w-8 h-8 bg-green-600 rounded-lg">
                       <svg
                         className="w-5 h-5 text-white"
                         fill="currentColor"
@@ -272,11 +272,11 @@ export default function ProjectDetailPage({
                         />
                       </svg>
                     </div>
-                    <h1 className="text-lg md:text-2xl font-bold text-gray-900">
+                    <h1 className="text-lg md:text-2xl font-bold text-foreground">
                       Liste des checkpoints
                     </h1>
                     <div className="ml-auto">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                      <span className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-primary/10 text-primary">
                         {checkpoints.length} checkpoint
                         {checkpoints.length !== 1 ? "s" : ""}
                       </span>
@@ -286,19 +286,19 @@ export default function ProjectDetailPage({
                     {checkpoints.map((checkpoint) => (
                       <div
                         key={checkpoint.id}
-                        className="p-4 md:p-6 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                        className="p-4 md:p-6 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200"
                       >
                         <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                           {/* Informations principales */}
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-3">
-                              <h3 className="text-lg font-semibold text-gray-900">
+                              <h3 className="text-lg font-semibold text-foreground">
                                 {checkpoint.name}
                               </h3>
                               <div className="flex items-center gap-2">
                                 {/* Badge de statut */}
                                 <span
-                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium ${
                                     checkpoint.status === "DONE"
                                       ? "bg-green-100 text-green-800"
                                       : checkpoint.status === "IN_PROGRESS"
@@ -422,7 +422,7 @@ export default function ProjectDetailPage({
                                 onClick={() =>
                                   handleCheckpointClick(checkpoint)
                                 }
-                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-freehunt-main to-pink-600 text-white rounded-lg hover:from-freehunt-main/90 hover:to-pink-600/90 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm min-w-[120px] justify-center"
+                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-freehunt-main to-freehunt-main/90 text-white rounded-lg hover:from-freehunt-main/90 hover:to-freehunt-main/80 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm min-w-[120px] justify-center"
                               >
                                 <svg
                                   className="w-4 h-4 mr-2"
@@ -490,7 +490,7 @@ export default function ProjectDetailPage({
               <div className="flex w-full md:w-1/3 flex-col items-start gap-2 md:gap-3 h-full">
                 <div className="flex w-full flex-col items-start gap-2 md:gap-3 p-2 md:p-5 bg-white rounded-lg shadow-sm border border-gray-200 h-full">
                   <div className="flex items-center gap-3 w-full">
-                    <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg">
+                    <div className="flex items-center justify-center w-8 h-8 bg-purple-600 rounded-lg">
                       <svg
                         className="w-5 h-5 text-white"
                         fill="currentColor"
@@ -507,7 +507,7 @@ export default function ProjectDetailPage({
                       Conversation
                     </h1>
                   </div>
-                  <div className="w-full bg-gradient-to-b from-gray-50 to-white p-3 md:p-4 rounded-lg border border-gray-100 flex-1">
+                  <div className="w-full bg-muted p-3 md:p-4 rounded-lg border border-border flex-1">
                     {conversation ? (
                       <Conversation
                         conversation={conversation}
@@ -516,7 +516,7 @@ export default function ProjectDetailPage({
                       />
                     ) : (
                       <div className="p-4 text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto mb-2"></div>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
                         <p className="text-gray-500">
                           Chargement de la conversation...
                         </p>

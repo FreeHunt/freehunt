@@ -1,14 +1,14 @@
 export default function PolitiqueConfidentialite() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        <div className="bg-white rounded-xl shadow-sm p-8">
-          <h1 className="text-3xl font-bold mb-8 text-center">
+        <div className="bg-card border border-border rounded-xl shadow-sm p-8">
+          <h1 className="text-3xl font-bold mb-8 text-center text-foreground">
             Politique de Confidentialité
           </h1>
 
           <div className="prose prose-gray max-w-none">
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Dernière mise à jour : 29 juin 2025
             </p>
 
@@ -42,7 +42,7 @@ export default function PolitiqueConfidentialite() {
                   Email :{" "}
                   <a
                     href="mailto:contact@freehunt.fr"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                   >
                     contact@freehunt.fr
                   </a>
@@ -52,7 +52,7 @@ export default function PolitiqueConfidentialite() {
                 <strong>Délégué à la Protection des Données (DPO) :</strong>
                 <a
                   href="mailto:dpo@freehunt.fr"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   {" "}
                   dpo@freehunt.fr
@@ -119,7 +119,7 @@ export default function PolitiqueConfidentialite() {
                 Nous utilisons des cookies pour améliorer votre expérience et
                 analyser l&apos;utilisation de notre site. Pour plus de détails,
                 consultez notre{" "}
-                <a href="/cookies" className="text-blue-600 hover:underline">
+                <a href="/cookies" className="text-primary hover:underline">
                   Politique des Cookies
                 </a>
                 .
@@ -328,7 +328,7 @@ export default function PolitiqueConfidentialite() {
                   Par email :{" "}
                   <a
                     href="mailto:dpo@freehunt.fr"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                   >
                     dpo@freehunt.fr
                   </a>
@@ -399,7 +399,7 @@ export default function PolitiqueConfidentialite() {
                   En ligne :{" "}
                   <a
                     href="https://www.cnil.fr/fr/plaintes"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                   >
                     www.cnil.fr/fr/plaintes
                   </a>
@@ -422,7 +422,7 @@ export default function PolitiqueConfidentialite() {
                   Email :{" "}
                   <a
                     href="mailto:dpo@freehunt.fr"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                   >
                     dpo@freehunt.fr
                   </a>

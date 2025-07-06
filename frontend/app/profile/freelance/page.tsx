@@ -507,10 +507,10 @@ export default function FreelanceProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
-          <p className="text-gray-600">Chargement...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-freehunt-main mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Chargement...</p>
         </div>
       </div>
     );
@@ -518,12 +518,12 @@ export default function FreelanceProfile() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-600 mb-4">Erreur: {error}</p>
+          <p className="text-destructive mb-4">Erreur: {error}</p>
           <Button
             onClick={fetchCurrentUser}
-            className="bg-pink-500 hover:bg-pink-600"
+            className="bg-freehunt-main hover:bg-freehunt-main/90"
           >
             Réessayer
           </Button>
@@ -544,14 +544,14 @@ export default function FreelanceProfile() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-background p-6">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             {/* Card Profil */}
             <Card className="overflow-hidden py-0">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 flex-shrink-0 overflow-hidden">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-muted-foreground to-foreground flex-shrink-0 overflow-hidden">
                     <img
                       src={displayAvatar}
                       alt={displayName}
@@ -566,7 +566,7 @@ export default function FreelanceProfile() {
                     className="hidden"
                   />
                   <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-1">
+                    <h3 className="text-xl font-semibold text-foreground mb-1">
                       {displayName}
                     </h3>
                     <Badge
@@ -575,12 +575,12 @@ export default function FreelanceProfile() {
                     >
                       Freelance
                     </Badge>
-                    <p className="text-gray-600 my-2">
+                    <p className="text-muted-foreground my-2">
                       {formData.jobTitle ||
                         freelance?.jobTitle ||
                         "Poste non renseigné"}
                     </p>
-                    <div className="flex items-center text-gray-500 text-sm mb-4">
+                    <div className="flex items-center text-muted-foreground text-sm mb-4">
                       <MapPin className="w-4 h-4 mr-1" />
                       {formData.location ||
                         freelance?.location ||
@@ -610,7 +610,7 @@ export default function FreelanceProfile() {
                 <CardTitle className="text-xl font-semibold">
                   Statistiques
                 </CardTitle>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span>Année</span>
                   <svg
                     className="w-4 h-4"
@@ -629,11 +629,11 @@ export default function FreelanceProfile() {
               </CardHeader>
               <CardContent>
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-2">
+                  <p className="text-sm text-muted-foreground mb-2">
                     Revenus de cette année
                   </p>
                   <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-bold text-gray-900">
+                    <span className="text-3xl font-bold text-foreground">
                       €108.9k
                     </span>
                     <div className="flex items-center text-green-600 text-sm">
@@ -644,7 +644,7 @@ export default function FreelanceProfile() {
                 </div>
 
                 {/* Graphique simulé */}
-                <div className="relative h-48 bg-gradient-to-t from-purple-200 to-purple-100 rounded-lg overflow-hidden">
+                <div className="relative h-48 bg-gradient-to-t from-purple-200 to-purple-100 rounded-xl overflow-hidden">
                   <svg
                     className="w-full h-full"
                     viewBox="0 0 400 200"
@@ -690,7 +690,7 @@ export default function FreelanceProfile() {
                   {/* Point avec tooltip */}
                   <div className="absolute top-6 right-16">
                     <div className="bg-black text-white px-3 py-2 rounded-lg text-sm relative">
-                      <span className="text-xs text-gray-300">
+                      <span className="text-xs text-muted-foreground">
                         807 missions
                       </span>
                       <br />
@@ -702,7 +702,7 @@ export default function FreelanceProfile() {
                   </div>
 
                   {/* Labels des mois */}
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-between px-4 text-xs text-gray-500">
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-between px-4 text-xs text-muted-foreground">
                     {[
                       "JAN",
                       "FEB",
@@ -741,7 +741,7 @@ export default function FreelanceProfile() {
                 <div className="space-y-2">
                   <Label>Photo de profil</Label>
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-gray-600 to-gray-800 overflow-hidden">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-muted-foreground to-foreground overflow-hidden">
                       <img
                         src={displayAvatar}
                         alt="Avatar"
@@ -753,7 +753,7 @@ export default function FreelanceProfile() {
                         type="button"
                         variant="outline"
                         onClick={handleAvatarClick}
-                        className="w-full border-2 border-dashed border-gray-300 hover:border-pink-500 hover:bg-pink-50"
+                        className="w-full border-2 border-dashed border-border hover:border-freehunt-main hover:bg-freehunt-main/5"
                       >
                         <Upload className="w-4 h-4 mr-2" />
                         {formData.avatar
@@ -763,11 +763,11 @@ export default function FreelanceProfile() {
                     </div>
                   </div>
                   {formData.avatar && (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-muted-foreground">
                       Fichier sélectionné: {formData.avatar.name}
                     </p>
                   )}
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Formats acceptés: JPG, PNG, GIF. Taille max: 5MB
                   </p>
                 </div>
@@ -775,7 +775,7 @@ export default function FreelanceProfile() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="firstName"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Prénom
                   </Label>
@@ -785,7 +785,7 @@ export default function FreelanceProfile() {
                     type="text"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
+                    className={`w-full bg-background focus:bg-card focus:ring-2 focus:ring-freehunt-main ${
                       formErrors.firstName
                         ? "border border-red-500"
                         : "border-0"
@@ -801,7 +801,7 @@ export default function FreelanceProfile() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="lastName"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Nom
                   </Label>
@@ -811,7 +811,7 @@ export default function FreelanceProfile() {
                     type="text"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
+                    className={`w-full bg-background focus:bg-card focus:ring-2 focus:ring-freehunt-main ${
                       formErrors.lastName ? "border border-red-500" : "border-0"
                     }`}
                   />
@@ -825,7 +825,7 @@ export default function FreelanceProfile() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="location"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Lieu
                   </Label>
@@ -835,7 +835,7 @@ export default function FreelanceProfile() {
                     type="text"
                     value={formData.location}
                     onChange={handleInputChange}
-                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
+                    className={`w-full bg-background focus:bg-card focus:ring-2 focus:ring-freehunt-main ${
                       formErrors.location ? "border border-red-500" : "border-0"
                     }`}
                   />
@@ -849,7 +849,7 @@ export default function FreelanceProfile() {
                 <div className="space-y-2">
                   <Label
                     htmlFor="jobTitle"
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Poste
                   </Label>
@@ -859,7 +859,7 @@ export default function FreelanceProfile() {
                     type="text"
                     value={formData.jobTitle}
                     onChange={handleInputChange}
-                    className={`w-full bg-gray-100 focus:bg-white focus:ring-2 focus:ring-pink-500 ${
+                    className={`w-full bg-background focus:bg-card focus:ring-2 focus:ring-freehunt-main ${
                       formErrors.jobTitle ? "border border-red-500" : "border-0"
                     }`}
                   />
@@ -941,7 +941,7 @@ export default function FreelanceProfile() {
                         type="text"
                         value={formData.stripeAccountId}
                         readOnly
-                        className="w-full bg-gray-50 border text-gray-600"
+                        className="w-full bg-muted border text-muted-foreground"
                       />
                       <div className="flex items-center text-green-600 text-sm">
                         <svg
@@ -976,7 +976,7 @@ export default function FreelanceProfile() {
                           "Connecter mon compte Stripe"
                         )}
                       </Button>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         Connectez votre compte Stripe pour recevoir vos
                         paiements
                       </p>

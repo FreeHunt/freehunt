@@ -1,6 +1,6 @@
 export default function CGU() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="bg-white rounded-xl shadow-sm p-8">
           <h1 className="text-3xl font-bold mb-8 text-center">
@@ -195,7 +195,7 @@ export default function CGU() {
                 suivante :{" "}
                 <a
                   href="/politique-confidentialite"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   /politique-confidentialite
                 </a>
@@ -218,7 +218,7 @@ export default function CGU() {
                 l&apos;adresse suivante :{" "}
                 <a
                   href="https://www.cmap.fr"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   www.cmap.fr
                 </a>
@@ -233,7 +233,7 @@ export default function CGU() {
                 :{" "}
                 <a
                   href="mailto:contact@freehunt.fr"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   contact@freehunt.fr
                 </a>

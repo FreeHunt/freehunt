@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/common/button";
-import { Freelance } from "@/lib/interfaces";
-import { getFreelanceById } from "@/actions/freelances";
 import { useAuth } from "@/actions/auth";
-import { User, MapPin, DollarSign, Calendar, ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { getFreelanceById } from "@/actions/freelances";
+import { Button } from "@/components/common/button";
 import ContactUserButton from "@/components/common/ContactUserButton";
+import { Badge } from "@/components/ui/badge";
+import { Freelance } from "@/lib/interfaces";
+import { ArrowLeft, Calendar, DollarSign, MapPin, User } from "lucide-react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function FreelanceProfilePage() {
   const params = useParams();
@@ -41,8 +41,8 @@ export default function FreelanceProfilePage() {
     return (
       <div className="px-4 lg:px-5 py-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-muted rounded-lg w-1/3 mb-4"></div>
+          <div className="h-64 bg-muted rounded-xl"></div>
         </div>
       </div>
     );
@@ -51,10 +51,16 @@ export default function FreelanceProfilePage() {
   if (error) {
     return (
       <div className="px-4 lg:px-5 py-6">
-        <div className="bg-white rounded-[30px] border border-freehunt-grey p-12 text-center">
-          <h3 className="text-lg font-bold text-freehunt-black-two mb-2">Erreur</h3>
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
+          <h3 className="text-lg font-bold text-freehunt-black-two mb-2">
+            Erreur
+          </h3>
           <p className="text-freehunt-black-two opacity-70 mb-4">{error}</p>
-          <Button variant="outline" theme="secondary" onClick={() => router.back()}>
+          <Button
+            variant="outline"
+            theme="secondary"
+            onClick={() => router.back()}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
           </Button>
@@ -71,20 +77,26 @@ export default function FreelanceProfilePage() {
     <div className="px-4 lg:px-5 py-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
-          <Button variant="outline" theme="secondary" onClick={() => router.back()}>
+          <Button
+            variant="outline"
+            theme="secondary"
+            onClick={() => router.back()}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour
           </Button>
         </div>
 
-        <div className="bg-white rounded-[30px] border border-freehunt-grey overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="bg-gradient-to-r from-freehunt-main/10 to-freehunt-main/5 p-6">
             <div className="flex items-start justify-between">
               <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-freehunt-black-two mb-2">
                   {freelance.firstName} {freelance.lastName}
                 </h1>
-                <p className="text-lg text-freehunt-black-two opacity-80 mb-2">{freelance.jobTitle}</p>
+                <p className="text-lg text-freehunt-black-two opacity-80 mb-2">
+                  {freelance.jobTitle}
+                </p>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-freehunt-black-two opacity-70">
                   <span className="flex items-center gap-1">
                     <User className="w-4 h-4" />
@@ -111,18 +123,27 @@ export default function FreelanceProfilePage() {
             {/* Description */}
             {freelance.description && (
               <div className="mb-6">
-                <h3 className="text-lg font-bold text-freehunt-black-two mb-3">À propos</h3>
-                <p className="text-freehunt-black-two opacity-70 leading-relaxed">{freelance.description}</p>
+                <h3 className="text-lg font-bold text-freehunt-black-two mb-3">
+                  À propos
+                </h3>
+                <p className="text-freehunt-black-two opacity-70 leading-relaxed">
+                  {freelance.description}
+                </p>
               </div>
             )}
 
             {/* Compétences */}
             {freelance.skills && freelance.skills.length > 0 && (
               <div className="mb-6">
-                <h3 className="text-lg font-bold text-freehunt-black-two mb-3">Compétences</h3>
+                <h3 className="text-lg font-bold text-freehunt-black-two mb-3">
+                  Compétences
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {freelance.skills.map((skill) => (
-                    <Badge key={skill.id} className="bg-freehunt-main/10 text-freehunt-black-two border-freehunt-main/20">
+                    <Badge
+                      key={skill.id}
+                      className="bg-freehunt-main/10 text-freehunt-black-two border-freehunt-main/20"
+                    >
                       {skill.name}
                     </Badge>
                   ))}
@@ -140,9 +161,7 @@ export default function FreelanceProfilePage() {
                 size="default"
               />
               <Button variant="outline" theme="secondary" asChild>
-                <Link href={`/freelances`}>
-                  Voir d&apos;autres freelances
-                </Link>
+                <Link href={`/freelances`}>Voir d&apos;autres freelances</Link>
               </Button>
             </div>
           </div>

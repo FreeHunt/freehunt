@@ -1,5 +1,5 @@
-import React from "react";
 import { Button as ShadcnButton } from "@/components/ui/button";
+import React from "react";
 
 type ButtonProps = React.ComponentProps<typeof ShadcnButton> & {
   theme?: "primary" | "secondary";
@@ -18,7 +18,7 @@ function Button({
 
   return (
     <ShadcnButton
-      className={`${colorClasses[theme]} cursor-pointer rounded-[25px] ${className}`}
+      className={`${colorClasses[theme]} cursor-pointer rounded-lg ${className}`}
       {...props}
     >
       {children}

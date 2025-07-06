@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -55,7 +55,10 @@ function PaymentSuccessContent() {
 
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-green-700">
-            <strong>ID de session :</strong> {sessionId}
+            <strong>ID de session :</strong>
+          </p>
+          <p className="text-xs text-green-600 font-mono break-all bg-green-100 p-2 rounded mt-1 mb-2">
+            {sessionId}
           </p>
           <p className="text-sm text-green-700 mt-1">
             Votre annonce est maintenant <strong>publiée</strong> et visible par

@@ -1,28 +1,28 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
 import { getCurrentUser } from "@/actions/auth";
 import {
+  canJobPostingBeCancelled,
+  deleteJobPosting,
   getJobPostingsByUserId,
   processJobPostingPayment,
   publishJobPosting,
-  deleteJobPosting,
-  canJobPostingBeCancelled,
 } from "@/actions/jobPostings";
-import { JobPosting, JobPostingStatus, User } from "@/lib/interfaces";
-import { showToast } from "@/lib/toast";
+import { CancelJobPostingButton } from "@/components/job-posting/CancelJobPostingButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CancelJobPostingButton } from "@/components/job-posting/CancelJobPostingButton";
+import { JobPosting, JobPostingStatus, User } from "@/lib/interfaces";
+import { showToast } from "@/lib/toast";
 import {
-  CreditCard,
-  Eye,
+  AlertCircle,
   CheckCircle,
   Clock,
-  AlertCircle,
+  CreditCard,
+  Eye,
   X,
 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 
 const getStatusBadge = (status: JobPostingStatus) => {
   switch (status) {
@@ -127,7 +127,9 @@ const getStatusAction = (
             <CancelJobPostingButton
               jobPostingId={jobPosting.id}
               jobPostingTitle={jobPosting.title}
-              isPaid={["PAID", "PUBLISHED"].includes(jobPosting.status as string)}
+              isPaid={["PAID", "PUBLISHED"].includes(
+                jobPosting.status as string,
+              )}
               hasProject={false}
               onCancelSuccess={() => {
                 // Recharger les job postings après annulation
@@ -148,9 +150,10 @@ export default function CompanyJobPostingsDashboard() {
   const [loading, setLoading] = useState(true);
   const [cancellableJobPostings, setCancellableJobPostings] = useState<
     Set<string>
-  >(new Set());  const loadJobPostings = useCallback(async () => {
+  >(new Set());
+  const loadJobPostings = useCallback(async () => {
     if (!user) return;
-    
+
     try {
       const userJobPostings = await getJobPostingsByUserId(user.id);
       setJobPostings(userJobPostings);
@@ -159,9 +162,7 @@ export default function CompanyJobPostingsDashboard() {
       const cancellableSet = new Set<string>();
       await Promise.all(
         userJobPostings.map(async (jobPosting) => {
-          const canBeCancelled = await canJobPostingBeCancelled(
-            jobPosting.id,
-          );
+          const canBeCancelled = await canJobPostingBeCancelled(jobPosting.id);
           if (canBeCancelled) {
             cancellableSet.add(jobPosting.id);
           }
@@ -319,18 +320,18 @@ export default function CompanyJobPostingsDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="mb-8">
-          <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-2 border-orange-200 p-6 mb-6">
-            <h1 className="text-3xl font-bold text-orange-800 mb-2">
+          <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-sm">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               📋 Gestion de mes annonces
             </h1>
-            <p className="text-orange-700 mb-2">
+            <p className="text-foreground mb-2">
               <strong>Centre de gestion complet</strong> : Paiements,
               publications, modifications et annulations de vos annonces.
             </p>
-            <p className="text-orange-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               💡{" "}
               <em>
                 Pour consulter uniquement vos annonces publiées et visibles par

@@ -1,5 +1,5 @@
-import { ProfileUploader } from "@/components/common/upload/ProfilUploader";
 import { TipBox } from "@/components/common/banner/TipBox";
+import { ProfileUploader } from "@/components/common/upload/ProfilUploader";
 import { Montserrat } from "next/font/google";
 import { ZodError, ZodIssue } from "zod";
 
@@ -20,9 +20,9 @@ export function AvatarSection({
   return (
     <div className="flex flex-col items-center gap-4 sm:gap-8 md:gap-10 w-full px-2 sm:px-0">
       <p
-        className={`${montserrat.className} text-black text-center text-base sm:text-lg font-medium mt-2 sm:mt-0`}
+        className={`${montserrat.className} text-foreground text-center text-base sm:text-lg font-medium mt-2 sm:mt-0`}
       >
-        Uploadez une photo de profil professionnel.
+        Ajoutez une photo qui vous représente bien !
       </p>
 
       {/* ProfileUploader centered with appropriate spacing */}
@@ -33,7 +33,7 @@ export function AvatarSection({
       {errorAvatarSection && (
         <div className="flex flex-col justify-center items-center gap-2 sm:gap-4 md:gap-5 self-stretch w-full">
           <p
-            className={`${montserrat.className} text-red-500 text-center text-sm sm:text-base md:text-lg font-medium`}
+            className={`${montserrat.className} text-destructive text-center text-sm sm:text-base md:text-lg font-medium`}
           >
             {
               errorAvatarSection.errors.find(

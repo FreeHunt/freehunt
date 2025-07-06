@@ -107,7 +107,7 @@ export default function NavigationMenu() {
                   ? "text-foreground hover:bg-accent hover:text-accent-foreground"
                   : "bg-freehunt-black-two text-white hover:bg-black/90"
               }
-              rounded-full
+              rounded-lg
             `}
             asChild
           >
@@ -129,7 +129,7 @@ export default function NavigationMenu() {
           <Button
             key={`${link.label}-${index}`}
             variant={isOutline ? "outline" : "default"}
-            className={`${mobile ? "w-full" : ""} rounded-full`}
+            className={`${mobile ? "w-full" : ""} rounded-lg`}
             asChild
           >
             <Link href={link.href} onClick={() => mobile && setIsOpen(false)}>
@@ -154,8 +154,8 @@ export default function NavigationMenu() {
             </nav>
           </div>
           <div className="hidden md:flex items-center gap-2">
-            <div className="h-9 w-24 bg-gray-200 animate-pulse rounded-full"></div>
-            <div className="h-9 w-24 bg-gray-200 animate-pulse rounded-full"></div>
+            <div className="h-9 w-24 bg-muted animate-pulse rounded-full"></div>
+            <div className="h-9 w-24 bg-muted animate-pulse rounded-full"></div>
           </div>
         </div>
       </header>
@@ -215,7 +215,7 @@ export default function NavigationMenu() {
                 {user ? <UserButtons mobile /> : <AuthButtons mobile />}
               </div>
               {user && (
-                <div className="text-sm text-gray-600 mt-2 text-center">
+                <div className="text-sm text-muted-foreground mt-2 text-center">
                   Connecté en tant que {user.username}
                 </div>
               )}

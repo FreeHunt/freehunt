@@ -1,6 +1,6 @@
-import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Montserrat } from "next/font/google";
+import { ChangeEvent } from "react";
 import { ZodError, ZodIssue } from "zod";
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -37,13 +37,13 @@ export function IdentitySection({
         {/* Champ prénom */}
         <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
           <p
-            className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium`}
+            className={`${montserrat.className} text-foreground text-center text-base md:text-lg font-medium`}
           >
             Votre prénom
           </p>
           <Input
             type="text"
-            className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
+            className="w-full h-10 rounded-lg border text-sm font-normal"
             value={firstName}
             onChange={onFirstNameChange}
             placeholder="Prénom"
@@ -51,7 +51,7 @@ export function IdentitySection({
           {errorFirstNameSection && (
             <div className="flex flex-col justify-center items-center self-stretch w-full">
               <p
-                className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
+                className={`${montserrat.className} text-destructive text-center text-sm md:text-base font-medium`}
               >
                 {
                   errorFirstNameSection.errors.find(
@@ -66,13 +66,13 @@ export function IdentitySection({
         {/* Champ nom */}
         <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full">
           <p
-            className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium`}
+            className={`${montserrat.className} text-foreground text-center text-base md:text-lg font-medium`}
           >
             Votre nom
           </p>
           <Input
             type="text"
-            className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
+            className="w-full h-10 rounded-lg border text-sm font-normal"
             value={lastName}
             onChange={onLastNameChange}
             placeholder="Nom"
@@ -80,7 +80,7 @@ export function IdentitySection({
           {errorLastNameSection && (
             <div className="flex flex-col justify-center items-center self-stretch w-full">
               <p
-                className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
+                className={`${montserrat.className} text-destructive text-center text-sm md:text-base font-medium`}
               >
                 {
                   errorLastNameSection.errors.find(
@@ -96,20 +96,22 @@ export function IdentitySection({
       {/* Champ métier */}
       <div className="flex flex-col justify-center items-center gap-3 md:gap-5 self-stretch w-full mt-2 md:mt-0">
         <p
-          className={`${montserrat.className} text-black text-center text-base md:text-lg font-medium px-2`}
+          className={`${montserrat.className} text-foreground text-center text-base md:text-lg font-medium px-2`}
         >
-          Quel est le nom du métier qui représente votre expertise ?{" "}
+          Dans quel domaine exercez-vous ?{" "}
           <span className="hidden md:inline">
             <br />
-            (les recruteurs vous trouveront via ces informations)
+            <span className="text-sm text-muted-foreground font-normal">
+              (Ce sera votre spécialité principale sur FreeHunt)
+            </span>
           </span>
-          <span className="inline md:hidden text-xs text-gray-600 block mt-1">
-            (les recruteurs vous trouveront via ces informations)
+          <span className="md:hidden text-xs text-muted-foreground block mt-1 font-normal">
+            (Ce sera votre spécialité principale sur FreeHunt)
           </span>
         </p>
         <Input
           type="text"
-          className="w-full h-10 rounded-lg border border-freehunt-black-two text-freehunt-black-two text-sm font-normal"
+          className="w-full h-10 rounded-lg border text-sm font-normal"
           value={workField}
           onChange={onWorkFieldChange}
           placeholder="Ex: Développeur web, UX Designer, etc."
@@ -117,7 +119,7 @@ export function IdentitySection({
         {errorWorkFieldSection && (
           <div className="flex flex-col justify-center items-center self-stretch w-full">
             <p
-              className={`${montserrat.className} text-red-500 text-center text-sm md:text-base font-medium`}
+              className={`${montserrat.className} text-destructive text-center text-sm md:text-base font-medium`}
             >
               {
                 errorWorkFieldSection.errors.find(

@@ -113,10 +113,10 @@ function Page() {
 
   // Titres dynamiques pour chaque section
   const sectionTitles: SectionTitleType[] = [
-    { highlight: "Définissez", regular: "-vous !" },
-    { highlight: "Quel est votre ", regular: " TJM ?" },
-    { highlight: "Vos compétences", regular: " clés ?" },
-    { highlight: "Mettons un visage", regular: " sur votre nom ?" },
+    { highlight: "Commençons par", regular: " faire connaissance !" },
+    { highlight: "Parlons", regular: " de votre expertise" },
+    { highlight: "Vos talents", regular: " et compétences" },
+    { highlight: "Une photo", regular: " pour vous représenter" },
   ];
 
   // Vérifier si c'est la dernière section

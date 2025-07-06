@@ -1,5 +1,5 @@
-import React from "react";
 import { Badge as ShadcnBadge } from "@/components/ui/badge";
+import React from "react";
 
 function SkillBadge({
   className,
@@ -11,7 +11,7 @@ function SkillBadge({
 }) {
   return (
     <ShadcnBadge
-      className={`bg-freehunt-grey-light text-freehunt-black-two rounded-[6px] self-start ${className}`}
+      className={`bg-freehunt-grey-light text-freehunt-black-two rounded-md self-start ${className}`}
       {...props}
     >
       {children}

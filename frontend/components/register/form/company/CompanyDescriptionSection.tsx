@@ -1,6 +1,6 @@
-import { ChangeEvent } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ChangeEvent } from "react";
 import { ZodError, ZodIssue } from "zod";
 
 interface CompanyDescriptionSectionProps {
@@ -28,12 +28,12 @@ export function CompanyDescriptionSection({
           rows={5}
           required
         />
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Cette description sera visible sur votre profil et aidera les
           freelances à comprendre votre activité.
         </p>
         {errorDescriptionSection && (
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             {
               errorDescriptionSection.errors.find(
                 (error: ZodIssue) => error.path[0] === "description",

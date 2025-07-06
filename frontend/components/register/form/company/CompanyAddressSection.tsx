@@ -1,7 +1,7 @@
-import { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ZodIssue, ZodError } from "zod";
+import { ChangeEvent } from "react";
+import { ZodError, ZodIssue } from "zod";
 
 interface CompanyAddressSectionProps {
   address: string;
@@ -26,7 +26,7 @@ export function CompanyAddressSection({
           required
         />
         {errorAddressSection && (
-          <p className="text-sm text-red-500">
+          <p className="text-sm text-destructive">
             {
               errorAddressSection.errors.find(
                 (error: ZodIssue) => error.path[0] === "address",
@@ -34,7 +34,7 @@ export function CompanyAddressSection({
             }
           </p>
         )}
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           Indiquez l&apos;adresse complète du siège social de votre entreprise.
         </p>
       </div>

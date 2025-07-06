@@ -1,9 +1,9 @@
 "use client";
 
-import { ComponentProps, useState, useEffect } from "react";
 import { Input as ShadcnInput } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Search } from "lucide-react";
+import { ComponentProps, useEffect, useState } from "react";
 import { Button } from "../button";
 
 function SearchInput({
@@ -42,7 +42,7 @@ function SearchInput({
       />
       <ShadcnInput
         className={cn(
-          "rounded-full h-16 px-12 text-freehunt-black-two font-bold placeholder:text-freehunt-black-two placeholder:font-bold focus-visible:ring-0 border border-freehunt-black-two focus-visible:border-freehunt-black-two",
+          "rounded-lg h-16 px-12 text-freehunt-black-two font-bold placeholder:text-freehunt-black-two placeholder:font-bold focus-visible:ring-0 border border-freehunt-black-two focus-visible:border-freehunt-black-two",
           className,
         )}
         value={value}
@@ -54,7 +54,7 @@ function SearchInput({
         <Button
           variant="secondary"
           className={cn(
-            "absolute top-1/2 right-4 -translate-y-1/2  rounded-full font-semibold lg:px-8 lg:py-5",
+            "absolute top-1/2 right-4 -translate-y-1/2 rounded-lg font-semibold lg:px-8 lg:py-5",
             buttonClassName,
           )}
         >
