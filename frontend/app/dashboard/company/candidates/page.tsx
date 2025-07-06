@@ -127,28 +127,28 @@ export default function CompanyCandidatesPage() {
     switch (status) {
       case "PENDING":
         return (
-          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1">
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200 flex items-center gap-1 rounded-md">
             <Clock className="w-3 h-3" />
             En attente
           </Badge>
         );
       case "ACCEPTED":
         return (
-          <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+          <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1 rounded-md">
             <CheckCircle className="w-3 h-3" />
             Acceptée
           </Badge>
         );
       case "REJECTED":
         return (
-          <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1">
+          <Badge className="bg-red-100 text-red-800 border-red-200 flex items-center gap-1 rounded-md">
             <XCircle className="w-3 h-3" />
             Refusée
           </Badge>
         );
       default:
         return (
-          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+          <Badge className="bg-muted text-foreground border-border">
             {status}
           </Badge>
         );
@@ -169,8 +169,8 @@ export default function CompanyCandidatesPage() {
     return (
       <div className="px-4 lg:px-5 py-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="h-8 bg-muted rounded-lg w-1/3 mb-4"></div>
+          <div className="h-4 bg-muted rounded-lg w-1/2 mb-8"></div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-32 bg-muted rounded-xl"></div>
@@ -201,7 +201,7 @@ export default function CompanyCandidatesPage() {
         </div>
 
         {candidates.length === 0 ? (
-          <div className="bg-white rounded-xl border border-freehunt-grey p-12 text-center">
+          <div className="bg-card rounded-xl border border-border p-12 text-center">
             <User className="w-12 h-12 text-freehunt-black-two opacity-40 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-freehunt-black-two mb-2">
               Aucune candidature
@@ -307,7 +307,7 @@ export default function CompanyCandidatesPage() {
                         <Button
                           variant="outline"
                           theme="secondary"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
                           onClick={() =>
                             handleStatusUpdate(candidate.id, "REJECTED")
                           }

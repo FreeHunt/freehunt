@@ -27,7 +27,7 @@ export function ProfileUploader({ onFileChange }: ProfileUploaderProps) {
           <div className="bg-destructive text-white rounded-full p-2 mr-3 flex items-center justify-center w-10 h-10">
             <PlusIcon className="w-6 h-6" />
           </div>
-          <span className="text-gray-500">
+          <span className="text-muted-foreground">
             Glissez ou sélectionner un fichier ici
           </span>
           <Input
@@ -41,7 +41,7 @@ export function ProfileUploader({ onFileChange }: ProfileUploaderProps) {
         </label>
       </div>
 
-      <div className="text-gray-400 text-sm">
+      <div className="text-muted-foreground text-sm">
         <div className="flex gap-2">
           <p className="font-bold">Format :</p> <p>JPEG, PNG</p>
         </div>

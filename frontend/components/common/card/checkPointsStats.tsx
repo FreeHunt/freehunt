@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Calendar, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { Checkpoint } from "@/lib/interfaces";
+import { AlertCircle, Calendar, CheckCircle, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
 
 // Composant pour afficher les statistiques des checkpoints
 export default function CheckpointStats({
@@ -61,15 +61,15 @@ export default function CheckpointStats({
     <div className="w-full">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
         {/* Carte - Total des checkpoints */}
-        <div className="bg-white rounded-lg shadow-sm p-4 flex items-center border border-gray-200 hover:shadow-md transition-shadow">
+        <div className="bg-card rounded-xl shadow-sm p-4 flex items-center border border-border hover:shadow-md transition-shadow">
           <div className="rounded-full bg-purple-100 p-3 mr-4">
             <Calendar className="h-6 w-6 text-purple-600" />
           </div>
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wide">
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">
               Total
             </p>
-            <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+            <p className="text-2xl font-bold text-foreground">{stats.total}</p>
           </div>
         </div>
 

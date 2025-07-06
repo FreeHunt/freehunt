@@ -54,7 +54,7 @@ export default function MyPublishedJobPostingsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Banner
         text="Mes annonces publiées et visibles"
         redPointerClassName="right-0"
@@ -62,16 +62,16 @@ export default function MyPublishedJobPostingsPage() {
 
       <div className="max-w-7xl mx-auto px-4 lg:px-5 py-6">
         {/* Note explicative */}
-        <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-6">
-          <h2 className="text-lg font-semibold text-green-800 mb-2">
+        <div className="bg-card border border-border rounded-xl p-6 mb-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-foreground mb-2">
             👁️ Consultation des annonces publiées
           </h2>
-          <p className="text-green-700 text-sm mb-2">
+          <p className="text-foreground text-sm mb-2">
             <strong>Cette page montre uniquement vos annonces publiées</strong>{" "}
             - celles que les freelances peuvent voir et pour lesquelles ils
             peuvent postuler.
           </p>
-          <p className="text-green-600 text-sm">
+          <p className="text-muted-foreground text-sm">
             💡 Pour gérer vos paiements, publications ou annuler des annonces,
             utilisez la <strong>&quot;Gestion des annonces&quot;</strong> depuis
             votre dashboard.
@@ -81,11 +81,11 @@ export default function MyPublishedJobPostingsPage() {
         {/* En-tête */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-freehunt-black-two">
+            <h1 className="text-2xl font-bold text-foreground">
               Mes annonces publiées
             </h1>
             {!loading && (
-              <Badge className="bg-green-600 font-bold text-white">
+              <Badge className="bg-freehunt-main font-bold text-white">
                 {jobPostings.length}
               </Badge>
             )}
@@ -118,24 +118,26 @@ export default function MyPublishedJobPostingsPage() {
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <AlertCircle className="w-12 h-12 text-destructive mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Erreur de chargement, veuillez vous reconnecter
             </h3>
-            <p className="text-gray-600 text-center max-w-md mb-4">{error}</p>
+            <p className="text-muted-foreground text-center max-w-md mb-4">
+              {error}
+            </p>
             <Button variant="outline" onClick={() => window.location.reload()}>
               Réessayer
             </Button>
           </div>
         ) : jobPostings.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-              <Plus className="w-12 h-12 text-gray-400" />
+            <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Plus className="w-12 h-12 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Aucune annonce publiée
             </h3>
-            <p className="text-gray-600 text-center max-w-md mb-4">
+            <p className="text-muted-foreground text-center max-w-md mb-4">
               Vous n&apos;avez pas encore d&apos;annonces publiées et visibles
               par les freelances. Créez et publiez votre première annonce pour
               commencer à recevoir des candidatures.

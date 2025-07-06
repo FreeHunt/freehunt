@@ -1,10 +1,10 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, ArrowLeft } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 function MessagesContent() {
@@ -25,22 +25,20 @@ function MessagesContent() {
 
         <Card>
           <CardHeader className="text-center">
-            <MessageSquare className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+            <MessageSquare className="w-12 h-12 text-primary mx-auto mb-4" />
             <CardTitle className="text-2xl">Messagerie</CardTitle>
           </CardHeader>
           <CardContent className="text-center py-12">
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               La fonctionnalité de messagerie sera bientôt disponible.
             </p>
             {freelanceId && (
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-muted-foreground mb-6">
                 ID du freelance à contacter : {freelanceId}
               </p>
             )}
             <Button variant="outline" asChild>
-              <Link href="/dashboard/company">
-                Retour au tableau de bord
-              </Link>
+              <Link href="/dashboard/company">Retour au tableau de bord</Link>
             </Button>
           </CardContent>
         </Card>

@@ -45,8 +45,8 @@ export default function FreelanceProfilePage() {
     return (
       <div className="px-4 lg:px-5 py-6">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-8 bg-muted rounded-lg w-1/3 mb-4"></div>
+          <div className="h-64 bg-muted rounded-xl"></div>
         </div>
       </div>
     );
@@ -55,7 +55,7 @@ export default function FreelanceProfilePage() {
   if (error) {
     return (
       <div className="px-4 lg:px-5 py-6">
-        <div className="bg-white rounded-xl border border-freehunt-grey p-12 text-center">
+        <div className="bg-card rounded-xl border border-border p-12 text-center">
           <h3 className="text-lg font-bold text-freehunt-black-two mb-2">
             Erreur
           </h3>
@@ -91,7 +91,7 @@ export default function FreelanceProfilePage() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-xl border border-freehunt-grey overflow-hidden">
+        <div className="bg-card rounded-xl border border-border overflow-hidden">
           <div className="bg-gradient-to-r from-freehunt-main/10 to-freehunt-main/5 p-6">
             <div className="flex items-start justify-between">
               <div>

@@ -202,7 +202,7 @@ export default function ConversationComponent({
             </div>
             <div className="bg-muted rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
               <p className="text-xs md:text-sm">{msg.content}</p>
-              <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1 text-right">
+              <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5 md:mt-1 text-right">
                 {formatMessageTime(msg.createdAt)}
               </p>
             </div>
@@ -211,7 +211,7 @@ export default function ConversationComponent({
           <div className="flex items-end space-x-1 md:space-x-2">
             <div className="bg-primary text-white rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
               <p className="text-xs md:text-sm">{msg.content}</p>
-              <p className="text-[10px] md:text-xs text-blue-100 mt-0.5 md:mt-1">
+              <p className="text-[10px] md:text-xs text-primary-foreground/70 mt-0.5 md:mt-1">
                 {formatMessageTime(msg.createdAt)}
               </p>
             </div>
@@ -279,15 +279,15 @@ export default function ConversationComponent({
             <div className="flex-grow overflow-y-auto p-2 md:p-4 space-y-3 md:space-y-4">
               {/* Date Divider */}
               <div className="flex items-center justify-center my-2 md:my-4">
-                <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs md:text-sm rounded-full mx-2">
+                <div className="h-px bg-border flex-grow max-w-xs"></div>
+                <span className="px-3 py-1 bg-muted text-muted-foreground text-xs md:text-sm rounded-full mx-2">
                   Aujourd&apos;hui
                 </span>
-                <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
+                <div className="h-px bg-border flex-grow max-w-xs"></div>
               </div>
 
               {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-24 text-gray-500 text-sm md:text-base">
+                <div className="flex items-center justify-center h-24 text-muted-foreground text-sm md:text-base">
                   Aucun message dans cette conversation
                 </div>
               ) : (
@@ -302,7 +302,7 @@ export default function ConversationComponent({
             <div className="flex items-center p-2 md:p-3 border-t">
               <button
                 type="button"
-                className="p-1.5 md:p-2 text-gray-500 hover:text-gray-700"
+                className="p-1.5 md:p-2 text-muted-foreground hover:text-foreground"
               >
                 <Paperclip size={isMobile ? 18 : 20} />
               </button>
@@ -316,7 +316,7 @@ export default function ConversationComponent({
               />
               <button
                 onClick={handleSendMessage}
-                className="p-1.5 md:p-2 text-gray-500 hover:text-gray-700"
+                className="p-1.5 md:p-2 text-muted-foreground hover:text-foreground"
                 disabled={!message.trim()}
               >
                 <Send size={isMobile ? 18 : 20} />
@@ -353,15 +353,15 @@ export default function ConversationComponent({
             <div className="flex-grow overflow-y-auto p-2 md:p-4 space-y-3 md:space-y-4">
               {/* Date Divider */}
               <div className="flex items-center justify-center my-2 md:my-4">
-                <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
-                <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs md:text-sm rounded-full mx-2">
+                <div className="h-px bg-border flex-grow max-w-xs"></div>
+                <span className="px-3 py-1 bg-muted text-muted-foreground text-xs md:text-sm rounded-full mx-2">
                   Aujourd&apos;hui
                 </span>
-                <div className="h-px bg-gray-200 flex-grow max-w-xs"></div>
+                <div className="h-px bg-border flex-grow max-w-xs"></div>
               </div>
 
               {messages.length === 0 ? (
-                <div className="flex items-center justify-center h-24 text-gray-500 text-sm md:text-base">
+                <div className="flex items-center justify-center h-24 text-muted-foreground text-sm md:text-base">
                   Aucun message dans cette conversation
                 </div>
               ) : (
@@ -376,7 +376,7 @@ export default function ConversationComponent({
             <div className="flex items-center p-2 md:p-3 border-t">
               <button
                 type="button"
-                className="p-1.5 md:p-2 text-gray-500 hover:text-gray-700"
+                className="p-1.5 md:p-2 text-muted-foreground hover:text-foreground"
               >
                 <Paperclip size={isMobile ? 18 : 20} />
               </button>
@@ -390,7 +390,7 @@ export default function ConversationComponent({
               />
               <button
                 onClick={handleSendMessage}
-                className="p-1.5 md:p-2 text-gray-500 hover:text-gray-700"
+                className="p-1.5 md:p-2 text-muted-foreground hover:text-foreground"
                 disabled={!message.trim()}
               >
                 <Send size={isMobile ? 18 : 20} />

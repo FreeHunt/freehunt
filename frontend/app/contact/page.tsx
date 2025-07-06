@@ -226,7 +226,7 @@ export default function Contact() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-freehunt-main hover:bg-freehunt-main/90 text-white rounded-full py-3"
+                className="w-full bg-freehunt-main hover:bg-freehunt-main/90 text-white rounded-lg py-3"
               >
                 {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
               </Button>
@@ -234,7 +234,7 @@ export default function Contact() {
           </div>
 
           <div className="space-y-8">
-            <div className="bg-white rounded-3xl p-8 shadow-sm">
+            <div className="bg-card rounded-xl p-8 shadow-sm">
               <h3 className="text-2xl font-bold mb-6">
                 Informations de contact
               </h3>
@@ -260,7 +260,7 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 shadow-sm">
+            <div className="bg-card rounded-xl p-8 shadow-sm">
               <h3 className="text-2xl font-bold mb-6">Questions fréquentes</h3>
               <div className="space-y-4">
                 {faqData.map((faq, index) => (

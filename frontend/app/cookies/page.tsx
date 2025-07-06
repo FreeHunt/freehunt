@@ -1,14 +1,14 @@
 export default function Cookies() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="container mx-auto px-4 max-w-4xl">
-        <div className="bg-white rounded-xl shadow-sm p-8">
-          <h1 className="text-3xl font-bold mb-8 text-center">
+        <div className="bg-card border border-border rounded-xl shadow-sm p-8">
+          <h1 className="text-3xl font-bold mb-8 text-center text-foreground">
             Politique des Cookies
           </h1>
 
           <div className="prose prose-gray max-w-none">
-            <p className="text-gray-600 mb-6">
+            <p className="text-muted-foreground mb-6">
               Dernière mise à jour : 29 juin 2025
             </p>
 
@@ -42,51 +42,51 @@ export default function Cookies() {
                 peuvent pas être désactivés.
               </p>
               <div className="overflow-x-auto mb-4">
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="w-full border-collapse border border-border rounded-lg">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                    <tr className="bg-muted">
+                      <th className="border border-border px-4 py-2 text-left">
                         Cookie
                       </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                      <th className="border border-border px-4 py-2 text-left">
                         Finalité
                       </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                      <th className="border border-border px-4 py-2 text-left">
                         Durée
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         authentik_session
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         Authentification utilisateur
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         Session
                       </td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         authentik_csrf
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         Protection contre les attaques CSRF
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         Session
                       </td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         freehunt_preferences
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         Préférences utilisateur (langue, thème)
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         12 mois
                       </td>
                     </tr>
@@ -103,29 +103,27 @@ export default function Cookies() {
                 services.
               </p>
               <div className="overflow-x-auto mb-4">
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="w-full border-collapse border border-border rounded-lg">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                    <tr className="bg-muted">
+                      <th className="border border-border px-4 py-2 text-left">
                         Service
                       </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                      <th className="border border-border px-4 py-2 text-left">
                         Finalité
                       </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                      <th className="border border-border px-4 py-2 text-left">
                         Durée
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
-                        Matomo
-                      </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">Matomo</td>
+                      <td className="border border-border px-4 py-2">
                         Analyse d&apos;audience anonymisée
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         13 mois
                       </td>
                     </tr>
@@ -146,40 +144,40 @@ export default function Cookies() {
                 expérience utilisateur.
               </p>
               <div className="overflow-x-auto mb-4">
-                <table className="w-full border-collapse border border-gray-300">
+                <table className="w-full border-collapse border border-border rounded-lg">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                    <tr className="bg-muted">
+                      <th className="border border-border px-4 py-2 text-left">
                         Cookie
                       </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                      <th className="border border-border px-4 py-2 text-left">
                         Finalité
                       </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left">
+                      <th className="border border-border px-4 py-2 text-left">
                         Durée
                       </th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         freehunt_search_history
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         Historique des recherches
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         30 jours
                       </td>
                     </tr>
                     <tr>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         freehunt_notifications
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         Préférences de notifications
                       </td>
-                      <td className="border border-gray-300 px-4 py-2">
+                      <td className="border border-border px-4 py-2">
                         12 mois
                       </td>
                     </tr>
@@ -202,7 +200,7 @@ export default function Cookies() {
                 Consultez la{" "}
                 <a
                   href="https://stripe.com/fr/privacy"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -222,7 +220,7 @@ export default function Cookies() {
                 Consultez la{" "}
                 <a
                   href="https://www.cloudflare.com/privacypolicy/"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -326,7 +324,7 @@ export default function Cookies() {
                 des mêmes droits que ceux décrits dans notre{" "}
                 <a
                   href="/politique-confidentialite"
-                  className="text-blue-600 hover:underline"
+                  className="text-primary hover:underline"
                 >
                   Politique de Confidentialité
                 </a>{" "}
@@ -375,7 +373,7 @@ export default function Cookies() {
                   Email :{" "}
                   <a
                     href="mailto:dpo@freehunt.fr"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                   >
                     dpo@freehunt.fr
                   </a>
@@ -393,7 +391,7 @@ export default function Cookies() {
                 <li>
                   <a
                     href="https://www.cnil.fr/fr/cookies-les-outils-pour-les-maitriser"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -403,7 +401,7 @@ export default function Cookies() {
                 <li>
                   <a
                     href="https://www.allaboutcookies.org/"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -413,7 +411,7 @@ export default function Cookies() {
                 <li>
                   <a
                     href="/politique-confidentialite"
-                    className="text-blue-600 hover:underline"
+                    className="text-primary hover:underline"
                   >
                     Notre Politique de Confidentialité
                   </a>

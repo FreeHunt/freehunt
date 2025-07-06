@@ -1,22 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { User, MessageCircle, Briefcase, Search } from "lucide-react";
-import Image from "next/image";
-import Conversation from "@/components/common/conversation/conversation";
-import {
-  getUserConversations,
-  getUserPicture,
-  getConversation,
-} from "@/actions/conversations";
 import { getCurrentUser } from "@/actions/auth";
 import {
+  getConversation,
+  getUserConversations,
+  getUserPicture,
+} from "@/actions/conversations";
+import Conversation from "@/components/common/conversation/conversation";
+import { SocketProvider } from "@/hooks/useSocket";
+import {
   Conversation as ConversationInterface,
-  User as UserInterface,
   Document,
   Project,
+  User as UserInterface,
 } from "@/lib/interfaces";
-import { SocketProvider } from "@/hooks/useSocket";
+import { Briefcase, MessageCircle, Search, User } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 type ConversationType = "all" | "project" | "normal";
 
@@ -190,7 +190,7 @@ export default function ConversationsPage() {
     return `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
       activeFilter === filter
         ? "bg-freehunt-main text-white"
-        : "text-gray-600 hover:bg-gray-100"
+        : "text-muted-foreground hover:bg-muted/50"
     }`;
   };
 
@@ -234,7 +234,7 @@ export default function ConversationsPage() {
       <div className="flex w-full h-full p-2 md:p-4">
         <div className="flex w-full h-full flex-col items-start gap-2 md:gap-3">
           {/* Header */}
-          <div className="flex h-16 md:h-20 p-3 md:p-5 items-center justify-between self-stretch border-b border-gray-200">
+          <div className="flex h-16 md:h-20 p-3 md:p-5 items-center justify-between self-stretch border-b border-border">
             <h1 className="text-xl md:text-3xl font-bold">Conversations</h1>
           </div>
 
@@ -273,7 +273,7 @@ export default function ConversationsPage() {
               {/* Search */}
               <div className="relative p-2">
                 <Search
-                  className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  className="absolute left-5 top-1/2 transform -translate-y-1/2 text-muted-foreground"
                   size={16}
                 />
                 <input
@@ -281,14 +281,14 @@ export default function ConversationsPage() {
                   placeholder="Rechercher une conversation..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-freehunt-main focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-freehunt-main focus:border-transparent"
                 />
               </div>
 
               {/* Conversations List */}
               <div className="flex-1 overflow-y-auto space-y-2 p-2">
                 {filteredConversations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+                  <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
                     <MessageCircle size={48} className="mb-4 opacity-50" />
                     <p className="text-center">
                       {searchQuery
@@ -301,10 +301,10 @@ export default function ConversationsPage() {
                     <div
                       key={conversation.id}
                       onClick={() => handleConversationSelect(conversation)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 ${
+                      className={`p-3 rounded-lg border cursor-pointer transition-colors hover:bg-muted/30 ${
                         selectedConversation?.id === conversation.id
                           ? "bg-freehunt-main/10 border-freehunt-main"
-                          : "bg-white border-gray-200"
+                          : "bg-card border-border"
                       }`}
                     >
                       <div className="flex items-start gap-3">
@@ -336,7 +336,7 @@ export default function ConversationsPage() {
                                 />
                               )}
                             </div>
-                            <span className="text-xs text-gray-500 flex-shrink-0">
+                            <span className="text-xs text-muted-foreground flex-shrink-0">
                               {formatLastMessageTime(
                                 conversation.lastMessage?.createdAt,
                               )}
@@ -349,7 +349,7 @@ export default function ConversationsPage() {
                             </p>
                           )}
 
-                          <p className="text-sm text-gray-600 truncate">
+                          <p className="text-sm text-muted-foreground truncate">
                             {conversation.lastMessage?.content ||
                               "Aucun message"}
                           </p>
@@ -371,10 +371,10 @@ export default function ConversationsPage() {
                 <div className="flex flex-col h-full">
                   {/* Mobile back button */}
                   {isMobile && (
-                    <div className="flex items-center p-3 border-b border-gray-200">
+                    <div className="flex items-center p-3 border-b border-border">
                       <button
                         onClick={() => setSelectedConversation(null)}
-                        className="mr-3 p-2 rounded-full hover:bg-gray-100"
+                        className="mr-3 p-2 rounded-full hover:bg-muted/50"
                       >
                         ←
                       </button>
@@ -417,7 +417,7 @@ export default function ConversationsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                   <MessageCircle size={64} className="mb-4 opacity-50" />
                   <h3 className="text-lg font-medium mb-2">
                     Sélectionnez une conversation

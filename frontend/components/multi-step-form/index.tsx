@@ -711,11 +711,11 @@ export default function MultiStepForm() {
   return (
     <div className="w-full flex flex-col gap-4">
       {/* Progress indicator */}
-      <div className="bg-freehunt-main rounded-full p-1 flex gap-0.5 shadow-sm">
+      <div className="bg-freehunt-main rounded-lg p-1 flex gap-0.5 shadow-sm">
         {steps.map((step, index) => (
           <div
             key={step.id}
-            className={`flex-1 text-center p-2 rounded-full font-medium duration-300 truncate ${
+            className={`flex-1 text-center p-2 rounded-md font-medium duration-300 truncate ${
               index === currentStep
                 ? "bg-white text-freehunt-black-two"
                 : "text-white hover:bg-freehunt-grey-light hover:text-freehunt-black-two cursor-pointer"
@@ -741,7 +741,7 @@ export default function MultiStepForm() {
       </div>
 
       {/* Form content */}
-      <div className="rounded-lg p-6 shadow-md mb-6">
+      <div className="rounded-xl p-6 shadow-md mb-6">
         {/* Step One */}
         {currentStep === 0 && (
           <div className="flex flex-col gap-8">
@@ -761,7 +761,7 @@ export default function MultiStepForm() {
                 value={formData.jobTitle}
                 onChange={handleChange}
                 onBlur={() => handleBlur("jobTitle")}
-                className={`rounded-full ${
+                className={`rounded-lg ${
                   errors.jobTitle ? "border-red-500" : ""
                 }`}
                 placeholder="Exemple : Développeur Front-End React"
@@ -825,7 +825,7 @@ export default function MultiStepForm() {
                 addOptions={setSkills}
                 selected={selectedSkills}
                 onChange={setSelectedSkills}
-                className={`rounded-full ${
+                className={`rounded-lg ${
                   errors.skills ? "border-red-500" : ""
                 }`}
                 placeholder="Sélectionnez les compétences"
@@ -855,7 +855,7 @@ export default function MultiStepForm() {
                 value={formData.tjm.toString()}
                 onChange={handleChange}
                 onBlur={() => handleBlur("tjm")}
-                className={`text-freehunt-black-two rounded-full ${
+                className={`text-freehunt-black-two rounded-lg ${
                   errors.tjm ? "border-red-500" : ""
                 }`}
                 placeholder="Exemple : 500 €/jour"
@@ -948,7 +948,7 @@ export default function MultiStepForm() {
                 value={formData.seniority.toString()}
                 onChange={handleChange}
                 onBlur={() => handleBlur("seniority")}
-                className={`text-freehunt-black-two rounded-full ${
+                className={`text-freehunt-black-two rounded-lg ${
                   errors.seniority ? "border-red-500" : ""
                 }`}
                 placeholder="Exemple : 3 (pour 3 ans d'expérience)"
@@ -1064,7 +1064,7 @@ export default function MultiStepForm() {
             )}
 
             {formData.checkpoints.length === 0 ? (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <div className="text-center py-8 bg-muted rounded-xl">
                 <p className="text-gray-500 mb-4">
                   Aucune étape définie pour l&apos;instant
                 </p>
@@ -1088,7 +1088,7 @@ export default function MultiStepForm() {
                 {formData.checkpoints.map((checkpoint, index) => (
                   <div
                     key={checkpoint.id}
-                    className={`border rounded-md p-4 flex flex-col gap-3 ${
+                    className={`border rounded-xl p-4 flex flex-col gap-3 ${
                       hasCheckpointErrors(checkpoint.id)
                         ? "border-red-200 bg-red-50"
                         : ""
@@ -1097,7 +1097,7 @@ export default function MultiStepForm() {
                     {/* Checkpoint Header + Delete */}
                     <div className="flex justify-between items-start">
                       <h2 className="text-xl font-bold text-freehunt-black-two">
-                        Checkpoint {index + 1} :
+                        Checkpoint {index + 1}
                       </h2>
                       <Button
                         variant="ghost"
@@ -1116,7 +1116,7 @@ export default function MultiStepForm() {
                           Nom de l&apos;étape
                         </h2>
                         <p className="text-gray-400">
-                          Veuillez saissir le nom de l&apos;étape.
+                          Veuillez saisir le nom de l&apos;étape.
                         </p>
                       </div>
                       <Input
@@ -1132,7 +1132,7 @@ export default function MultiStepForm() {
                         onBlur={() =>
                           handleBlur(`checkpoints.${checkpoint.id}.name`)
                         }
-                        className={`w-full p-2 border rounded-md ${
+                        className={`w-full p-2 border rounded-lg ${
                           errors[`checkpoints.${checkpoint.id}.name`]
                             ? "border-red-500"
                             : ""
@@ -1171,7 +1171,7 @@ export default function MultiStepForm() {
                         onBlur={() =>
                           handleBlur(`checkpoints.${checkpoint.id}.description`)
                         }
-                        className={`w-full p-2 border rounded-md ${
+                        className={`w-full p-2 border rounded-lg ${
                           errors[`checkpoints.${checkpoint.id}.description`]
                             ? "border-red-500"
                             : ""
@@ -1234,7 +1234,7 @@ export default function MultiStepForm() {
                         //     : ""
                         // }`}
                       >
-                        <SelectTrigger className="rounded-full">
+                        <SelectTrigger className="rounded-lg">
                           <SelectValue placeholder="Sélectionnez un statut" />
                         </SelectTrigger>
                         <SelectContent>
@@ -1280,13 +1280,13 @@ export default function MultiStepForm() {
                         onBlur={() =>
                           handleBlur(`checkpoints.${checkpoint.id}.amount`)
                         }
-                        className={`w-full p-2 border rounded-md ${
+                        className={`w-full p-2 border rounded-lg ${
                           errors[`checkpoints.${checkpoint.id}.amount`]
                             ? "border-red-500"
                             : ""
                         } ${
                           formData.checkpoints.length === 1
-                            ? "bg-gray-100 cursor-not-allowed"
+                            ? "bg-muted cursor-not-allowed"
                             : ""
                         }`}
                         placeholder="Exemple : 1000 €"
@@ -1335,19 +1335,21 @@ export default function MultiStepForm() {
             </p>
 
             {/* Informations du job */}
-            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <div className="bg-card rounded-xl p-6 border border-border">
               <h3 className="text-xl font-bold text-freehunt-main mb-4">
                 Informations du poste
               </h3>
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <p className="text-gray-500 text-sm">Titre du poste</p>
+                  <p className="text-muted-foreground text-sm">
+                    Titre du poste
+                  </p>
                   <p className="font-medium">
                     {formData.jobTitle || "Non spécifié"}
                   </p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-sm">Description</p>
+                  <p className="text-muted-foreground text-sm">Description</p>
                   <p className="whitespace-pre-wrap">
                     {formData.jobDescription || "Non spécifié"}
                   </p>
@@ -1356,7 +1358,7 @@ export default function MultiStepForm() {
             </div>
 
             {/* Profil recherché */}
-            <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <div className="bg-card rounded-xl p-6 border border-border">
               <h3 className="text-xl font-bold text-freehunt-main mb-4">
                 Profil recherché
               </h3>

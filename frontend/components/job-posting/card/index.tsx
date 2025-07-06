@@ -50,7 +50,7 @@ function JobPostingCard(jobPosting: JobPosting) {
   return (
     <Card className="w-full max-w-[340px] rounded-xl pb-0 shadow-none flex flex-col relative">
       {recommended && (
-        <Badge className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 font-semibold z-10 rounded-xl p-1">
+        <Badge className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 font-semibold z-10 rounded-md p-1">
           <Star size={12} />
         </Badge>
       )}
@@ -68,8 +68,8 @@ function JobPostingCard(jobPosting: JobPosting) {
             <CardDescription className="flex flex-col gap-1.5 max-w-[200px]">
               {company && (
                 <div className="flex items-center gap-1 min-w-0">
-                  <Building size={14} className="text-gray-500 flex-shrink-0" />
-                  <p className="text-gray-600 font-medium truncate max-w-[170px]">
+                  <Building size={14} className="text-muted-foreground flex-shrink-0" />
+                  <p className="text-muted-foreground font-medium truncate max-w-[170px]">
                     {company.name}
                   </p>
                 </div>
@@ -83,7 +83,7 @@ function JobPostingCard(jobPosting: JobPosting) {
                   {getLocationText(location)}
                 </p>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Expérience: {seniority} an{seniority > 1 ? "s" : ""}
               </p>
             </CardDescription>
@@ -100,7 +100,7 @@ function JobPostingCard(jobPosting: JobPosting) {
                 <SkillBadge key={skill.id}>{skill.name}</SkillBadge>
               ))
           ) : (
-            <p className="text-sm text-gray-400 italic">
+            <p className="text-sm text-muted-foreground italic">
               Aucune compétence listée
             </p>
           )}

@@ -12,17 +12,17 @@ export default function CookieConsentBanner() {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg animate-in slide-in-from-bottom-full duration-300">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t shadow-lg animate-in slide-in-from-bottom-full duration-300">
       <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-1">
-            <p className="text-sm text-gray-700 mb-2">
+            <p className="text-sm text-foreground mb-2">
               Nous utilisons des cookies pour améliorer votre expérience et
               analyser notre trafic.
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               Consultez notre{" "}
-              <Link href="/cookies" className="text-blue-600 hover:underline">
+              <Link href="/cookies" className="text-primary hover:underline">
                 politique des cookies
               </Link>{" "}
               pour plus d&apos;informations.
@@ -33,14 +33,14 @@ export default function CookieConsentBanner() {
               variant="outline"
               size="sm"
               onClick={() => setConsentChoice("essential")}
-              className="text-gray-700 border-gray-300 hover:bg-gray-50"
+              className="text-foreground border-border hover:bg-muted"
             >
               Cookies essentiels uniquement
             </Button>
             <Button
               size="sm"
               onClick={() => setConsentChoice("all")}
-              className="bg-gray-900 hover:bg-gray-800 text-white"
+              className="bg-foreground hover:bg-foreground/90 text-background"
             >
               Accepter tous les cookies
             </Button>

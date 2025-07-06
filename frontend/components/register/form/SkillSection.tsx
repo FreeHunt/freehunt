@@ -262,12 +262,12 @@ export function SkillsSection({
           {showSuggestions && suggestions.length > 0 && (
             <div
               ref={suggestionsRef}
-              className="absolute mt-12 w-full left-0 right-0 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 sm:max-h-60 overflow-y-auto z-10"
+              className="absolute mt-12 w-full left-0 right-0 bg-card border border-border rounded-lg shadow-lg max-h-48 sm:max-h-60 overflow-y-auto z-10"
             >
               {suggestions.map((skill) => (
                 <div
                   key={skill.id}
-                  className="p-2 hover:bg-gray-100 cursor-pointer text-sm sm:text-base"
+                  className="p-2 hover:bg-muted cursor-pointer text-sm sm:text-base"
                   onClick={() => handleSelectSuggestion(skill)}
                 >
                   <span className="text-freehunt-black-two">{skill.name}</span>
@@ -291,7 +291,7 @@ export function SkillsSection({
                   .map((skill, index) => (
                     <div
                       key={`tech-${index}`}
-                      className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm"
+                      className="flex items-center gap-1 bg-muted rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm"
                     >
                       <span className="text-freehunt-black-two">
                         {skill.name}
@@ -324,7 +324,7 @@ export function SkillsSection({
                   .map((skill, index) => (
                     <div
                       key={`soft-${index}`}
-                      className="flex items-center gap-1 bg-gray-100 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm"
+                      className="flex items-center gap-1 bg-muted rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-sm"
                     >
                       <span className="text-freehunt-black-two">
                         {skill.name}
