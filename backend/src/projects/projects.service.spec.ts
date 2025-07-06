@@ -18,6 +18,18 @@ describe('ProjectsService', () => {
     title: 'Frontend Developer',
     description: 'Développer une application React',
     companyId: 'company-user-id',
+    location: 'REMOTE',
+    isPromoted: false,
+    averageDailyRate: 600,
+    seniority: 3,
+    totalAmount: 5000,
+    status: 'PUBLISHED',
+    stripeSessionId: null,
+    stripeRefundId: null,
+    canceledAt: null,
+    cancelReason: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
     company: {
       user: {
         id: 'company-user-id',

@@ -103,6 +103,7 @@ enum JobPostingStatus {
   DRAFT
   EXPIRED
   REJECTED
+  CANCELED
 }
 
 model JobPosting {
@@ -119,6 +120,10 @@ model JobPosting {
   seniority        Int
   totalAmount      Float? // Montant total de la mission (TJM × nombre de jours)
   status           JobPostingStatus   @default(PENDING_PAYMENT) // Nouveau champ pour gérer le statut
+  stripeSessionId  String? // ID de session Stripe pour le paiement
+  stripeRefundId   String? // ID du remboursement Stripe
+  canceledAt       DateTime? // Date d'annulation
+  cancelReason     String? // Raison de l'annulation
   skills           Skill[]
   checkpoints      Checkpoint[]
   project          Project?

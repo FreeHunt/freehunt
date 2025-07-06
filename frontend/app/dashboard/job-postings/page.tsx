@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getCurrentUser } from "@/actions/auth";
 import {
   getJobPostingsByUserId,
@@ -14,6 +14,7 @@ import { showToast } from "@/lib/toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CancelJobPostingButton } from "@/components/job-posting/CancelJobPostingButton";
 import {
   CreditCard,
   Eye,
@@ -46,6 +47,13 @@ const getStatusBadge = (status: JobPostingStatus) => {
           Publiée
         </Badge>
       );
+    case JobPostingStatus.CANCELED:
+      return (
+        <Badge variant="destructive" className="flex items-center gap-1">
+          <X size={14} />
+          Annulée
+        </Badge>
+      );
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -55,6 +63,7 @@ const getStatusAction = (
   jobPosting: JobPosting,
   onAction: (action: string, id: string) => void,
   canBeCancelled: boolean = false,
+  onCancelSuccess?: () => void,
 ) => {
   switch (jobPosting.status) {
     case JobPostingStatus.PENDING_PAYMENT:
@@ -70,15 +79,13 @@ const getStatusAction = (
             {jobPosting.totalAmount ? `${jobPosting.totalAmount}€` : "N/A"})
           </Button>
           {canBeCancelled && (
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => onAction("cancel", jobPosting.id)}
-              className="flex items-center gap-2"
-            >
-              <X size={16} />
-              Annuler
-            </Button>
+            <CancelJobPostingButton
+              jobPostingId={jobPosting.id}
+              jobPostingTitle={jobPosting.title}
+              isPaid={false}
+              hasProject={false}
+              onCancelSuccess={onCancelSuccess}
+            />
           )}
         </div>
       );
@@ -94,15 +101,13 @@ const getStatusAction = (
             Publier l&apos;annonce
           </Button>
           {canBeCancelled && (
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => onAction("cancel", jobPosting.id)}
-              className="flex items-center gap-2"
-            >
-              <X size={16} />
-              Annuler
-            </Button>
+            <CancelJobPostingButton
+              jobPostingId={jobPosting.id}
+              jobPostingTitle={jobPosting.title}
+              isPaid={true}
+              hasProject={false}
+              onCancelSuccess={onCancelSuccess}
+            />
           )}
         </div>
       );
@@ -119,16 +124,16 @@ const getStatusAction = (
             Voir l&apos;annonce
           </Button>
           {canBeCancelled && (
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => onAction("cancel", jobPosting.id)}
-              className="flex items-center gap-2"
-              title="Aucune candidature acceptée, l'annonce peut encore être annulée"
-            >
-              <X size={16} />
-              Annuler
-            </Button>
+            <CancelJobPostingButton
+              jobPostingId={jobPosting.id}
+              jobPostingTitle={jobPosting.title}
+              isPaid={["PAID", "PUBLISHED"].includes(jobPosting.status as string)}
+              hasProject={false}
+              onCancelSuccess={() => {
+                // Recharger les job postings après annulation
+                onCancelSuccess?.();
+              }}
+            />
           )}
         </div>
       );
@@ -143,7 +148,31 @@ export default function CompanyJobPostingsDashboard() {
   const [loading, setLoading] = useState(true);
   const [cancellableJobPostings, setCancellableJobPostings] = useState<
     Set<string>
-  >(new Set());
+  >(new Set());  const loadJobPostings = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const userJobPostings = await getJobPostingsByUserId(user.id);
+      setJobPostings(userJobPostings);
+
+      // Vérifier quelles annonces peuvent être annulées
+      const cancellableSet = new Set<string>();
+      await Promise.all(
+        userJobPostings.map(async (jobPosting) => {
+          const canBeCancelled = await canJobPostingBeCancelled(
+            jobPosting.id,
+          );
+          if (canBeCancelled) {
+            cancellableSet.add(jobPosting.id);
+          }
+        }),
+      );
+      setCancellableJobPostings(cancellableSet);
+    } catch (error) {
+      console.error("Erreur lors du chargement des données:", error);
+      showToast.error("Erreur lors du chargement des annonces");
+    }
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -162,23 +191,6 @@ export default function CompanyJobPostingsDashboard() {
         }
 
         setUser(currentUser);
-
-        const userJobPostings = await getJobPostingsByUserId(currentUser.id);
-        setJobPostings(userJobPostings);
-
-        // Vérifier quelles annonces peuvent être annulées
-        const cancellableSet = new Set<string>();
-        await Promise.all(
-          userJobPostings.map(async (jobPosting) => {
-            const canBeCancelled = await canJobPostingBeCancelled(
-              jobPosting.id,
-            );
-            if (canBeCancelled) {
-              cancellableSet.add(jobPosting.id);
-            }
-          }),
-        );
-        setCancellableJobPostings(cancellableSet);
       } catch (error) {
         console.error("Erreur lors du chargement des données:", error);
         showToast.error("Erreur lors du chargement des annonces");
@@ -189,6 +201,13 @@ export default function CompanyJobPostingsDashboard() {
 
     fetchData();
   }, []);
+
+  // Charger les job postings quand user change
+  useEffect(() => {
+    if (user) {
+      loadJobPostings();
+    }
+  }, [user, loadJobPostings]);
 
   const handleAction = async (action: string, jobPostingId: string) => {
     try {
@@ -416,6 +435,7 @@ export default function CompanyJobPostingsDashboard() {
                         jobPosting,
                         handleAction,
                         cancellableJobPostings.has(jobPosting.id),
+                        loadJobPostings,
                       )}
                     </div>
                   </div>

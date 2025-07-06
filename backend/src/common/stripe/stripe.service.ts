@@ -461,6 +461,115 @@ export class StripeService {
     }
   }
 
+  // Méthodes pour la gestion des remboursements
+
+  // Créer un remboursement pour une session de paiement
+  async createRefund(sessionId: string, reason?: string): Promise<Stripe.Refund> {
+    try {
+      // Récupérer la session de paiement
+      const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (!session.payment_intent) {
+        throw new Error('Payment intent not found for this session');
+      }
+
+      // Créer le remboursement
+      const refund = await this.stripe.refunds.create({
+        payment_intent: session.payment_intent as string,
+        reason:
+          reason === 'requested_by_customer' ||
+          reason === 'duplicate' ||
+          reason === 'fraudulent'
+            ? reason
+            : 'requested_by_customer',
+        metadata: {
+          originalSessionId: sessionId,
+          refundReason: reason || 'Job posting canceled',
+        },
+      });
+
+      console.log(`Refund created: ${refund.id} for session ${sessionId}`);
+      return refund;
+    } catch (error) {
+      console.error('Error creating refund:', error);
+      throw new Error(
+        `Failed to create refund: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
+  // Vérifier le statut d'un remboursement
+  async getRefundStatus(refundId: string): Promise<Stripe.Refund> {
+    try {
+      return await this.stripe.refunds.retrieve(refundId);
+    } catch (error) {
+      console.error('Error retrieving refund:', error);
+      throw new Error(
+        `Failed to retrieve refund: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
+  // Récupérer tous les remboursements pour un payment intent
+  async getRefundsForPaymentIntent(
+    paymentIntentId: string,
+  ): Promise<Stripe.Refund[]> {
+    try {
+      const refunds = await this.stripe.refunds.list({
+        payment_intent: paymentIntentId,
+      });
+      return refunds.data;
+    } catch (error) {
+      console.error('Error retrieving refunds:', error);
+      throw new Error(
+        `Failed to retrieve refunds: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
+  // Calculer le montant disponible pour remboursement
+  async getAvailableRefundAmount(sessionId: string): Promise<{
+    totalAmount: number;
+    refundedAmount: number;
+    availableAmount: number;
+  }> {
+    try {
+      const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+      
+      if (!session.payment_intent) {
+        throw new Error('Payment intent not found');
+      }
+
+      const paymentIntent = await this.stripe.paymentIntents.retrieve(
+        session.payment_intent as string,
+      );
+
+      const refunds = await this.getRefundsForPaymentIntent(paymentIntent.id);
+      const refundedAmount = refunds.reduce((sum, refund) => {
+        return refund.status === 'succeeded' ? sum + refund.amount : sum;
+      }, 0);
+
+      return {
+        totalAmount: paymentIntent.amount,
+        refundedAmount,
+        availableAmount: paymentIntent.amount - refundedAmount,
+      };
+    } catch (error) {
+      console.error('Error calculating available refund amount:', error);
+      throw new Error(
+        `Failed to calculate refund amount: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    }
+  }
+
   // Méthode utilitaire pour prévisualiser les frais et montants nets
   previewTransferAmount(grossAmountInEuros: number): {
     grossAmount: number;

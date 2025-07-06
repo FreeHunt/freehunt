@@ -9,7 +9,7 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { catchError, mergeMap, of } from 'rxjs';
 import { User } from '@prisma/client';
 import { EnvironmentService } from '../environment/environment.service';
-import { UsersService } from '@/src/users/users.service';
+import { UsersService } from '../../users/users.service';
 import { UserResponseDto } from '../../auth/dto/user-response.dto';
 
 @Injectable()

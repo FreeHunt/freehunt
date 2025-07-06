@@ -76,6 +76,10 @@ describe('JobPostingsController', () => {
     id: '3246540a-3ecd-4912-a909-953c881816fc',
     totalAmount: 5000,
     status: 'PENDING_PAYMENT', // Ajout du champ status
+    stripeSessionId: null,
+    stripeRefundId: null,
+    canceledAt: null,
+    cancelReason: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -165,6 +169,10 @@ describe('JobPostingsController', () => {
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         totalAmount: 12000,
         status: 'PUBLISHED',
+        stripeSessionId: null,
+        stripeRefundId: null,
+        canceledAt: null,
+        cancelReason: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -180,6 +188,10 @@ describe('JobPostingsController', () => {
         companyId: '3246540a-3ecd-4912-a909-953c881816fc',
         totalAmount: 13000,
         status: 'PUBLISHED',
+        stripeSessionId: null,
+        stripeRefundId: null,
+        canceledAt: null,
+        cancelReason: null,
         createdAt: new Date(),
         updatedAt: new Date(),
         recommended: false,
@@ -198,6 +210,10 @@ describe('JobPostingsController', () => {
       companyId: '3246540a-3ecd-4912-a909-953c881816fc',
       totalAmount: 14000,
       status: 'PUBLISHED',
+      stripeSessionId: null,
+      stripeRefundId: null,
+      canceledAt: null,
+      cancelReason: null,
       createdAt: new Date(),
       updatedAt: new Date(),
       recommended: true,
@@ -472,6 +488,121 @@ describe('JobPostingsController', () => {
       expect(await jobPostingsController.canBeCancelled(jobPosting.id)).toEqual(
         canBeCancelledResult,
       );
+    });
+  });
+
+  describe('cancelJobPosting', () => {
+    it('should cancel a job posting successfully without refund', async () => {
+      const mockUser: User = {
+        id: 'user-1',
+        email: 'company@test.com',
+        username: 'Company User',
+        role: Role.COMPANY,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const cancelResponse = {
+        success: true,
+        message: 'Job posting has been canceled (no payment to refund)',
+      };
+
+      jest
+        .spyOn(jobPostingsService, 'cancelJobPosting')
+        .mockResolvedValue(cancelResponse);
+
+      expect(
+        await jobPostingsController.cancelJobPosting(
+          jobPosting.id,
+          { reason: 'Requirements changed' },
+          mockUser,
+        ),
+      ).toEqual(cancelResponse);
+    });
+
+    it('should cancel a job posting successfully with refund', async () => {
+      const mockUser: User = {
+        id: 'user-1',
+        email: 'company@test.com',
+        username: 'Company User',
+        role: Role.COMPANY,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const cancelResponse = {
+        success: true,
+        message: 'Job posting has been canceled and refund has been processed',
+        refundId: 're_test_123',
+        refundAmount: 49.99,
+        refundStatus: 'succeeded',
+      };
+
+      jest
+        .spyOn(jobPostingsService, 'cancelJobPosting')
+        .mockResolvedValue(cancelResponse);
+
+      expect(
+        await jobPostingsController.cancelJobPosting(
+          jobPosting.id,
+          { reason: 'Project canceled' },
+          mockUser,
+        ),
+      ).toEqual(cancelResponse);
+    });
+
+    it('should throw error if job posting cannot be canceled due to existing project', async () => {
+      const mockUser: User = {
+        id: 'user-1',
+        email: 'company@test.com',
+        username: 'Company User',
+        role: Role.COMPANY,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest
+        .spyOn(jobPostingsService, 'cancelJobPosting')
+        .mockRejectedValue(
+          new Error(
+            'Cannot cancel job posting: A project has already been created from this job posting',
+          ),
+        );
+
+      await expect(
+        jobPostingsController.cancelJobPosting(
+          jobPosting.id,
+          { reason: 'Change of mind' },
+          mockUser,
+        ),
+      ).rejects.toThrow(
+        'Cannot cancel job posting: A project has already been created from this job posting',
+      );
+    });
+
+    it('should throw error if user is not authorized', async () => {
+      const mockUser: User = {
+        id: 'different-user',
+        email: 'other@test.com',
+        username: 'Other User',
+        role: Role.COMPANY,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      jest
+        .spyOn(jobPostingsService, 'cancelJobPosting')
+        .mockRejectedValue(
+          new Error('You are not authorized to cancel this job posting'),
+        );
+
+      await expect(
+        jobPostingsController.cancelJobPosting(
+          jobPosting.id,
+          { reason: 'Unauthorized attempt' },
+          mockUser,
+        ),
+      ).rejects.toThrow('You are not authorized to cancel this job posting');
     });
   });
 });

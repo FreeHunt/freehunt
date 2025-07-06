@@ -254,3 +254,42 @@ export async function getJobPostingProject(
     return null;
   }
 }
+
+/**
+ * Interface pour la réponse d'annulation d'un job posting
+ */
+export interface CancelJobPostingResponse {
+  success: boolean;
+  message: string;
+  refundId?: string;
+  refundAmount?: number;
+  refundStatus?: string;
+}
+
+/**
+ * Annuler un job posting avec remboursement automatique si applicable
+ */
+export async function cancelJobPosting(
+  jobPostingId: string,
+  reason?: string,
+): Promise<CancelJobPostingResponse> {
+  try {
+    const response = await api.post<CancelJobPostingResponse>(
+      `/job-postings/${jobPostingId}/cancel`,
+      { reason },
+    );
+    return response.data;
+  } catch (error: unknown) {
+    console.error("Erreur lors de l'annulation du job posting:", error);
+
+    // Extraire le message d'erreur du backend
+    const errorMessage =
+      (error as { response?: { data?: { message?: string } } }).response?.data?.message ||
+      "Une erreur est survenue lors de l'annulation";
+
+    return {
+      success: false,
+      message: errorMessage,
+    };
+  }
+}

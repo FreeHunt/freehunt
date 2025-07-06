@@ -14,7 +14,9 @@ import { JobPostingsService } from './job-postings.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
 import { SearchJobPostingDto } from './dto/search-job-posting.dto';
+import { CancelJobPostingDto } from './dto/cancel-job-posting.dto';
 import { JobPostingResponseDto } from './dto/job-posting-response.dto';
+import { CancelJobPostingResponseDto } from './dto/cancel-job-posting-response.dto';
 import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { User } from '@prisma/client';
@@ -143,6 +145,46 @@ export class JobPostingsController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<JobPostingResponseDto> {
     return this.jobPostingsService.remove(id);
+  }
+
+  @Post(':id/cancel')
+  @ApiOperation({
+    summary: 'Cancel a job posting with optional refund',
+    description:
+      'Cancel a job posting and process a refund if payment was made. Cannot cancel if a project has been created.',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the job posting to cancel (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Job posting canceled successfully',
+    type: CancelJobPostingResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request or authorization error',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job posting not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Cannot cancel job posting (project exists or already accepted)',
+  })
+  cancelJobPosting(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() cancelDto: CancelJobPostingDto,
+    @CurrentUser() user?: User,
+  ): Promise<CancelJobPostingResponseDto> {
+    return this.jobPostingsService.cancelJobPosting(
+      id,
+      cancelDto.reason,
+      user?.id,
+    );
   }
 
   @Post('search')

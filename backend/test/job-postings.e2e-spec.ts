@@ -48,6 +48,8 @@ describe('JobPostingsController (e2e)', () => {
     update: jest.fn((): JobPostingResponseDto => jobPostingResponse),
     remove: jest.fn((): JobPostingResponseDto => jobPostingResponse),
     search: jest.fn((): [JobPostingResponseDto] => [jobPostingResponse]),
+    cancel: jest.fn(),
+    canBeCancelled: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -139,5 +141,112 @@ describe('JobPostingsController (e2e)', () => {
           typeof (res.body as { canBeCancelled: boolean }).canBeCancelled,
         ).toBe('boolean');
       });
+  });
+
+  describe('/job-postings/:id/cancel (POST)', () => {
+    it('should successfully cancel a job posting without refund', () => {
+      const cancelRequest = {
+        reason: 'Job no longer needed',
+      };
+
+      const cancelResponse = {
+        success: true,
+        refunded: false,
+        message: 'Job posting canceled successfully',
+      };
+
+      // Mock the service to return success without refund
+      jobPostingsService.cancel = jest.fn().mockResolvedValue(cancelResponse);
+
+      return request(app.getHttpServer())
+        .post(`/job-postings/${jobPostingResponse.id}/cancel`)
+        .send(cancelRequest)
+        .expect(200)
+        .expect(cancelResponse);
+    });
+
+    it('should successfully cancel a job posting with refund', () => {
+      const cancelRequest = {
+        reason: 'Change in project requirements',
+      };
+
+      const cancelResponse = {
+        success: true,
+        refunded: true,
+        refundAmount: 12000,
+        refundId: 're_test_123',
+        message: 'Job posting canceled and refund processed successfully',
+      };
+
+      // Mock the service to return success with refund
+      jobPostingsService.cancel = jest.fn().mockResolvedValue(cancelResponse);
+
+      return request(app.getHttpServer())
+        .post(`/job-postings/${jobPostingResponse.id}/cancel`)
+        .send(cancelRequest)
+        .expect(200)
+        .expect(cancelResponse);
+    });
+
+    it('should fail to cancel when job posting has existing project', () => {
+      const cancelRequest = {
+        reason: 'No longer needed',
+      };
+
+      // Mock the service to throw an error for existing project
+      jobPostingsService.cancel = jest
+        .fn()
+        .mockRejectedValue(
+          new Error('Cannot cancel job posting: projects already exist'),
+        );
+
+      return request(app.getHttpServer())
+        .post(`/job-postings/${jobPostingResponse.id}/cancel`)
+        .send(cancelRequest)
+        .expect(400);
+    });
+
+    it('should fail to cancel when job posting has accepted candidates', () => {
+      const cancelRequest = {
+        reason: 'Change of plans',
+      };
+
+      // Mock the service to throw an error for accepted candidates
+      jobPostingsService.cancel = jest
+        .fn()
+        .mockRejectedValue(
+          new Error('Cannot cancel job posting: candidates already accepted'),
+        );
+
+      return request(app.getHttpServer())
+        .post(`/job-postings/${jobPostingResponse.id}/cancel`)
+        .send(cancelRequest)
+        .expect(400);
+    });
+
+    it('should fail to cancel when reason is missing', () => {
+      return request(app.getHttpServer())
+        .post(`/job-postings/${jobPostingResponse.id}/cancel`)
+        .send({})
+        .expect(400);
+    });
+
+    it('should fail to cancel when user is not authorized', () => {
+      const cancelRequest = {
+        reason: 'Unauthorized attempt',
+      };
+
+      // Mock the service to throw an unauthorized error
+      jobPostingsService.cancel = jest
+        .fn()
+        .mockRejectedValue(
+          new Error('Unauthorized to cancel this job posting'),
+        );
+
+      return request(app.getHttpServer())
+        .post(`/job-postings/${jobPostingResponse.id}/cancel`)
+        .send(cancelRequest)
+        .expect(403);
+    });
   });
 });
