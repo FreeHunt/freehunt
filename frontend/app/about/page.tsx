@@ -1,31 +1,14 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { ReactNode } from "react";
 
-function AboutCardColumn({ children }: { children: ReactNode }) {
-  return <div className="flex flex-col gap-3 lg:gap-[34px]">{children}</div>;
-}
-
-function AboutCard({
-  title,
-  content,
-  className,
-}: {
-  title: string;
-  content: string;
-  className?: string;
-}) {
+function StatCard({ title, content }: { title: string; content: string }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col justify-center lg:w-[312px] lg:h-[200px] bg-white rounded-xl px-6 py-8 gap-2.5",
-        className,
-      )}
-    >
-      <h3 className="font-medium text-4xl lg:text-5xl">{title}</h3>
-      <p className="text-lg lg:text-xl">{content}</p>
+    <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+      <h3 className="text-4xl lg:text-5xl font-bold text-freehunt-main mb-3">
+        {title}
+      </h3>
+      <p className="text-lg text-gray-700">{content}</p>
     </div>
   );
 }
@@ -33,21 +16,21 @@ function AboutCard({
 function ValueCard({
   title,
   description,
-  className,
+  icon,
 }: {
   title: string;
   description: string;
-  className?: string;
+  icon: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col justify-center bg-white rounded-xl px-6 py-8 gap-3 text-center",
-        className,
-      )}
-    >
-      <h3 className="font-bold text-2xl lg:text-3xl">{title}</h3>
-      <p className="text-lg">{description}</p>
+    <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 text-center group hover:border-freehunt-main">
+      <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
+        {icon}
+      </div>
+      <h3 className="font-bold text-2xl lg:text-3xl mb-4 text-gray-800">
+        {title}
+      </h3>
+      <p className="text-lg text-gray-600">{description}</p>
     </div>
   );
 }
@@ -88,68 +71,63 @@ export default function About() {
         </div>
       </section>
 
-      <section className="flex flex-col lg:flex-row pb-10 lg:px-20 lg:pb-20 justify-between items-center gap-3">
-        <AboutCardColumn>
-          <AboutCard
-            title="+ 7 000"
-            content="Freelances inscrits"
-            className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow"
-          />
-          <AboutCard
-            title="+ 800"
-            content="Entreprises inscrites"
-            className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
-          />
-        </AboutCardColumn>
+      <section className="py-20 bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="container mx-auto px-6 lg:px-20">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+            {/* Stats Column 1 */}
+            <div className="space-y-6">
+              <StatCard title="+ 7 000" content="Freelances inscrits" />
+              <StatCard title="+ 800" content="Entreprises inscrites" />
+            </div>
 
-        <Image
-          src="/assets/about.jpg"
-          width={443}
-          height={428}
-          alt=""
-          className="hidden lg:block object-cover lg:h-[428px] lg:w-[443px] rounded-xl"
-        />
+            {/* Image */}
+            <div className="flex justify-center">
+              <Image
+                src="/assets/about.jpg"
+                width={443}
+                height={428}
+                alt="Équipe FreeHunt travaillant sur la plateforme"
+                className="object-cover h-[400px] w-full max-w-[400px] rounded-2xl shadow-xl"
+              />
+            </div>
 
-        <AboutCardColumn>
-          <AboutCard
-            title="98%"
-            content="Utilisateurs satisfaits"
-            className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
-          />
-          <AboutCard
-            title="+ 9 000"
-            content="Postes pourvus"
-            className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow"
-          />
-        </AboutCardColumn>
+            {/* Stats Column 2 */}
+            <div className="space-y-6">
+              <StatCard title="98%" content="Utilisateurs satisfaits" />
+              <StatCard title="+ 9 000" content="Postes pourvus" />
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className="p-10 lg:p-20 bg-freehunt-beige-dark">
-        <div className="flex flex-col items-center gap-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-center">
-            Nos valeurs
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
-            <ValueCard
-              title="Innovation"
-              description="Nous repoussons constamment les limites technologiques"
-              className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow hover:border-freehunt-main"
-            />
-            <ValueCard
-              title="Qualité"
-              description="Excellence et professionnalisme dans chaque interaction"
-              className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
-            />
-            <ValueCard
-              title="Simplicité"
-              description="Une expérience utilisateur fluide et intuitive"
-              className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow hover:border-freehunt-main"
-            />
-            <ValueCard
-              title="Confiance"
-              description="Un environnement sécurisé pour tous nos utilisateurs"
-              className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
-            />
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-6 lg:px-20">
+          <div className="flex flex-col items-center gap-16">
+            <h2 className="text-3xl lg:text-4xl font-bold text-center">
+              Nos valeurs
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full max-w-6xl">
+              <ValueCard
+                title="Innovation"
+                description="Nous repoussons constamment les limites technologiques"
+                icon="💡"
+              />
+              <ValueCard
+                title="Qualité"
+                description="Excellence et professionnalisme dans chaque interaction"
+                icon="⭐"
+              />
+              <ValueCard
+                title="Simplicité"
+                description="Une expérience utilisateur fluide et intuitive"
+                icon="🎯"
+              />
+              <ValueCard
+                title="Confiance"
+                description="Un environnement sécurisé pour tous nos utilisateurs"
+                icon="🔒"
+              />
+            </div>
           </div>
         </div>
       </section>
