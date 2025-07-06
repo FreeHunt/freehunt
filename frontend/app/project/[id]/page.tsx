@@ -160,7 +160,7 @@ export default function ProjectDetailPage({
     <SocketProvider userId={currentUserId || ""}>
       <div className="flex w-full h-full p-2 md:p-4">
         <div className="flex w-full h-full flex-col items-start gap-2 md:gap-3">
-          <div className="flex h-16 md:h-20 p-3 md:p-5 items-center md:items-start gap-2.5 self-stretch bg-gradient-to-r from-freehunt-main to-freehunt-main/90 text-white rounded-lg shadow-lg mb-4">
+          <div className="flex h-16 md:h-20 p-3 md:p-5 items-center gap-2.5 self-stretch bg-gradient-to-r from-freehunt-main to-freehunt-main/90 text-white rounded-lg shadow-lg mb-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 bg-white/20 rounded-lg">
                 <svg
@@ -175,12 +175,12 @@ export default function ProjectDetailPage({
                   />
                 </svg>
               </div>
-              <div>
-                <h1 className="text-xl md:text-3xl font-bold">
+              <div className="flex flex-col justify-center">
+                <h1 className="text-xl md:text-3xl font-bold leading-tight">
                   {project ? project.name : "Chargement..."}
                 </h1>
                 {project && (
-                  <p className="text-white/80 text-sm md:text-base">
+                  <p className="text-white/80 text-sm md:text-base leading-tight mt-1">
                     Projet géré avec FreeHunt
                   </p>
                 )}
