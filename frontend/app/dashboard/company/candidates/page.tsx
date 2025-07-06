@@ -11,19 +11,19 @@ import { Badge } from "@/components/ui/badge";
 import { Candidate, CandidateStatus } from "@/lib/interfaces";
 import { showToast } from "@/lib/toast";
 import {
-  CheckCircle,
-  XCircle,
-  Clock,
-  User,
-  MapPin,
-  DollarSign,
   Calendar,
-  MessageSquare,
+  CheckCircle,
+  Clock,
+  DollarSign,
   Eye,
+  MapPin,
+  MessageSquare,
+  User,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default function CompanyCandidatesPage() {
   const { user, isLoading } = useAuth();
@@ -173,7 +173,7 @@ export default function CompanyCandidatesPage() {
           <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-[30px]"></div>
+              <div key={i} className="h-32 bg-muted rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -201,7 +201,7 @@ export default function CompanyCandidatesPage() {
         </div>
 
         {candidates.length === 0 ? (
-          <div className="bg-white rounded-[30px] border border-freehunt-grey p-12 text-center">
+          <div className="bg-white rounded-xl border border-freehunt-grey p-12 text-center">
             <User className="w-12 h-12 text-freehunt-black-two opacity-40 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-freehunt-black-two mb-2">
               Aucune candidature
@@ -219,7 +219,7 @@ export default function CompanyCandidatesPage() {
             {candidates.map((candidate) => (
               <div
                 key={candidate.id}
-                className="bg-white rounded-[30px] border border-freehunt-grey overflow-hidden"
+                className="bg-white rounded-xl border border-freehunt-grey overflow-hidden"
               >
                 <div className="bg-gradient-to-r from-freehunt-main/10 to-freehunt-main/5 p-6">
                   <div className="flex items-start justify-between">

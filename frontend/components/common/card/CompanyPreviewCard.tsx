@@ -1,8 +1,8 @@
-import Image from "next/image";
+import { CompanyPreviewCardProps } from "@/actions/register";
 import { Button } from "@/components/common/button";
 import { LocationIcon } from "@/components/common/icons/LocationIcon";
-import { CompanyPreviewCardProps } from "@/actions/register";
 import { BuildingIcon } from "lucide-react";
+import Image from "next/image";
 
 export function CompanyPreviewCard({
   formData,
@@ -28,7 +28,7 @@ export function CompanyPreviewCard({
   const fileUrl = formData.logo ? URL.createObjectURL(formData.logo) : "";
 
   return (
-    <div className="flex w-80 h-full flex-col align-start border-black border rounded-2xl md:rounded-3xl lg:rounded-4xl bg-zinc-50">
+    <div className="flex w-80 h-full flex-col align-start border-black border rounded-xl bg-zinc-50">
       <div className="flex p-6 flex-col items-start gap-5 self-stretch">
         <div className="flex justify-start gap-5">
           <div

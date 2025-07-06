@@ -1,18 +1,18 @@
+import { Button } from "@/components/common/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/common/button";
-import { MapPin } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { SkillBadge } from "../skill-badge";
 import { Freelance } from "@/lib/interfaces";
 import { formatNumberToEuros } from "@/lib/utils";
+import { MapPin } from "lucide-react";
+import { SkillBadge } from "../skill-badge";
 
 function FreelanceCard(freelance: Freelance) {
   const { firstName, lastName, location, jobTitle, skills, averageDailyRate } =
@@ -23,7 +23,7 @@ function FreelanceCard(freelance: Freelance) {
   };
 
   return (
-    <Card className="w-[340px] rounded-[30px] pb-0 shadow-none">
+    <Card className="w-[340px] rounded-xl pb-0 shadow-none">
       <CardHeader>
         <div className="flex">
           {/* Avatar */}
@@ -57,7 +57,7 @@ function FreelanceCard(freelance: Freelance) {
           ))}
       </CardContent>
 
-      <CardFooter className="bg-freehunt-main p-6 rounded-b-[30px]">
+      <CardFooter className="bg-freehunt-main p-6 rounded-b-xl">
         <CardAction className="flex flex-1 justify-between items-center">
           <p className="text-white">
             <strong>{formatNumberToEuros(averageDailyRate)}</strong> / jour

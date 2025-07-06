@@ -107,7 +107,7 @@ export default function NavigationMenu() {
                   ? "text-foreground hover:bg-accent hover:text-accent-foreground"
                   : "bg-freehunt-black-two text-white hover:bg-black/90"
               }
-              rounded-full
+              rounded-lg
             `}
             asChild
           >
@@ -129,7 +129,7 @@ export default function NavigationMenu() {
           <Button
             key={`${link.label}-${index}`}
             variant={isOutline ? "outline" : "default"}
-            className={`${mobile ? "w-full" : ""} rounded-full`}
+            className={`${mobile ? "w-full" : ""} rounded-lg`}
             asChild
           >
             <Link href={link.href} onClick={() => mobile && setIsOpen(false)}>

@@ -20,7 +20,7 @@ function AboutCard({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center lg:w-[312px] lg:h-[200px] bg-white rounded-3xl px-[25px] py-[30px] gap-2.5",
+        "flex flex-col justify-center lg:w-[312px] lg:h-[200px] bg-white rounded-xl px-6 py-8 gap-2.5",
         className,
       )}
     >
@@ -42,7 +42,7 @@ function ValueCard({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center bg-white rounded-3xl px-6 py-8 gap-3 text-center",
+        "flex flex-col justify-center bg-white rounded-xl px-6 py-8 gap-3 text-center",
         className,
       )}
     >
@@ -93,12 +93,12 @@ export default function About() {
           <AboutCard
             title="+ 7 000"
             content="Freelances inscrits"
-            className="bg-freehunt-main"
+            className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow"
           />
           <AboutCard
             title="+ 800"
             content="Entreprises inscrites"
-            className="bg-freehunt-blue"
+            className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
           />
         </AboutCardColumn>
 
@@ -107,19 +107,19 @@ export default function About() {
           width={443}
           height={428}
           alt=""
-          className="hidden lg:block object-cover lg:h-[428px] lg:w-[443px] rounded-3xl"
+          className="hidden lg:block object-cover lg:h-[428px] lg:w-[443px] rounded-xl"
         />
 
         <AboutCardColumn>
           <AboutCard
             title="98%"
             content="Utilisateurs satisfaits"
-            className="bg-freehunt-yellow"
+            className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
           />
           <AboutCard
             title="+ 9 000"
             content="Postes pourvus"
-            className="bg-freehunt-green"
+            className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow"
           />
         </AboutCardColumn>
       </section>
@@ -133,22 +133,22 @@ export default function About() {
             <ValueCard
               title="Innovation"
               description="Nous repoussons constamment les limites technologiques"
-              className="bg-freehunt-main"
+              className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow hover:border-freehunt-main"
             />
             <ValueCard
               title="Qualité"
               description="Excellence et professionnalisme dans chaque interaction"
-              className="bg-freehunt-blue"
+              className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
             />
             <ValueCard
               title="Simplicité"
               description="Une expérience utilisateur fluide et intuitive"
-              className="bg-freehunt-yellow text-freehunt-black-two"
+              className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow hover:border-freehunt-main"
             />
             <ValueCard
               title="Confiance"
               description="Un environnement sécurisé pour tous nos utilisateurs"
-              className="bg-freehunt-green"
+              className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
             />
           </div>
         </div>

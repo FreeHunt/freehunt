@@ -1,21 +1,21 @@
 "use client";
 
+import { Button } from "@/components/common/button";
+import { SkillBadge } from "@/components/freelance/skill-badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardAction,
   CardContent,
+  CardDescription,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/common/button";
-import { MapPin, Building, Star } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { SkillBadge } from "@/components/freelance/skill-badge";
 import { JobPosting, JobPostingLocation } from "@/lib/interfaces";
 import { formatNumberToEuros } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { Building, MapPin, Star } from "lucide-react";
 import { useRouter } from "next/navigation";
 const getLocationText = (location: JobPostingLocation): string => {
   switch (location) {
@@ -48,9 +48,9 @@ function JobPostingCard(jobPosting: JobPosting) {
   const router = useRouter();
 
   return (
-    <Card className="w-full max-w-[340px] rounded-[30px] pb-0 shadow-none flex flex-col relative">
+    <Card className="w-full max-w-[340px] rounded-xl pb-0 shadow-none flex flex-col relative">
       {recommended && (
-        <Badge className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 font-semibold z-10 rounded-[30px] p-1">
+        <Badge className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 font-semibold z-10 rounded-xl p-1">
           <Star size={12} />
         </Badge>
       )}
@@ -115,7 +115,7 @@ function JobPostingCard(jobPosting: JobPosting) {
         </div>
       </CardContent>
 
-      <CardFooter className="bg-freehunt-main p-6 rounded-b-[30px] mt-4 flex-shrink-0">
+      <CardFooter className="bg-freehunt-main p-6 rounded-b-xl mt-4 flex-shrink-0">
         <CardAction className="flex flex-1 justify-between items-center">
           <p className="text-white">
             <strong>{formatNumberToEuros(averageDailyRate)}</strong> / jour

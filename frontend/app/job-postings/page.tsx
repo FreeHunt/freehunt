@@ -1,16 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { JobPosting } from "@/lib/interfaces";
-import { getJobPostingsByUserIdAndStatus } from "@/actions/jobPostings";
 import { getCurrentUser } from "@/actions/auth";
-import { JobPostingCard } from "@/components/job-posting/card";
+import { getJobPostingsByUserIdAndStatus } from "@/actions/jobPostings";
 import { Banner } from "@/components/common/banner";
+import { Button } from "@/components/common/button";
+import { JobPostingCard } from "@/components/job-posting/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { JobPosting } from "@/lib/interfaces";
 import { AlertCircle, Plus } from "lucide-react";
-import { Button } from "@/components/common/button";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 interface User {
   id: string;
@@ -112,7 +112,7 @@ export default function MyPublishedJobPostingsPage() {
             {Array.from({ length: 6 }).map((_, index) => (
               <Skeleton
                 key={index}
-                className="w-full max-w-[340px] h-[300px] rounded-[30px]"
+                className="w-full max-w-[340px] h-[300px] rounded-xl"
               />
             ))}
           </div>

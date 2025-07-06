@@ -1,7 +1,7 @@
-import Image from "next/image";
+import { BlurStates, ProfileFormData } from "@/actions/register";
 import { Button } from "@/components/common/button";
 import { LocationIcon } from "@/components/common/icons/LocationIcon";
-import { ProfileFormData, BlurStates } from "@/actions/register";
+import Image from "next/image";
 
 interface PreviewCardProps {
   formData: ProfileFormData;
@@ -47,7 +47,7 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
   const fileUrl = formData.avatar ? URL.createObjectURL(formData.avatar) : "";
 
   return (
-    <div className="flex w-80 h-full flex-col align-start border-black border rounded-2xl md:rounded-3xl lg:rounded-4xl bg-white">
+    <div className="flex w-80 h-full flex-col align-start border-black border rounded-xl bg-white">
       <div className="flex p-6 flex-col items-start gap-5 self-stretch">
         <div className="flex justify-start gap-5">
           <div
@@ -125,7 +125,7 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
                 ? technicalSkills.map((skill, index) => (
                     <div
                       key={`tech-${index}`}
-                      className="flex py-1.5 px-2.5 justify-center items-center rounded-lg border border-freehunt-black-two bg-gray-100 mb-2"
+                      className="flex py-1.5 px-2.5 justify-center items-center rounded-md border border-freehunt-black-two bg-muted mb-2"
                     >
                       <p className="text-freehunt-black-two text-xs font-normal truncate max-w-16">
                         {skill}
@@ -135,7 +135,7 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
                 : defaultTechnicalSkills.map((skill, index) => (
                     <div
                       key={`tech-${index}`}
-                      className={`flex py-1.5 px-2.5 justify-center items-center rounded-lg border border-freehunt-black-two bg-gray-100 mb-2 ${
+                      className={`flex py-1.5 px-2.5 justify-center items-center rounded-md border border-freehunt-black-two bg-muted mb-2 ${
                         blurStates.isSkillsBlurred ? "blur-sm" : ""
                       }`}
                     >
@@ -157,7 +157,7 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
                 ? softSkills.map((skill, index) => (
                     <div
                       key={`soft-${index}`}
-                      className="flex py-1.5 px-2.5 justify-center items-center rounded-lg border border-freehunt-black-two bg-blue-50 mb-2"
+                      className="flex py-1.5 px-2.5 justify-center items-center rounded-md border border-freehunt-black-two bg-accent mb-2"
                     >
                       <p className="text-freehunt-black-two text-xs font-normal truncate max-w-16">
                         {skill}
@@ -167,7 +167,7 @@ export function PreviewCard({ formData, blurStates }: PreviewCardProps) {
                 : defaultSoftSkills.map((skill, index) => (
                     <div
                       key={`soft-${index}`}
-                      className={`flex py-1.5 px-2.5 justify-center items-center rounded-lg border border-freehunt-black-two bg-blue-50 mb-2 ${
+                      className={`flex py-1.5 px-2.5 justify-center items-center rounded-md border border-freehunt-black-two bg-accent mb-2 ${
                         blurStates.isSkillsBlurred ? "blur-sm" : ""
                       }`}
                     >

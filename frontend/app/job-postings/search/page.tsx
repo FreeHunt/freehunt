@@ -1,26 +1,14 @@
 "use client";
 
-import { Banner } from "@/components/common/banner";
-import { JobPostingCard } from "@/components/job-posting/card";
-import { Slider } from "@/components/ui/slider";
-import { formatNumberToEuros } from "@/lib/utils";
-import { SearchInput } from "@/components/common/search-input";
-import { Badge } from "@/components/ui/badge";
 import { searchJobPostings } from "@/actions/jobPostings";
-import { useState, useEffect, useCallback, Suspense } from "react";
-import {
-  JobPostingSearchResult,
-  Skill,
-  JobPostingLocation,
-} from "@/lib/interfaces";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ToggleBadge } from "@/components/common/toggle-badge";
 import { getSkills } from "@/actions/skills";
-import debounce from "debounce";
-import { Button } from "@/components/ui/button";
-import { X, Filter } from "lucide-react";
+import { Banner } from "@/components/common/banner";
 import { Button as FreeHuntButton } from "@/components/common/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { SearchInput } from "@/components/common/search-input";
+import { ToggleBadge } from "@/components/common/toggle-badge";
+import { JobPostingCard } from "@/components/job-posting/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Pagination,
@@ -31,7 +19,19 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
+import {
+  JobPostingLocation,
+  JobPostingSearchResult,
+  Skill,
+} from "@/lib/interfaces";
+import { formatNumberToEuros } from "@/lib/utils";
+import debounce from "debounce";
+import { Filter, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 
 const MINIMUM_AVERAGE_DAILY_RATE = 0;
 const MAXIMUM_AVERAGE_DAILY_RATE = 1500;
@@ -318,10 +318,7 @@ function SearchPageContent() {
             <div className="flex flex-wrap gap-2.5 w-full">
               {skillsLoading &&
                 Array.from({ length: 5 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    className="w-[63px] h-4 rounded-[8px]"
-                  />
+                  <Skeleton key={index} className="w-[63px] h-4 rounded-lg" />
                 ))}
               {!skillsLoading &&
                 skills.map((skill) => (
@@ -431,7 +428,7 @@ function SearchPageContent() {
               Array.from({ length: 6 }).map((_, index) => (
                 <Skeleton
                   key={index}
-                  className="w-full max-w-[340px] h-[300px] rounded-[30px]"
+                  className="w-full max-w-[340px] h-[300px] rounded-xl"
                 />
               ))}
             {jobPostingResults.data.length > 0 &&

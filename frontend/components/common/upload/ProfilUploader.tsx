@@ -1,6 +1,6 @@
-import { useState, ChangeEvent } from "react";
-import { Input } from "@/components/ui/input";
 import { PlusIcon } from "@/components/common/icons/PlusIcon";
+import { Input } from "@/components/ui/input";
+import { ChangeEvent, useState } from "react";
 
 interface ProfileUploaderProps {
   onFileChange: (file: File) => void;
@@ -24,7 +24,7 @@ export function ProfileUploader({ onFileChange }: ProfileUploaderProps) {
           htmlFor="profile-photo"
           className="flex items-center cursor-pointer w-full"
         >
-          <div className="bg-red-400 text-white rounded-full p-2 mr-3 flex items-center justify-center w-10 h-10">
+          <div className="bg-destructive text-white rounded-full p-2 mr-3 flex items-center justify-center w-10 h-10">
             <PlusIcon className="w-6 h-6" />
           </div>
           <span className="text-gray-500">

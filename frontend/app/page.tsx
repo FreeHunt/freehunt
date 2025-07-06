@@ -29,7 +29,7 @@ function HomeCard({
   return (
     <div
       className={cn(
-        "flex flex-col justify-center lg:w-[312px] lg:h-[200px] bg-white rounded-3xl px-[25px] py-[30px] gap-2.5",
+        "flex flex-col justify-center lg:w-[312px] lg:h-[200px] bg-white rounded-xl px-6 py-8 gap-2.5",
         className,
       )}
     >
@@ -137,12 +137,12 @@ export default function Home() {
           <HomeCard
             title="+ 7 000"
             content="Freelances inscrits"
-            className="bg-freehunt-main"
+            className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow"
           />
           <HomeCard
             title="+ 800"
             content="Entreprises inscrites"
-            className="bg-freehunt-blue"
+            className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
           />
         </HomeCardColumn>
 
@@ -151,19 +151,19 @@ export default function Home() {
           width={443}
           height={428}
           alt=""
-          className="hidden lg:block object-cover lg:h-[428px] lg:w-[443px] rounded-3xl"
+          className="hidden lg:block object-cover lg:h-[428px] lg:w-[443px] rounded-xl"
         />
 
         <HomeCardColumn>
           <HomeCard
             title="98%"
             content="Utilisateurs satisfaits"
-            className="bg-freehunt-yellow"
+            className="bg-freehunt-main text-white shadow-md hover:shadow-lg transition-shadow"
           />
           <HomeCard
             title="+ 9 000"
             content="Postes pourvus"
-            className="bg-freehunt-green"
+            className="bg-white border border-freehunt-grey shadow-md hover:shadow-lg transition-shadow"
           />
         </HomeCardColumn>
       </section>

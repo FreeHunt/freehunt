@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { ArrowUpRight, X, Send, Paperclip } from "lucide-react";
-import Image from "next/image";
+import { getCurrentUser } from "@/actions/auth";
 import {
   getMessagesByConversation,
   sendMessage,
 } from "@/actions/conversations";
-import { getCurrentUser } from "@/actions/auth";
+import { Conversation, Document, Message, User } from "@/lib/interfaces";
+import { ArrowUpRight, Paperclip, Send, X } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { Conversation, Message, User, Document } from "@/lib/interfaces";
 
 export default function ConversationComponent({
   conversation,
@@ -200,7 +200,7 @@ export default function ConversationComponent({
                 height={32}
               />
             </div>
-            <div className="bg-gray-200 rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
+            <div className="bg-muted rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
               <p className="text-xs md:text-sm">{msg.content}</p>
               <p className="text-[10px] md:text-xs text-gray-500 mt-0.5 md:mt-1 text-right">
                 {formatMessageTime(msg.createdAt)}
@@ -209,7 +209,7 @@ export default function ConversationComponent({
           </div>
         ) : (
           <div className="flex items-end space-x-1 md:space-x-2">
-            <div className="bg-blue-500 text-white rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
+            <div className="bg-primary text-white rounded-2xl py-1.5 md:py-2 px-3 md:px-4 max-w-[75vw] md:max-w-xs">
               <p className="text-xs md:text-sm">{msg.content}</p>
               <p className="text-[10px] md:text-xs text-blue-100 mt-0.5 md:mt-1">
                 {formatMessageTime(msg.createdAt)}
@@ -268,7 +268,7 @@ export default function ConversationComponent({
               </div>
               <button
                 onClick={toggleExpand}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-full hover:bg-muted transition-colors"
                 aria-label="Fermer"
               >
                 <X size={isMobile ? 18 : 20} />
@@ -342,7 +342,7 @@ export default function ConversationComponent({
               </div>
               <button
                 onClick={toggleExpand}
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="p-2 rounded-full hover:bg-muted transition-colors"
                 aria-label="Agrandir"
               >
                 <ArrowUpRight size={isMobile ? 18 : 20} />
