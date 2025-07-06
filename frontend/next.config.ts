@@ -15,7 +15,6 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "s3.eu-west-3.amazonaws.com",
-        port: "",
         pathname: "/freehunt-avatar/**",
       },
     ],
