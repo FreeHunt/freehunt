@@ -32,6 +32,7 @@ interface ConversationWithDetails extends ConversationInterface {
 }
 
 export default function ConversationsPage() {
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationWithDetails[]>(
     [],
@@ -48,6 +49,17 @@ export default function ConversationsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Get selected conversation ID from URL parameters (client-side only)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const selected = urlParams.get('selected');
+      if (selected) {
+        setSelectedConversationId(selected);
+      }
+    }
+  }, []);
 
   // Check mobile viewport
   useEffect(() => {
@@ -169,6 +181,16 @@ export default function ConversationsPage() {
 
     setFilteredConversations(filtered);
   }, [conversations, activeFilter, searchQuery]);
+
+  // Auto-select conversation from URL parameter
+  useEffect(() => {
+    if (selectedConversationId && conversations.length > 0 && !selectedConversation) {
+      const targetConversation = conversations.find(conv => conv.id === selectedConversationId);
+      if (targetConversation) {
+        handleConversationSelect(targetConversation);
+      }
+    }
+  }, [selectedConversationId, conversations, selectedConversation]);
 
   const handleConversationSelect = async (
     conversation: ConversationWithDetails,

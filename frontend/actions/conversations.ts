@@ -92,3 +92,40 @@ export const getUserPicture = async (userId: string) => {
   const response = await api.get(`/documents/user/${userId}`);
   return response.data;
 };
+
+// Nouvelle fonction pour créer ou trouver une conversation
+export const findOrCreateConversation = async (
+  senderId: string,
+  receiverId: string,
+  projectId?: string,
+) => {
+  try {
+    const response = await api.post("/conversations/find-or-create", {
+      senderId,
+      receiverId,
+      projectId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating/finding conversation:", error);
+    throw error;
+  }
+};
+
+export const createConversation = async (
+  senderId: string,
+  receiverId: string,
+  projectId?: string,
+) => {
+  try {
+    const response = await api.post("/conversations", {
+      senderId,
+      receiverId,
+      projectId,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating conversation:", error);
+    throw error;
+  }
+};

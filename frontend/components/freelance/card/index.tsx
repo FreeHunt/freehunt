@@ -13,13 +13,19 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SkillBadge } from "../skill-badge";
 import { Freelance } from "@/lib/interfaces";
 import { formatNumberToEuros } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 function FreelanceCard(freelance: Freelance) {
-  const { firstName, lastName, location, jobTitle, skills, averageDailyRate } =
+  const router = useRouter();
+  const { id, firstName, lastName, location, jobTitle, skills, averageDailyRate } =
     freelance;
 
   const getInitials = () => {
     return firstName.charAt(0).toUpperCase() + lastName.charAt(0).toUpperCase();
+  };
+
+  const handleViewProfile = () => {
+    router.push(`/freelances/${id}`);
   };
 
   return (
@@ -62,7 +68,7 @@ function FreelanceCard(freelance: Freelance) {
           <p className="text-white">
             <strong>{formatNumberToEuros(averageDailyRate)}</strong> / jour
           </p>
-          <Button theme="secondary" className="font-semibold">
+          <Button theme="secondary" className="font-semibold" onClick={handleViewProfile}>
             Voir le profil
           </Button>
         </CardAction>
