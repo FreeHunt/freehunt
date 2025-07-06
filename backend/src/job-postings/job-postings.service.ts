@@ -1,12 +1,19 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { JobPosting, Prisma, Role, Skill, User } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { FreelancesService } from '../freelances/freelances.service';
 import { SkillsService } from '../skills/skills.service';
+import { StripeService } from '../common/stripe/stripe.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
 import { JobPostingSearchResult } from './dto/job-posting-search-result.dto';
 import { SearchJobPostingDto } from './dto/search-job-posting.dto';
 import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
+import { CancelJobPostingResponseDto } from './dto/cancel-job-posting-response.dto';
 
 @Injectable()
 export class JobPostingsService {
@@ -16,6 +23,7 @@ export class JobPostingsService {
     private readonly prisma: PrismaService,
     private readonly skillsService: SkillsService,
     private readonly freelancesService: FreelancesService,
+    private readonly stripeService: StripeService,
   ) {}
 
   async create(data: CreateJobPostingDto): Promise<JobPosting> {
@@ -420,6 +428,7 @@ export class JobPostingsService {
         'DRAFT',
         'EXPIRED',
         'REJECTED',
+        'CANCELED',
       ];
       if (validStatuses.includes(status)) {
         where.status = status as
@@ -464,5 +473,144 @@ export class JobPostingsService {
         jobPostingId: jobPostingId,
       },
     });
+  }
+
+  /**
+   * Annuler un job posting avec remboursement si applicable
+   * @param id - ID du job posting
+   * @param reason - Raison de l'annulation (optionnel)
+   * @param userId - ID de l'utilisateur qui demande l'annulation (pour vérification des droits)
+   */
+  async cancelJobPosting(
+    id: string,
+    reason?: string,
+    userId?: string,
+  ): Promise<CancelJobPostingResponseDto> {
+    // Récupérer le job posting avec les relations nécessaires
+    const jobPosting = await this.prisma.jobPosting.findUnique({
+      where: { id },
+      include: {
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        project: true,
+      },
+    });
+
+    if (!jobPosting) {
+      throw new NotFoundException('Job posting not found');
+    }
+
+    // Vérifier que l'utilisateur a le droit d'annuler cette annonce
+    if (userId && jobPosting.company.userId !== userId) {
+      throw new BadRequestException(
+        'You are not authorized to cancel this job posting',
+      );
+    }
+
+    // Vérifier que l'annonce peut être annulée
+    if (jobPosting.status === 'CANCELED') {
+      throw new ConflictException('Job posting is already canceled');
+    }
+
+    if (jobPosting.status === 'EXPIRED' || jobPosting.status === 'REJECTED') {
+      throw new ConflictException(
+        'Cannot cancel a job posting that is already expired or rejected',
+      );
+    }
+
+    // Vérifier qu'aucun projet n'a été créé à partir de cette annonce
+    if (jobPosting.project) {
+      throw new ConflictException(
+        'Cannot cancel job posting: A project has already been created from this job posting',
+      );
+    }
+
+    // Vérifier qu'aucune candidature n'a été acceptée
+    const acceptedCandidate = await this.prisma.candidate.findFirst({
+      where: {
+        jobPostingId: id,
+        status: 'ACCEPTED',
+      },
+    });
+
+    if (acceptedCandidate) {
+      throw new ConflictException(
+        'Cannot cancel job posting: A candidate has already been accepted',
+      );
+    }
+
+    const response: CancelJobPostingResponseDto = {
+      success: true,
+      message: 'Job posting has been canceled successfully',
+    };
+
+    // Traiter le remboursement si l'annonce était payée et qu'une session Stripe existe
+    if (
+      (jobPosting.status === 'PAID' || jobPosting.status === 'PUBLISHED') &&
+      jobPosting.stripeSessionId
+    ) {
+      try {
+        // Créer le remboursement
+        const refund = await this.stripeService.createRefund(
+          jobPosting.stripeSessionId!,
+          reason || 'Job posting canceled by company',
+        );
+
+        // Mettre à jour le job posting avec les informations de remboursement
+        await this.prisma.jobPosting.update({
+          where: { id },
+          data: {
+            status: 'CANCELED',
+            canceledAt: new Date(),
+            cancelReason: reason,
+            stripeRefundId: refund.id,
+          },
+        });
+
+        response.refundId = refund.id;
+        response.refundAmount = refund.amount / 100; // Convertir centimes en euros
+        response.refundStatus = refund.status || undefined;
+        response.message =
+          'Job posting has been canceled and refund has been processed';
+      } catch (error) {
+        // En cas d'erreur de remboursement, on annule quand même le job posting
+        // mais on indique l'erreur
+        await this.prisma.jobPosting.update({
+          where: { id },
+          data: {
+            status: 'CANCELED',
+            canceledAt: new Date(),
+            cancelReason: reason,
+          },
+        });
+
+        console.error('Refund error:', error);
+        response.message =
+          'Job posting has been canceled, but there was an issue processing the refund. Please contact support.';
+      }
+    } else {
+      // Pas de paiement à rembourser, on annule simplement
+      await this.prisma.jobPosting.update({
+        where: { id },
+        data: {
+          status: 'CANCELED',
+          canceledAt: new Date(),
+          cancelReason: reason,
+        },
+      });
+
+      if (
+        jobPosting.status === 'PENDING_PAYMENT' ||
+        jobPosting.status === 'DRAFT'
+      ) {
+        response.message =
+          'Job posting has been canceled (no payment to refund)';
+      }
+    }
+
+    return response;
   }
 }

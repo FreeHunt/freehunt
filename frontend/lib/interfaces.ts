@@ -59,6 +59,7 @@ export enum JobPostingStatus {
   DRAFT = "DRAFT",
   EXPIRED = "EXPIRED",
   REJECTED = "REJECTED",
+  CANCELED = "CANCELED",
 }
 
 export enum CheckpointStatus {
