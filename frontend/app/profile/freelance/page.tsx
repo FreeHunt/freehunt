@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SkillsSection } from "@/components/register/form/SkillSection";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin, TrendingUp, Upload } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SkillsSection } from "@/components/register/form/SkillSection";
 import { Skill } from "@/lib/interfaces";
+import { MapPin, TrendingUp, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 interface Freelance {
@@ -54,8 +54,7 @@ interface FormData {
   avatar: File | null;
 }
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 const DEFAULT_AVATAR_URL = "../assets/logo.jpg";
 
 const freelanceSchema = z.object({
