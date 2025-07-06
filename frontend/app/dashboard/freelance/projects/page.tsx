@@ -144,15 +144,15 @@ export default function FreelanceProjectsPage() {
               return (
                 <div
                   key={project.id}
-                  className="bg-white rounded-xl border border-freehunt-grey overflow-hidden"
+                  className="bg-card rounded-xl border border-border overflow-hidden shadow-sm"
                 >
-                  <div className="bg-gradient-to-r from-freehunt-main/10 to-freehunt-main/5 p-6">
+                  <div className="bg-freehunt-main/5 p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <h2 className="text-xl lg:text-2xl font-bold text-freehunt-black-two mb-2">
+                        <h2 className="text-xl lg:text-2xl font-bold text-foreground mb-2">
                           {project.name}
                         </h2>
-                        <div className="flex flex-wrap items-center gap-4 text-sm text-freehunt-black-two opacity-70 mb-2">
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-2">
                           <span className="flex items-center gap-1">
                             <Building className="w-4 h-4" />
                             {project.jobPosting?.company?.name || "Entreprise"}
