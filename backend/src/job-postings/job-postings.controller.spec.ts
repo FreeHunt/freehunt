@@ -115,7 +115,8 @@ describe('JobPostingsController', () => {
   describe('findAll', () => {
     it('should return an array of job postings', async () => {
       jest.spyOn(jobPostingsService, 'findAll').mockResolvedValue([jobPosting]);
-      expect(await jobPostingsController.findAll()).toEqual([jobPosting]);
+      expect(await jobPostingsController.findAll(mockCompanyUser)).toEqual([jobPosting]);
+      expect(jobPostingsService.findAll).toHaveBeenCalledWith(mockCompanyUser.id);
     });
   });
 
@@ -141,7 +142,7 @@ describe('JobPostingsController', () => {
         await jobPostingsController.update(jobPosting.id, {
           ...updatedJobPosting,
           totalAmount: updatedJobPosting.totalAmount || undefined,
-        }),
+        }, mockCompanyUser),
       ).toEqual(updatedJobPosting);
     });
   });
@@ -149,7 +150,7 @@ describe('JobPostingsController', () => {
   describe('remove', () => {
     it('should remove a job posting', async () => {
       jest.spyOn(jobPostingsService, 'remove').mockResolvedValue(jobPosting);
-      expect(await jobPostingsController.remove(jobPosting.id)).toEqual(
+      expect(await jobPostingsController.remove(jobPosting.id, mockCompanyUser)).toEqual(
         jobPosting,
       );
     });

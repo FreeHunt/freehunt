@@ -52,7 +52,30 @@ export class JobPostingsService {
     });
   }
 
-  async findAll(): Promise<JobPosting[]> {
+  async findAll(userId?: string): Promise<JobPosting[]> {
+    if (userId) {
+      return this.prisma.jobPosting.findMany({
+        where: {
+          company: {
+            userId: userId,
+          },
+        },
+        include: {
+          skills: true,
+          company: {
+            include: {
+              user: true,
+            },
+          },
+          checkpoints: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    }
+
+    // Sinon, retourner les annonces publiques (pour les freelances)
     return this.prisma.jobPosting.findMany({
       where: {
         status: 'PUBLISHED', // Ne retourner que les annonces publiées

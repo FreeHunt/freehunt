@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   HttpCode,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { JobPostingsService } from './job-postings.service';
 import { CreateJobPostingDto } from './dto/create-job-posting.dto';
@@ -23,6 +24,8 @@ import { User } from '@prisma/client';
 import { CurrentUser } from '../common/decorators/currentUsers.decorators';
 import { OptionalAuthInterceptor } from '../common/interceptors/optional-auth.interceptor';
 import { StripeService } from '../common/stripe/stripe.service';
+import { AuthentikAuthGuard } from '../auth/auth.guard';
+import { JobPostingAccessGuard } from '../auth/job-posting-access.guard';
 
 @ApiTags('job-postings')
 @Controller('job-postings')
@@ -49,23 +52,80 @@ export class JobPostingsController {
   }
 
   @Get()
+  @UseGuards(AuthentikAuthGuard)
   @ApiOperation({
     summary: 'Find all job postings',
-    description: 'Retrieve all job postings with their skills and company',
+    description: 'Retrieve all job postings for the authenticated company',
   })
   @ApiResponse({
     status: 200,
-    description: 'Returns all job postings',
+    description: 'Returns all job postings for the authenticated company',
     type: [JobPostingResponseDto],
   })
-  findAll(): Promise<JobPostingResponseDto[]> {
-    return this.jobPostingsService.findAll();
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  findAll(@CurrentUser() user: User): Promise<JobPostingResponseDto[]> {
+    return this.jobPostingsService.findAll(user.id);
+  }
+
+  @Get('public')
+  @ApiOperation({
+    summary: 'Find all published job postings',
+    description: 'Retrieve all published job postings (public access for freelances)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all published job postings',
+    type: [JobPostingResponseDto],
+  })
+  findAllPublic(): Promise<JobPostingResponseDto[]> {
+    return this.jobPostingsService.findAll(); // Sans userId = mode public
+  }
+
+  @Get('company/:id')
+  @UseGuards(AuthentikAuthGuard, JobPostingAccessGuard)
+  @ApiOperation({
+    summary: 'Find a job posting by ID (company access)',
+    description: 'Retrieve a job posting by its ID - accessible only by the company owner',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'The ID of the job posting (must be a valid UUID)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the job posting with the specified ID',
+    type: JobPostingResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid UUID format',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - You do not have access to this job posting',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Job posting not found',
+  })
+  findOneCompany(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: User,
+  ): Promise<JobPostingResponseDto | null> {
+    return this.jobPostingsService.findOne(id);
   }
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Find a job posting by ID',
-    description: 'Retrieve a job posting by its ID with skills and company',
+    summary: 'Find a job posting by ID (public access)',
+    description: 'Retrieve a job posting by its ID - public access for freelances',
   })
   @ApiParam({
     name: 'id',
@@ -91,9 +151,10 @@ export class JobPostingsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthentikAuthGuard, JobPostingAccessGuard)
   @ApiOperation({
     summary: 'Update a job posting',
-    description: 'Update a job posting with optional skills modification',
+    description: 'Update a job posting with optional skills modification (company owner only)',
   })
   @ApiParam({
     name: 'id',
@@ -109,20 +170,30 @@ export class JobPostingsController {
     description: 'Invalid UUID format',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - You do not have access to this job posting',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Job posting not found',
   })
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateJobPostingDto: UpdateJobPostingDto,
+    @CurrentUser() user: User,
   ): Promise<JobPostingResponseDto> {
     return this.jobPostingsService.update(id, updateJobPostingDto);
   }
 
   @Delete(':id')
+  @UseGuards(AuthentikAuthGuard, JobPostingAccessGuard)
   @ApiOperation({
     summary: 'Remove a job posting',
-    description: 'Delete a job posting by its ID',
+    description: 'Delete a job posting by its ID (company owner only)',
   })
   @ApiParam({
     name: 'id',
@@ -138,11 +209,20 @@ export class JobPostingsController {
     description: 'Invalid UUID format',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - You do not have access to this job posting',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Job posting not found',
   })
   remove(
     @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: User,
   ): Promise<JobPostingResponseDto> {
     return this.jobPostingsService.remove(id);
   }
