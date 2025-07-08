@@ -118,12 +118,45 @@ export class ProjectsService {
     });
   }
 
-  // Find all projects
-  async findAll() {
+  // Find all projects accessible to the user
+  async findAll(userId: string) {
     const projects = await this.prismaService.project.findMany({
+      where: {
+        OR: [
+          {
+            freelance: {
+              userId: userId,
+            },
+          },
+          {
+            company: {
+              userId: userId,
+            },
+          },
+        ],
+      },
       include: {
-        freelance: true,
-        jobPosting: true,
+        freelance: {
+          include: {
+            user: true,
+            skills: true,
+          },
+        },
+        jobPosting: {
+          include: {
+            company: true,
+            skills: true,
+          },
+        },
+        company: {
+          include: {
+            user: true,
+          },
+        },
+        conversation: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
 
