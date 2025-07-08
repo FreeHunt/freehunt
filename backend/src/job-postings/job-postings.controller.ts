@@ -55,11 +55,11 @@ export class JobPostingsController {
   @UseGuards(AuthentikAuthGuard)
   @ApiOperation({
     summary: 'Find all job postings',
-    description: 'Retrieve all job postings for the authenticated company',
+    description: 'Retrieve job postings based on user role: companies see their own, freelances see all published',
   })
   @ApiResponse({
     status: 200,
-    description: 'Returns all job postings for the authenticated company',
+    description: 'Returns job postings based on user role',
     type: [JobPostingResponseDto],
   })
   @ApiResponse({
@@ -67,21 +67,7 @@ export class JobPostingsController {
     description: 'Unauthorized',
   })
   findAll(@CurrentUser() user: User): Promise<JobPostingResponseDto[]> {
-    return this.jobPostingsService.findAll(user.id);
-  }
-
-  @Get('public')
-  @ApiOperation({
-    summary: 'Find all published job postings',
-    description: 'Retrieve all published job postings (public access for freelances)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Returns all published job postings',
-    type: [JobPostingResponseDto],
-  })
-  findAllPublic(): Promise<JobPostingResponseDto[]> {
-    return this.jobPostingsService.findAll(); // Sans userId = mode public
+    return this.jobPostingsService.findAllByRole(user);
   }
 
   @Get('company/:id')

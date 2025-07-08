@@ -114,9 +114,9 @@ describe('JobPostingsController', () => {
 
   describe('findAll', () => {
     it('should return an array of job postings', async () => {
-      jest.spyOn(jobPostingsService, 'findAll').mockResolvedValue([jobPosting]);
+      jest.spyOn(jobPostingsService, 'findAllByRole').mockResolvedValue([jobPosting]);
       expect(await jobPostingsController.findAll(mockCompanyUser)).toEqual([jobPosting]);
-      expect(jobPostingsService.findAll).toHaveBeenCalledWith(mockCompanyUser.id);
+      expect(jobPostingsService.findAllByRole).toHaveBeenCalledWith(mockCompanyUser);
     });
   });
 
