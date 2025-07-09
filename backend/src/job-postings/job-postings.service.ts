@@ -52,28 +52,55 @@ export class JobPostingsService {
     });
   }
 
-  async findAll(): Promise<JobPosting[]> {
-    return this.prisma.jobPosting.findMany({
-      where: {
-        status: 'PUBLISHED', // Ne retourner que les annonces publiées
-        candidates: {
-          none: {
-            status: 'ACCEPTED', // Exclure les annonces avec candidature acceptée
+  async findAllByRole(user: User): Promise<JobPosting[]> {
+    if (user.role === 'COMPANY') {
+      return this.prisma.jobPosting.findMany({
+        where: {
+          company: {
+            userId: user.id,
           },
         },
-      },
-      include: {
-        skills: true,
-        company: {
-          include: {
-            user: true,
+        include: {
+          skills: true,
+          company: {
+            include: {
+              user: true,
+            },
+          },
+          checkpoints: true,
+          candidates: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    } else {
+      return this.prisma.jobPosting.findMany({
+        where: {
+          status: 'PUBLISHED',
+          candidates: {
+            none: {
+              status: 'ACCEPTED', 
+            },
           },
         },
-        checkpoints: true,
-      },
-    });
+        include: {
+          skills: true,
+          company: {
+            include: {
+              user: true,
+            },
+          },
+          checkpoints: true,
+          candidates: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    }
   }
-
+  
   async findOne(id: string): Promise<JobPosting | null> {
     return this.prisma.jobPosting.findUnique({
       where: { id },

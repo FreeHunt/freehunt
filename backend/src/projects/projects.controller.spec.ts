@@ -154,7 +154,7 @@ describe('ProjectController', () => {
       jest
         .spyOn(projectsService, 'create')
         .mockResolvedValue(simpleProjectMock as any);
-      expect(await projectController.create(createProjectDto)).toEqual(
+      expect(await projectController.create(createProjectDto, mockUser)).toEqual(
         simpleProjectMock,
       );
     });
@@ -165,7 +165,8 @@ describe('ProjectController', () => {
       jest
         .spyOn(projectsService, 'findAll')
         .mockResolvedValue([simpleProjectMock as any]);
-      expect(await projectController.findAll()).toEqual([simpleProjectMock]);
+      expect(await projectController.findAll(mockUser)).toEqual([simpleProjectMock]);
+      expect(projectsService.findAll).toHaveBeenCalledWith(mockUser.id);
     });
   });
 
@@ -174,7 +175,7 @@ describe('ProjectController', () => {
       jest
         .spyOn(projectsService, 'findOne')
         .mockResolvedValue(simpleProjectMock as any);
-      expect(await projectController.findOne(simpleProjectMock.id)).toEqual(
+      expect(await projectController.findOne(simpleProjectMock.id, mockUser)).toEqual(
         simpleProjectMock,
       );
     });
@@ -188,7 +189,7 @@ describe('ProjectController', () => {
       expect(
         await projectController.update(simpleProjectMock.id, {
           name: 'Updated Project Title',
-        }),
+        }, mockUser),
       ).toEqual(updatedProjectWithRelations);
     });
   });
@@ -198,7 +199,7 @@ describe('ProjectController', () => {
       jest
         .spyOn(projectsService, 'remove')
         .mockResolvedValue(simpleProjectMock as any);
-      expect(await projectController.remove(simpleProjectMock.id)).toEqual(
+      expect(await projectController.remove(simpleProjectMock.id, mockUser)).toEqual(
         simpleProjectMock,
       );
     });
