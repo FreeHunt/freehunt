@@ -21,7 +21,7 @@ export class ProjectAccessGuard implements CanActivate {
     const projectId = request.params.id;
 
     if (!user || !projectId) {
-      throw new ForbiddenException('Accès non autorisé');
+      throw new ForbiddenException('Unauthorized access');
     }
 
     // Récupérer le projet avec les informations nécessaires
