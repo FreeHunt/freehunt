@@ -42,7 +42,7 @@ export class ProjectAccessGuard implements CanActivate {
     });
 
     if (!project) {
-      throw new NotFoundException(`Projet avec l'ID ${projectId} introuvable`);
+      throw new NotFoundException(`Project with ID ${projectId} not found`);
     }
 
     // Vérifier si l'utilisateur a accès au projet
