@@ -50,7 +50,7 @@ export class ProjectAccessGuard implements CanActivate {
 
     if (!hasAccess) {
       throw new ForbiddenException(
-        'Vous n\'avez pas l\'autorisation d\'accéder à ce projet. Seuls les membres assignés au projet peuvent y accéder.',
+        'You do not have permission to access this project. Only assigned project members can access it.',
       );
     }
 
