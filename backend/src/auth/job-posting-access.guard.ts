@@ -43,7 +43,7 @@ export class JobPostingAccessGuard implements CanActivate {
 
     if (!hasAccess) {
       throw new ForbiddenException(
-        'Vous n\'avez pas l\'autorisation d\'accéder à cette annonce. Seule l\'entreprise propriétaire peut y accéder.',
+        'You do not have permission to access this job posting. Only the owner company can access it.',
       );
     }
 
