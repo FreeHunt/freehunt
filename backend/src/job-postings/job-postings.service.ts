@@ -100,7 +100,7 @@ export class JobPostingsService {
       });
     }
   }
-
+  
   async findOne(id: string): Promise<JobPosting | null> {
     return this.prisma.jobPosting.findUnique({
       where: { id },
