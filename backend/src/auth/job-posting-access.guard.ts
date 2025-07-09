@@ -36,7 +36,7 @@ export class JobPostingAccessGuard implements CanActivate {
     });
 
     if (!jobPosting) {
-      throw new NotFoundException(`Annonce avec l'ID ${jobPostingId} introuvable`);
+      throw new NotFoundException(`Job posting with ID ${jobPostingId} not found`);
     }
 
     const hasAccess = this.checkUserAccess(user, jobPosting);
