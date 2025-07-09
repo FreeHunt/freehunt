@@ -21,7 +21,7 @@ export class JobPostingAccessGuard implements CanActivate {
     const jobPostingId = request.params.id;
 
     if (!user || !jobPostingId) {
-      throw new ForbiddenException('Accès non autorisé');
+      throw new ForbiddenException('Unauthorized access');
     }
 
     const jobPosting = await this.prismaService.jobPosting.findUnique({
