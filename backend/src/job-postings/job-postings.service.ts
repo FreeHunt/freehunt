@@ -101,51 +101,6 @@ export class JobPostingsService {
     }
   }
 
-  async findAll(userId?: string): Promise<JobPosting[]> {
-    if (userId) {
-      return this.prisma.jobPosting.findMany({
-        where: {
-          company: {
-            userId: userId,
-          },
-        },
-        include: {
-          skills: true,
-          company: {
-            include: {
-              user: true,
-            },
-          },
-          checkpoints: true,
-        },
-        orderBy: {
-          createdAt: 'desc',
-        },
-      });
-    }
-
-    // Sinon, retourner les annonces publiques (pour les freelances)
-    return this.prisma.jobPosting.findMany({
-      where: {
-        status: 'PUBLISHED', // Ne retourner que les annonces publiées
-        candidates: {
-          none: {
-            status: 'ACCEPTED', // Exclure les annonces avec candidature acceptée
-          },
-        },
-      },
-      include: {
-        skills: true,
-        company: {
-          include: {
-            user: true,
-          },
-        },
-        checkpoints: true,
-      },
-    });
-  }
-
   async findOne(id: string): Promise<JobPosting | null> {
     return this.prisma.jobPosting.findUnique({
       where: { id },
