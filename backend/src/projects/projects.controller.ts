@@ -185,7 +185,7 @@ export class ProjectController {
     @Param('id') id: string,
     @CurrentUser() user: User,
   ): Promise<ProjectResponseDto> {
-    return this.projectsService.remove(id);
+    return this.projectsService.remove(id, user.id);
   }
 
   @Get('company/:companyId')
