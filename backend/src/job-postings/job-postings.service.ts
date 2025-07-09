@@ -124,7 +124,7 @@ export class JobPostingsService {
       });
     }
 
-    // Sinon, retourner les annonces publiques (pour les freelances)
+    // Otherwise, return public job postings (for freelances)
     return this.prisma.jobPosting.findMany({
       where: {
         status: 'PUBLISHED', // Ne retourner que les annonces publiées
