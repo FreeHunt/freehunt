@@ -147,7 +147,7 @@ export class ProjectController {
     @Body() updateProjectDto: UpdateProjectDto,
     @CurrentUser() user: User,
   ): Promise<ProjectResponseDto> {
-    return this.projectsService.update(id, updateProjectDto);
+    return this.projectsService.update(id, updateProjectDto, user.id);
   }
 
   @Delete(':id')
