@@ -108,7 +108,7 @@ export class ProjectController {
     @Param('id') id: string,
     @CurrentUser() user: User,
   ): Promise<ProjectResponseDto> {
-    return this.projectsService.findOne(id);
+    return this.projectsService.findOne(id, user.id);
   }
 
   @Patch(':id')
