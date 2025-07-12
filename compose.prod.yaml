@@ -12,6 +12,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 1G
+          cpus: 0.5
+        limits:
+          memory: 2G
+          cpus: 1.0
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   adminer:
     deploy:
@@ -30,6 +44,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 256M
+          cpus: 0.25
+        limits:
+          memory: 512M
+          cpus: 0.5
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   authentik-redis:
     deploy:
@@ -37,6 +65,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 128M
+          cpus: 0.1
+        limits:
+          memory: 256M
+          cpus: 0.25
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   authentik-server:
     environment:
@@ -50,6 +92,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 256M
+          cpus: 0.25
+        limits:
+          memory: 512M
+          cpus: 0.5
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   authentik-worker:
     environment:
@@ -63,6 +119,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 256M
+          cpus: 0.25
+        limits:
+          memory: 512M
+          cpus: 0.5
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   matomo-db:
     environment:
@@ -78,6 +148,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 256M
+          cpus: 0.25
+        limits:
+          memory: 512M
+          cpus: 0.5
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   matomo:
     environment:
@@ -91,6 +175,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 256M
+          cpus: 0.25
+        limits:
+          memory: 512M
+          cpus: 0.5
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   # Frontend
   frontend:
@@ -101,6 +199,20 @@ services:
       - socket_url
     deploy:
       replicas: 3
+      resources:
+        reservations:
+          memory: 256M
+          cpus: 0.25
+        limits:
+          memory: 512M
+          cpus: 0.5
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   # Backend
   backend:
@@ -116,6 +228,20 @@ services:
       - socket_url
     deploy:
       replicas: 3
+      resources:
+        reservations:
+          memory: 512M
+          cpus: 0.5
+        limits:
+          memory: 1G
+          cpus: 1.0
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
   # Production-only services
   uptime-kuma:
@@ -132,6 +258,20 @@ services:
       placement:
         constraints:
           - node.role == manager
+      resources:
+        reservations:
+          memory: 128M
+          cpus: 0.1
+        limits:
+          memory: 256M
+          cpus: 0.25
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
 
 volumes:
   uptime-kuma-data:
@@ -164,7 +304,5 @@ secrets:
     external: true
   stripe_webhook_secret:
     external: true
-
-  # socket.io secret
   socket_url:
     external: true
