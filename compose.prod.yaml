@@ -89,9 +89,6 @@ services:
       - authentik_secret_key
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
       resources:
         reservations:
           memory: 256M
@@ -116,9 +113,6 @@ services:
       - authentik_secret_key
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
       resources:
         reservations:
           memory: 256M
@@ -172,9 +166,6 @@ services:
       - matomo_database_password
     deploy:
       replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
       resources:
         reservations:
           memory: 256M
