@@ -19,7 +19,7 @@ export default function MatomoScript() {
         _paq.push(['trackPageView']);
         _paq.push(['enableLinkTracking']);
         (function() {
-          var u='${matomoUrl}/';
+          var u='${matomoUrl.endsWith("/") ? matomoUrl : matomoUrl + "/"}';
           _paq.push(['setTrackerUrl', u + 'matomo.php']);
           _paq.push(['setSiteId', '${process.env.NEXT_PUBLIC_MATOMO_SITE_ID || "1"}']);
           var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
