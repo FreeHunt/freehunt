@@ -147,6 +147,7 @@ jobs:
             NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_MATOMO_URL=${{ vars.NEXT_PUBLIC_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ vars.NEXT_PUBLIC_MATOMO_SITE_ID }}
+            NEXT_PUBLIC_SOCKET_URL=${{ vars.NEXT_PUBLIC_SOCKET_URL }}
 
   build-backend:
     name: Build and push backend
@@ -252,7 +253,7 @@ jobs:
             create_secret_if_not_exists() {
               local secret_name=$1
               local secret_value=$2
-              
+
               if docker secret inspect "$secret_name" >/dev/null 2>&1; then
                 echo "Secret $secret_name already exists, skipping..."
               else
@@ -273,9 +274,11 @@ jobs:
             create_secret_if_not_exists "matomo_database_password" "${{ secrets.MATOMO_DATABASE_PASSWORD }}"
             create_secret_if_not_exists "matomo_mysql_root_password" "${{ secrets.MATOMO_MYSQL_ROOT_PASSWORD }}"
 
-            # Existing secrets (for automation)
+            # S3 secrets
             create_secret_if_not_exists "s3_access_key" "${{ secrets.S3_ACCESS_KEY }}"
             create_secret_if_not_exists "s3_secret_key" "${{ secrets.S3_SECRET_KEY }}"
+
+            # Stripe secrets
             create_secret_if_not_exists "stripe_secret_key" "${{ secrets.STRIPE_SECRET_KEY }}"
             create_secret_if_not_exists "stripe_webhook_secret" "${{ secrets.STRIPE_WEBHOOK_SECRET }}"
 
@@ -307,7 +310,7 @@ jobs:
 
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Pull newest images 
+            # Pull newest images
             docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-frontend:latest
             docker pull ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/freehunt-backend:latest
 
