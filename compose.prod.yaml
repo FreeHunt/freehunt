@@ -217,6 +217,7 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-backend:latest
     ports:
       - "3000:3000"
+      - "3001:3001" # For websocket connections
     secrets:
       - database_url
       - s3_access_key
