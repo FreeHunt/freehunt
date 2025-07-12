@@ -195,8 +195,6 @@ services:
     image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-frontend:latest
     ports:
       - "5173:5173"
-    secrets:
-      - socket_url
     deploy:
       replicas: 3
       resources:
@@ -225,7 +223,6 @@ services:
       - s3_secret_key
       - stripe_secret_key
       - stripe_webhook_secret
-      - socket_url
     deploy:
       replicas: 3
       resources:
@@ -295,14 +292,14 @@ secrets:
   matomo_mysql_root_password:
     external: true
 
-  # Existing secrets
+  # S3 secrets
   s3_access_key:
     external: true
   s3_secret_key:
     external: true
+
+  # Stripe secrets
   stripe_secret_key:
     external: true
   stripe_webhook_secret:
-    external: true
-  socket_url:
     external: true
