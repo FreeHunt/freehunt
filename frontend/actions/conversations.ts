@@ -10,7 +10,7 @@ let socket: Socket | null = null;
 // Initialize socket connection
 export const initializeSocket = () => {
   if (!socket) {
-    socket = io("http://localhost:3001");
+    socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001");
     console.log("Socket connection initialized");
   }
   return socket;
