@@ -74,9 +74,6 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
-          memory: 256M
-          cpus: '0.25'
         limits:
           memory: 512M
           cpus: '0.5'
@@ -95,9 +92,6 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
-          memory: 128M
-          cpus: '0.1'
         limits:
           memory: 256M
           cpus: '0.25'
@@ -124,9 +118,6 @@ services:
         - "traefik.http.routers.authentik.entrypoints=web"
         - "traefik.http.services.authentik.loadbalancer.server.port=9000"
       resources:
-        reservations:
-          memory: 256M
-          cpus: '0.25'
         limits:
           memory: 512M
           cpus: '0.5'
@@ -148,9 +139,6 @@ services:
     deploy:
       replicas: 1
       resources:
-        reservations:
-          memory: 256M
-          cpus: '0.25'
         limits:
           memory: 512M
           cpus: '0.5'
@@ -177,9 +165,6 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
-          memory: 256M
-          cpus: '0.25'
         limits:
           memory: 512M
           cpus: '0.5'
@@ -206,9 +191,6 @@ services:
         - "traefik.http.routers.matomo.entrypoints=web"
         - "traefik.http.services.matomo.loadbalancer.server.port=80"
       resources:
-        reservations:
-          memory: 256M
-          cpus: '0.25'
         limits:
           memory: 512M
           cpus: '0.5'
@@ -304,9 +286,6 @@ services:
         constraints:
           - node.role == manager
       resources:
-        reservations:
-          memory: 128M
-          cpus: '0.1'
         limits:
           memory: 256M
           cpus: '0.25'
