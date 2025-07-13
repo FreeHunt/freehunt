@@ -27,7 +27,9 @@ export const SocketProvider: React.FC<{
     // Initialize socket connection with environment variable
     const socketUrl =
       process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
-    const socketInstance = io(socketUrl);
+    const socketInstance = io(socketUrl, {
+      withCredentials: true,
+    });
 
     // Set up event listeners
     socketInstance.on("connect", () => {

@@ -11,7 +11,22 @@ import { ConnectedSocket } from '@nestjs/websockets';
 import { Conversation, Message } from '@prisma/client';
 
 @Injectable()
-@WebSocketGateway(3001, { cors: { origin: '*' } })
+@WebSocketGateway(3001, {
+  cors: {
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        'http://localhost:5173',
+        process.env.FRONTEND_URL || '',
+      ].filter(Boolean);
+      if (!origin) {
+        callback(null, true); // Allow requests with no Origin header
+      } else if (allowedOrigins.includes(origin)) {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  },
+})
 export class ChatService implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
