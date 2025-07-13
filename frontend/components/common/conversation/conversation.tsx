@@ -50,6 +50,9 @@ export default function ConversationComponent({
     // Connect to the WebSocket server
     socketRef.current = io(
       process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001",
+      {
+        withCredentials: true,
+      },
     );
 
     // Join conversation room
