@@ -7,11 +7,10 @@ entryPoints:
     address: ":80"
 
 providers:
-  docker:
+  swarm:
     endpoint: "unix:///var/run/docker.sock"
-    swarmMode: true
     exposedByDefault: false
-    network: freehunt_default
+    watch: true
 
 log:
   level: INFO
