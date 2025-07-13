@@ -1,7 +1,7 @@
 services:
   # Traefik reverse proxy
   traefik:
-    image: traefik:v3.0
+    image: traefik:v3.4
     ports:
       - "80:80"
       - "8080:8080"
@@ -244,13 +244,6 @@ services:
         failure_action: rollback
         max_failure_ratio: 0.3
         order: start-first
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`your-frontend-domain.com`)"
-      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
-      - "traefik.http.routers.frontend.entrypoints=web"
-      - "traefik.http.routers.frontend.middlewares=frontend-sticky"
-      - "traefik.http.middlewares.frontend-sticky.sticky.sessions=true"
 
   # Backend
   backend:
@@ -267,8 +260,8 @@ services:
       - "traefik.http.routers.backend-socket.entrypoints=web"
       - "traefik.http.routers.backend-socket.service=backend-socket"
       - "traefik.http.services.backend-socket.loadbalancer.server.port=3001"
-      - "traefik.http.services.backend-socket.loadbalancer.sticky.cookie=true"
-      - "traefik.http.services.backend-socket.loadbalancer.sticky.cookie.name=traefik-backend-socket"
+      - "traefik.http.services.backend-socket.loadbalancer.sticky.cookie.name=freehunt-socket"
+      - "traefik.http.services.backend-socket.loadbalancer.sticky.cookie.httpOnly=true"
     secrets:
       - database_url
       - s3_access_key
@@ -291,13 +284,6 @@ services:
         failure_action: rollback
         max_failure_ratio: 0.3
         order: start-first
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`your-backend-domain.com`)"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend.entrypoints=web"
-      - "traefik.http.routers.backend.middlewares=backend-sticky"
-      - "traefik.http.middlewares.backend-sticky.sticky.sessions=true"
 
   # Production-only services
   uptime-kuma:
