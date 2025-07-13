@@ -1,4 +1,33 @@
 services:
+  # Traefik reverse proxy
+  traefik:
+    image: traefik:v3.0
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        reservations:
+          memory: 128M
+          cpus: '0.1'
+        limits:
+          memory: 256M
+          cpus: '0.25'
+      update_config:
+        parallelism: 1
+        delay: 10s
+        monitor: 30s
+        failure_action: rollback
+        max_failure_ratio: 0.3
+        order: start-first
+
   # Overrides
   db:
     environment:
@@ -87,6 +116,11 @@ services:
     secrets:
       - authentik_postgresql_password
       - authentik_secret_key
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.authentik.rule=Host(`authentik.freehunt.fr`)"
+      - "traefik.http.routers.authentik.entrypoints=web"
+      - "traefik.http.services.authentik.loadbalancer.server.port=9000"
     deploy:
       replicas: 1
       resources:
@@ -164,6 +198,11 @@ services:
       MATOMO_DATABASE_DBNAME: matomo
     secrets:
       - matomo_database_password
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.matomo.rule=Host(`matomo.freehunt.fr`)"
+      - "traefik.http.routers.matomo.entrypoints=web"
+      - "traefik.http.services.matomo.loadbalancer.server.port=80"
     deploy:
       replicas: 1
       resources:
@@ -184,8 +223,11 @@ services:
   # Frontend
   frontend:
     image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-frontend:latest
-    ports:
-      - "5173:5173"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`freehunt.fr`) || Host(`www.freehunt.fr`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
     deploy:
       replicas: 3
       resources:
@@ -202,13 +244,31 @@ services:
         failure_action: rollback
         max_failure_ratio: 0.3
         order: start-first
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`your-frontend-domain.com`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=5173"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.middlewares=frontend-sticky"
+      - "traefik.http.middlewares.frontend-sticky.sticky.sessions=true"
 
   # Backend
   backend:
     image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-freehunt}/freehunt-backend:latest
-    ports:
-      - "3000:3000"
-      - "3001:3001" # For websocket connections
+    labels:
+      - "traefik.enable=true"
+      # API routing
+      - "traefik.http.routers.backend-api.rule=Host(`api.freehunt.fr`)"
+      - "traefik.http.routers.backend-api.entrypoints=web"
+      - "traefik.http.routers.backend-api.service=backend-api"
+      - "traefik.http.services.backend-api.loadbalancer.server.port=3000"
+      # Socket.IO routing with sticky sessions
+      - "traefik.http.routers.backend-socket.rule=Host(`socket.freehunt.fr`)"
+      - "traefik.http.routers.backend-socket.entrypoints=web"
+      - "traefik.http.routers.backend-socket.service=backend-socket"
+      - "traefik.http.services.backend-socket.loadbalancer.server.port=3001"
+      - "traefik.http.services.backend-socket.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.backend-socket.loadbalancer.sticky.cookie.name=traefik-backend-socket"
     secrets:
       - database_url
       - s3_access_key
@@ -231,17 +291,27 @@ services:
         failure_action: rollback
         max_failure_ratio: 0.3
         order: start-first
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`your-backend-domain.com`)"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.middlewares=backend-sticky"
+      - "traefik.http.middlewares.backend-sticky.sticky.sessions=true"
 
   # Production-only services
   uptime-kuma:
     container_name: uptime-kuma
     image: louislam/uptime-kuma:1.23.16-alpine
-    ports:
-      - 3002:3001
     volumes:
       - uptime-kuma-data:/app/data
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.uptime-kuma.rule=Host(`uptime.freehunt.fr`)"
+      - "traefik.http.routers.uptime-kuma.entrypoints=web"
+      - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
     deploy:
       replicas: 1
       placement:
