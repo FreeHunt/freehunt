@@ -204,7 +204,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.matomo.rule=Host(`matomo.freehunt.fr`)"
         - "traefik.http.routers.matomo.entrypoints=web"
-        - "traefik.http.services.matomo.loadbalancer.server.port=8090"
+        - "traefik.http.services.matomo.loadbalancer.server.port=80"
       resources:
         reservations:
           memory: 256M
@@ -299,7 +299,7 @@ services:
         - "traefik.enable=true"
         - "traefik.http.routers.uptime-kuma.rule=Host(`uptime.freehunt.fr`)"
         - "traefik.http.routers.uptime-kuma.entrypoints=web"
-        - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3002"
+        - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
       placement:
         constraints:
           - node.role == manager
