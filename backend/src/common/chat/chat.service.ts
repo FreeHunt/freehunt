@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ConnectedSocket,
   MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { OnGatewayConnection, OnGatewayDisconnect } from '@nestjs/websockets';
-import { ConnectedSocket } from '@nestjs/websockets';
 import { Conversation, Message } from '@prisma/client';
+import { Server, Socket } from 'socket.io';
 
 @Injectable()
 @WebSocketGateway(3001, {
@@ -20,8 +21,10 @@ import { Conversation, Message } from '@prisma/client';
       ].filter(Boolean);
       if (!origin) {
         callback(null, true); // Allow requests with no Origin header
-      } else if (allowedOrigins.includes(origin)) {
+      } else if (!allowedOrigins.includes(origin)) {
         callback(new Error('Not allowed by CORS'));
+      } else {
+        callback(null, true); // Allow requests from allowed origins
       }
     },
     credentials: true,
