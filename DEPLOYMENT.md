@@ -380,3 +380,102 @@ resources:
 ```
 
 **Note** : Les réservations de ressources ne s'appliquent qu'aux services critiques (frontend et backend), tandis que les limites protègent l'ensemble du système contre la surconsommation.
+
+## 6. CI/CD avec GitHub Actions
+
+### Vue d'ensemble de la pipeline
+
+Le projet FreeHunt utilise GitHub Actions pour automatiser l'ensemble du processus de déploiement, depuis les tests jusqu'à la mise en production sur le cluster Docker Swarm. La pipeline est configurée dans `.github/workflows/node.js.yml` et s'exécute automatiquement sur les événements suivants :
+
+- **Push sur la branche main** : Déploiement complet en production
+- **Pull request vers main** : Tests uniquement
+- **Déclenchement manuel** : Via l'interface GitHub (`workflow_dispatch`)
+
+### Architecture des jobs
+
+La pipeline est composée de 6 jobs exécutés selon un ordre de dépendances précis :
+
+![Architecture des jobs](./docs/ci-cd.png)
+
+### Détail des jobs
+
+**1. test-backend & test-frontend (parallèle)**
+
+Jobs de test exécutés en parallèle :
+
+- **test-backend** :
+  - Installation des dépendances Node.js 22.x
+  - Build du projet NestJS
+  - Exécution des tests unitaires
+  
+- **test-frontend** :
+  - Installation des dépendances Node.js 22.x
+  - Vérification TypeScript (`tsc --noEmit`)
+  - Analyse statique ESLint
+
+**2. build-backend & build-frontend (parallèle)**
+
+Construction et publication des images Docker :
+
+- **Prérequis** : Tests réussis pour le service correspondant
+- **Environnement** : production
+- **Registry** : GitHub Container Registry (GHCR)
+- **Optimisations** :
+  - Cache GitHub Actions pour accélérer les builds
+  - Support multi-plateforme avec Docker Buildx
+  - Variables d'environnement injectées via build-args
+
+**Tags générés** :
+```
+ghcr.io/freehunt/freehunt-frontend:latest
+ghcr.io/freehunt/freehunt-backend:latest
+ghcr.io/freehunt/freehunt-frontend:sha-<commit-hash>
+ghcr.io/freehunt/freehunt-backend:sha-<commit-hash>
+```
+
+**3. sync-secrets**
+
+Synchronisation des secrets Docker Swarm :
+
+- **Prérequis** : Build des deux images réussi
+- **Exécution** : Runner self-hosted sur le cluster
+- **Fonction** : Création idempotente des 10 secrets requis
+- **Sécurité** : Connexion SSH chiffrée avec clé privée
+
+**Script de synchronisation** :
+```bash
+create_secret_if_not_exists() {
+  local secret_name=$1
+  local secret_value=$2
+  
+  if docker secret inspect "$secret_name" >/dev/null 2>&1; then
+    echo "Secret $secret_name already exists, skipping..."
+  else
+    echo "$secret_value" | docker secret create "$secret_name" -
+    echo "Created secret: $secret_name"
+  fi
+}
+```
+
+**4. deploy**
+
+Déploiement final sur le cluster :
+
+- **Prérequis** : Synchronisation des secrets réussie
+- **Exécution** : Runner self-hosted sur le cluster
+- **Actions** :
+  - Mise à jour du code source (`git pull`)
+  - Authentification auprès de GHCR
+  - Pull des nouvelles images Docker
+  - Déploiement avec `docker stack deploy`
+  - Vérification de l'état des services
+
+### Déploiement continu
+
+**Déclenchement automatique** :
+
+Chaque push sur la branche `main` déclenche automatiquement :
+1. Tests de non-régression
+2. Build et publication des images
+3. Mise à jour des secrets (si nécessaire)
+4. Déploiement avec mise à jour progressive
