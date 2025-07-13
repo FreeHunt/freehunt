@@ -26,7 +26,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   # Overrides
   db:
@@ -54,7 +53,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   adminer:
     deploy:
@@ -83,7 +81,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   authentik-redis:
     deploy:
@@ -101,7 +98,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   authentik-server:
     environment:
@@ -124,7 +120,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   authentik-worker:
     environment:
@@ -145,7 +140,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   matomo-db:
     environment:
@@ -171,7 +165,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   matomo:
     environment:
@@ -194,7 +187,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   # Frontend
   frontend:
@@ -219,7 +211,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   # Backend
   backend:
@@ -259,7 +250,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
   # Production-only services
   uptime-kuma:
@@ -286,7 +276,6 @@ services:
         monitor: 30s
         failure_action: rollback
         max_failure_ratio: 0.3
-        order: start-first
 
 volumes:
   uptime-kuma-data:
