@@ -1,5 +1,4 @@
 services:
-  # Traefik reverse proxy
   traefik:
     image: traefik:v3.4
     ports:
@@ -27,7 +26,6 @@ services:
         failure_action: rollback
         max_failure_ratio: 0.3
 
-  # Overrides
   db:
     environment:
       POSTGRES_USER: freehunt
@@ -42,11 +40,8 @@ services:
           - node.role == manager
       resources:
         reservations:
-          memory: 1G
+          memory: 512M
           cpus: "0.5"
-        limits:
-          memory: 2G
-          cpus: "1.0"
       update_config:
         parallelism: 1
         delay: 10s
@@ -72,9 +67,9 @@ services:
         constraints:
           - node.role == manager
       resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.2"
       update_config:
         parallelism: 1
         delay: 10s
@@ -111,9 +106,9 @@ services:
     deploy:
       replicas: 1
       resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.2"
       update_config:
         parallelism: 1
         delay: 10s
@@ -131,9 +126,9 @@ services:
     deploy:
       replicas: 1
       resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
+        reservations:
+          memory: 256M
+          cpus: "0.2"
       update_config:
         parallelism: 1
         delay: 10s
@@ -157,8 +152,8 @@ services:
           - node.role == manager
       resources:
         limits:
-          memory: 512M
-          cpus: "0.5"
+          memory: 256M
+          cpus: "0.3"
       update_config:
         parallelism: 1
         delay: 10s
@@ -179,8 +174,8 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 512M
-          cpus: "0.5"
+          memory: 256M
+          cpus: "0.3"
       update_config:
         parallelism: 1
         delay: 10s
@@ -200,11 +195,8 @@ services:
         - "traefik.http.services.frontend.loadbalancer.server.port=5173"
       resources:
         reservations:
-          memory: 256M
-          cpus: "0.25"
-        limits:
-          memory: 512M
-          cpus: "0.5"
+          memory: 128M
+          cpus: "0.2"
       update_config:
         parallelism: 1
         delay: 10s
@@ -239,11 +231,8 @@ services:
         - "traefik.http.services.backend-socket.loadbalancer.sticky.cookie.httpOnly=true"
       resources:
         reservations:
-          memory: 512M
-          cpus: "0.5"
-        limits:
-          memory: 1G
-          cpus: "1.0"
+          memory: 256M
+          cpus: "0.3"
       update_config:
         parallelism: 1
         delay: 10s
