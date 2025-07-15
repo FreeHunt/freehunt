@@ -16,9 +16,6 @@ services:
         reservations:
           memory: 128M
           cpus: "0.1"
-        limits:
-          memory: 256M
-          cpus: "0.25"
       update_config:
         parallelism: 1
         delay: 10s
@@ -83,10 +80,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
       update_config:
         parallelism: 1
         delay: 10s
@@ -150,10 +143,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.3"
       update_config:
         parallelism: 1
         delay: 10s
@@ -172,10 +161,6 @@ services:
       - "8090:80"
     deploy:
       replicas: 1
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.3"
       update_config:
         parallelism: 1
         delay: 10s
@@ -255,10 +240,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-      resources:
-        limits:
-          memory: 256M
-          cpus: "0.25"
       update_config:
         parallelism: 1
         delay: 10s
